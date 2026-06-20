@@ -120,9 +120,25 @@ function AgentPage() {
           </h1>
         </div>
         {messages.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={newConversation}>
-            <Trash2 className="h-4 w-4 mr-2" /> New chat
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                try {
+                  exportConversationToPdf(messages);
+                  toast.success("PDF report downloaded");
+                } catch (e) {
+                  toast.error((e as Error).message ?? "Failed to export PDF");
+                }
+              }}
+            >
+              <FileDown className="h-4 w-4 mr-2" /> Export PDF
+            </Button>
+            <Button variant="ghost" size="sm" onClick={newConversation}>
+              <Trash2 className="h-4 w-4 mr-2" /> New chat
+            </Button>
+          </div>
         )}
       </div>
 
