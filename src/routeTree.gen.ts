@@ -26,6 +26,7 @@ import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
 import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
 import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
+import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticated/app.agent'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -116,6 +117,11 @@ const AuthenticatedAppAuctionsRoute =
     path: '/auctions',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
+  id: '/agent',
+  path: '/agent',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/app/agent': typeof AuthenticatedAppAgentRoute
   '/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/app/agent': typeof AuthenticatedAppAgentRoute
   '/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/app/agent': typeof AuthenticatedAppAgentRoute
   '/_authenticated/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/dashboard'
     | '/api/chat'
+    | '/app/agent'
     | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard'
     | '/api/chat'
+    | '/app/agent'
     | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/dashboard'
     | '/api/chat'
+    | '/_authenticated/app/agent'
     | '/_authenticated/app/auctions'
     | '/_authenticated/app/campaigns'
     | '/_authenticated/app/contacts'
@@ -360,10 +372,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/agent': {
+      id: '/_authenticated/app/agent'
+      path: '/agent'
+      fullPath: '/app/agent'
+      preLoaderRoute: typeof AuthenticatedAppAgentRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRoute
   AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRoute
   AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
@@ -375,6 +395,7 @@ interface AuthenticatedAppRouteChildren {
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAgentRoute: AuthenticatedAppAgentRoute,
   AuthenticatedAppAuctionsRoute: AuthenticatedAppAuctionsRoute,
   AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
