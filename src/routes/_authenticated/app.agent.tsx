@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Sparkles, Trash2, Wrench } from "lucide-react";
+import { Bot, Sparkles, Trash2 } from "lucide-react";
 
 import {
   Conversation,
@@ -16,6 +16,7 @@ import {
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
+  type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import {
@@ -57,17 +58,15 @@ const SUGGESTIONS = [
 
 function AgentPage() {
   const initialMessages = useMemo(loadMessages, []);
-  const [input, setInput] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        headers: async () => {
+        headers: async (): Promise<Record<string, string>> => {
           const { data } = await supabase.auth.getSession();
-          const token = data.session?.access_token;
-          return token ? { Authorization: `Bearer ${token}` } : {};
+          const token = data.session?.access_token ?? "";
+          return { Authorization: `Bearer ${token}` };
         },
       }),
     [],
@@ -90,18 +89,11 @@ function AgentPage() {
     }
   }, [messages]);
 
-  // Keep composer focused
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, [status]);
-
   const isLoading = status === "submitted" || status === "streaming";
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
+  async function handleSubmit(message: PromptInputMessage) {
+    const text = message.text?.trim();
     if (!text || isLoading) return;
-    setInput("");
     await sendMessage({ text });
   }
 
@@ -138,8 +130,10 @@ function AgentPage() {
           <ConversationContent>
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
-                <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
-                     style={{ background: "var(--cyan-d)", border: "1px solid var(--cyan-b)" }}>
+                <div
+                  className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
+                  style={{ background: "var(--cyan-d)", border: "1px solid var(--cyan-b)" }}
+                >
                   <Bot className="h-7 w-7" style={{ color: "var(--cyan)" }} />
                 </div>
                 <h2 className="text-xl font-semibold">PropAI Agent</h2>
@@ -178,7 +172,7 @@ function AgentPage() {
                           </div>
                         );
                       }
-                      if (part.type?.startsWith("tool-")) {
+                      if (typeof part.type === "string" && part.type.startsWith("tool-")) {
                         const tp = part as {
                           type: string;
                           toolCallId?: string;
@@ -187,17 +181,22 @@ function AgentPage() {
                           output?: unknown;
                           errorText?: string;
                         };
-                        const name = tp.type.replace(/^tool-/, "");
+                        const state =
+                          (tp.state as
+                            | "input-streaming"
+                            | "input-available"
+                            | "output-available"
+                            | "output-error"
+                            | undefined) ?? "output-available";
                         return (
                           <Tool key={tp.toolCallId ?? i} defaultOpen={false}>
-                            <ToolHeader
-                              type={name as `tool-${string}`}
-                              state={(tp.state as "input-streaming" | "input-available" | "output-available" | "output-error") ?? "output-available"}
-                              icon={<Wrench className="size-4" />}
-                            />
+                            <ToolHeader type={tp.type as `tool-${string}`} state={state} />
                             <ToolContent>
                               <ToolInput input={tp.input} />
-                              <ToolOutput output={tp.output as React.ReactNode} errorText={tp.errorText} />
+                              <ToolOutput
+                                output={tp.output as React.ReactNode}
+                                errorText={tp.errorText}
+                              />
                             </ToolContent>
                           </Tool>
                         );
@@ -221,16 +220,12 @@ function AgentPage() {
         <div className="border-t border-border p-3">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your leads, or draft outreach…"
               autoFocus
             />
             <PromptInputFooter className="justify-end">
               <PromptInputSubmit
                 status={status}
-                disabled={!input.trim() && !isLoading}
                 onClick={isLoading ? () => stop() : undefined}
               />
             </PromptInputFooter>
@@ -240,3 +235,4 @@ function AgentPage() {
     </div>
   );
 }
+
