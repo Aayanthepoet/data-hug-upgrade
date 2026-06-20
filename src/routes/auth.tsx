@@ -46,30 +46,30 @@ function AuthPage() {
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/app`,
           data: { full_name: parsed.data.full_name },
         },
       });
       setLoading(false);
       if (error) { toast.error(error.message); return; }
       toast.success("Account created!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/app" });
     } else {
       const { error } = await supabase.auth.signInWithPassword({
         email: parsed.data.email, password: parsed.data.password,
       });
       setLoading(false);
       if (error) { toast.error(error.message); return; }
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/app" });
     }
   }
 
   async function signInGoogle() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/dashboard` });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/app` });
     if (result.error) { setLoading(false); toast.error("Google sign-in failed"); return; }
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/app" });
   }
 
   return (
