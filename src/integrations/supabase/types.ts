@@ -14,6 +14,254 @@ export type Database = {
   }
   public: {
     Tables: {
+      auctions: {
+        Row: {
+          created_at: string
+          current_bid: number
+          description: string | null
+          ends_at: string
+          id: string
+          opening_bid: number
+          property_id: string | null
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_bid?: number
+          description?: string | null
+          ends_at: string
+          id?: string
+          opening_bid?: number
+          property_id?: string | null
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_bid?: number
+          description?: string | null
+          ends_at?: string
+          id?: string
+          opening_bid?: number
+          property_id?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auctions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          bidder_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          lead_list_id: string | null
+          name: string
+          script: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          id?: string
+          lead_list_id?: string | null
+          name: string
+          script?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          lead_list_id?: string | null
+          name?: string
+          script?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_lead_list_id_fkey"
+            columns: ["lead_list_id"]
+            isOneToOne: false
+            referencedRelation: "lead_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          confidence: number | null
+          contact_type: string
+          created_at: string
+          do_not_contact: boolean
+          id: string
+          is_verified: boolean
+          notes: string | null
+          owner_id: string | null
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          confidence?: number | null
+          contact_type?: string
+          created_at?: string
+          do_not_contact?: boolean
+          id?: string
+          is_verified?: boolean
+          notes?: string | null
+          owner_id?: string | null
+          updated_at?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          confidence?: number | null
+          contact_type?: string
+          created_at?: string
+          do_not_contact?: boolean
+          id?: string
+          is_verified?: boolean
+          notes?: string | null
+          owner_id?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_list_items: {
+        Row: {
+          created_at: string
+          id: string
+          lead_list_id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_list_id: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_list_id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_list_items_lead_list_id_fkey"
+            columns: ["lead_list_id"]
+            isOneToOne: false
+            referencedRelation: "lead_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_list_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          filters: Json
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          filters?: Json
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          filters?: Json
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           company: string | null
@@ -50,6 +298,152 @@ export type Database = {
         }
         Relationships: []
       }
+      media_assets: {
+        Row: {
+          asset_type: string
+          created_at: string
+          id: string
+          metadata: Json
+          prompt: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          prompt?: string | null
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          prompt?: string | null
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      outreach_messages: {
+        Row: {
+          body: string | null
+          campaign_id: string | null
+          channel: string
+          contact_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          response: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          response?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          campaign_id?: string | null
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          response?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_messages_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owners: {
+        Row: {
+          created_at: string
+          entity_type: string | null
+          full_name: string
+          id: string
+          mailing_address: string | null
+          mailing_city: string | null
+          mailing_state: string | null
+          mailing_zip: string | null
+          notes: string | null
+          property_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type?: string | null
+          full_name: string
+          id?: string
+          mailing_address?: string | null
+          mailing_city?: string | null
+          mailing_state?: string | null
+          mailing_zip?: string | null
+          notes?: string | null
+          property_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string | null
+          full_name?: string
+          id?: string
+          mailing_address?: string | null
+          mailing_city?: string | null
+          mailing_state?: string | null
+          mailing_zip?: string | null
+          notes?: string | null
+          property_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -80,6 +474,84 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string
+          baths: number | null
+          beds: number | null
+          city: string | null
+          county: string | null
+          created_at: string
+          equity: number | null
+          estimated_value: number | null
+          id: string
+          is_absentee: boolean
+          is_preforeclosure: boolean
+          is_vacant: boolean
+          lead_score: number | null
+          lot_sqft: number | null
+          notes: string | null
+          parcel_id: string | null
+          property_type: string | null
+          sqft: number | null
+          state: string | null
+          updated_at: string
+          user_id: string
+          year_built: number | null
+          zip: string | null
+        }
+        Insert: {
+          address: string
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          equity?: number | null
+          estimated_value?: number | null
+          id?: string
+          is_absentee?: boolean
+          is_preforeclosure?: boolean
+          is_vacant?: boolean
+          lead_score?: number | null
+          lot_sqft?: number | null
+          notes?: string | null
+          parcel_id?: string | null
+          property_type?: string | null
+          sqft?: number | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+          year_built?: number | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          equity?: number | null
+          estimated_value?: number | null
+          id?: string
+          is_absentee?: boolean
+          is_preforeclosure?: boolean
+          is_vacant?: boolean
+          lead_score?: number | null
+          lot_sqft?: number | null
+          notes?: string | null
+          parcel_id?: string | null
+          property_type?: string | null
+          sqft?: number | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+          year_built?: number | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -100,6 +572,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string | null
+          render_url: string | null
+          script: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          voiceover_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id?: string | null
+          render_url?: string | null
+          script?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          voiceover_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string | null
+          render_url?: string | null
+          script?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          voiceover_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
