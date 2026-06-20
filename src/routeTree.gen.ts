@@ -16,6 +16,15 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
+import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
+import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
+import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
+import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
+import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -51,6 +60,56 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppPropertiesRoute =
+  AuthenticatedAppPropertiesRouteImport.update({
+    id: '/properties',
+    path: '/properties',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
+  id: '/owners',
+  path: '/owners',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppLeadListsRoute =
+  AuthenticatedAppLeadListsRouteImport.update({
+    id: '/lead-lists',
+    path: '/lead-lists',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppContactsRoute =
+  AuthenticatedAppContactsRouteImport.update({
+    id: '/contacts',
+    path: '/contacts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCampaignsRoute =
+  AuthenticatedAppCampaignsRouteImport.update({
+    id: '/campaigns',
+    path: '/campaigns',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppAuctionsRoute =
+  AuthenticatedAppAuctionsRouteImport.update({
+    id: '/auctions',
+    path: '/auctions',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,7 +117,16 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/app/auctions': typeof AuthenticatedAppAuctionsRoute
+  '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
+  '/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
+  '/app/owners': typeof AuthenticatedAppOwnersRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +135,14 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/app/auctions': typeof AuthenticatedAppAuctionsRoute
+  '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
+  '/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
+  '/app/owners': typeof AuthenticatedAppOwnersRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,7 +152,16 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/app/auctions': typeof AuthenticatedAppAuctionsRoute
+  '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
+  '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
+  '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
+  '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,9 +171,32 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/sitemap.xml'
+    | '/app'
     | '/dashboard'
+    | '/app/auctions'
+    | '/app/campaigns'
+    | '/app/contacts'
+    | '/app/lead-lists'
+    | '/app/owners'
+    | '/app/properties'
+    | '/app/videos'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/features' | '/pricing' | '/sitemap.xml' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/features'
+    | '/pricing'
+    | '/sitemap.xml'
+    | '/dashboard'
+    | '/app/auctions'
+    | '/app/campaigns'
+    | '/app/contacts'
+    | '/app/lead-lists'
+    | '/app/owners'
+    | '/app/properties'
+    | '/app/videos'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -97,7 +205,16 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/sitemap.xml'
+    | '/_authenticated/app'
     | '/_authenticated/dashboard'
+    | '/_authenticated/app/auctions'
+    | '/_authenticated/app/campaigns'
+    | '/_authenticated/app/contacts'
+    | '/_authenticated/app/lead-lists'
+    | '/_authenticated/app/owners'
+    | '/_authenticated/app/properties'
+    | '/_authenticated/app/videos'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,14 +277,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/videos': {
+      id: '/_authenticated/app/videos'
+      path: '/videos'
+      fullPath: '/app/videos'
+      preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/properties': {
+      id: '/_authenticated/app/properties'
+      path: '/properties'
+      fullPath: '/app/properties'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/owners': {
+      id: '/_authenticated/app/owners'
+      path: '/owners'
+      fullPath: '/app/owners'
+      preLoaderRoute: typeof AuthenticatedAppOwnersRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/lead-lists': {
+      id: '/_authenticated/app/lead-lists'
+      path: '/lead-lists'
+      fullPath: '/app/lead-lists'
+      preLoaderRoute: typeof AuthenticatedAppLeadListsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/contacts': {
+      id: '/_authenticated/app/contacts'
+      path: '/contacts'
+      fullPath: '/app/contacts'
+      preLoaderRoute: typeof AuthenticatedAppContactsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/campaigns': {
+      id: '/_authenticated/app/campaigns'
+      path: '/campaigns'
+      fullPath: '/app/campaigns'
+      preLoaderRoute: typeof AuthenticatedAppCampaignsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/auctions': {
+      id: '/_authenticated/app/auctions'
+      path: '/auctions'
+      fullPath: '/app/auctions'
+      preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRoute
+  AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
+  AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
+  AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
+  AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
+  AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRoute
+  AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+}
+
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAuctionsRoute: AuthenticatedAppAuctionsRoute,
+  AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
+  AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
+  AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
+  AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
+  AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRoute,
+  AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+}
+
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 

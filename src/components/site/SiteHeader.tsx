@@ -17,7 +17,7 @@ export function SiteHeader() {
         </nav>
         <div className="flex items-center gap-3">
           {!loading && user ? (
-            <Link to="/dashboard" className="btn-primary text-xs px-4 py-2">Open dashboard</Link>
+            <Link to="/app" className="btn-primary text-xs px-4 py-2">Open dashboard</Link>
           ) : (
             <>
               <Link to="/auth" className="text-sm text-[var(--w75)] hover:text-white hidden sm:inline">Sign in</Link>
