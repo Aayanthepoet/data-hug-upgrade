@@ -16,6 +16,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -51,6 +53,16 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,7 +70,9 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +81,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,7 +91,9 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,9 +103,18 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/sitemap.xml'
+    | '/app'
     | '/dashboard'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/features' | '/pricing' | '/sitemap.xml' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/features'
+    | '/pricing'
+    | '/sitemap.xml'
+    | '/dashboard'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -97,7 +123,9 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/sitemap.xml'
+    | '/_authenticated/app'
     | '/_authenticated/dashboard'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,14 +188,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+}
+
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+}
+
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
