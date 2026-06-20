@@ -3,7 +3,8 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Sparkles, Trash2 } from "lucide-react";
+import { Bot, Sparkles, Trash2, FileDown } from "lucide-react";
+import { exportConversationToPdf } from "@/lib/export-pdf";
 
 import {
   Conversation,
