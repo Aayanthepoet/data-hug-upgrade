@@ -49,6 +49,15 @@ function Overview() {
       </p>
 
       <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Link
+          to="/app/agent"
+          className="surface p-5 hover:border-cyan transition col-span-2 md:col-span-1"
+          style={{ background: "var(--cyan-d)", borderColor: "var(--cyan-b)" }}
+        >
+          <div className="text-xs uppercase tracking-widest font-bold text-cyan">PropAI Agent</div>
+          <div className="text-2xl font-bold mt-3">Chat →</div>
+          <div className="text-xs text-[var(--w55)] mt-1">Summarize leads, draft outreach</div>
+        </Link>
         {tiles.map((t) => (
           <Link key={t.name} to={t.to} className="surface p-5 hover:border-cyan transition">
             <div className="text-xs uppercase tracking-widest font-bold" style={{ color: t.color }}>
