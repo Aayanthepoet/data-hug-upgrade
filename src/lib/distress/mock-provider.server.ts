@@ -168,6 +168,17 @@ export class MockProvider implements PropertyProvider {
       const distressType = pick(types, i);
       const rec = buildRecord(state, city, zip, county, i, distressType);
 
+      // Attach jittered lat/lng around the county centroid (when known)
+      const center = countyMatch
+        ?? counties.find((c) => c.name === county);
+      if (center?.lat != null && center?.lng != null) {
+        const seed = hash(`${state}-${zip}-${i}-${distressType}`);
+        const jitterLat = (((seed % 200) - 100) / 100) * 0.05; // ~5km
+        const jitterLng = ((((seed >> 7) % 200) - 100) / 100) * 0.05;
+        rec.lat = +(center.lat + jitterLat).toFixed(6);
+        rec.lng = +(center.lng + jitterLng).toFixed(6);
+      }
+
       if (filters.minEquity != null && (rec.equity ?? 0) < filters.minEquity) { i++; continue; }
       if (filters.minDaysOnMarket != null && (rec.daysOnMarket ?? 0) < filters.minDaysOnMarket) { i++; continue; }
       if (filters.minListPrice != null && (rec.listPrice ?? 0) < filters.minListPrice) { i++; continue; }
