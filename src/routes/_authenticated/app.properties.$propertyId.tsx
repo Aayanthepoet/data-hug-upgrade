@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, Search, X } from "lucide-react";
 
 const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }> = {
   deed: { label: "Deed", color: "#06b6d4" },
@@ -129,43 +130,7 @@ function PropertyDetailPage() {
           )}
 
           {g.timeline && g.timeline.length > 0 && (
-            <div className="p-4 border-t border-border">
-              <h3 className="text-xs uppercase tracking-wider text-[var(--w55)] mb-3">Timeline</h3>
-              <ol className="relative border-l border-border/60 ml-2 space-y-4">
-                {g.timeline.map((e, ei) => {
-                  const meta = KIND_META[e.kind];
-                  return (
-                    <li key={ei} className="pl-5 relative">
-                      <span
-                        className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full ring-2 ring-background"
-                        style={{ background: meta.color }}
-                      />
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <time className="text-xs font-mono text-[var(--w55)]">{e.date}</time>
-                        <span
-                          className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border"
-                          style={{ color: meta.color, borderColor: `${meta.color}55`, background: `${meta.color}15` }}
-                        >
-                          {meta.label}
-                        </span>
-                        <span className="text-sm font-medium">{e.title}</span>
-                        {e.amount != null && e.amount > 0 && (
-                          <span className="text-sm text-cyan">${e.amount.toLocaleString()}</span>
-                        )}
-                      </div>
-                      {(e.from || e.to) && (
-                        <p className="text-xs text-[var(--w55)] mt-0.5">
-                          {e.from ?? "—"} <span className="opacity-60">→</span> {e.to ?? "—"}
-                        </p>
-                      )}
-                      {e.docId && (
-                        <p className="text-[10px] font-mono text-[var(--w55)] mt-0.5">Doc {e.docId}</p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
+            <TimelineSection events={g.timeline} />
           )}
 
           {g.rows && g.rows.length > 0 && (
@@ -201,6 +166,91 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="border border-border rounded-md p-3">
       <p className="text-[10px] uppercase tracking-wider text-[var(--w55)]">{label}</p>
       <p className="text-sm font-medium mt-1">{value}</p>
+    </div>
+  );
+}
+
+function TimelineSection({ events }: { events: TimelineEvent[] }) {
+  const [q, setQ] = useState("");
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return events;
+    return events.filter((e) =>
+      [e.from, e.to, e.docId, e.date, e.title, KIND_META[e.kind].label]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(term)),
+    );
+  }, [events, q]);
+
+  return (
+    <div className="p-4 border-t border-border">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h3 className="text-xs uppercase tracking-wider text-[var(--w55)]">Timeline</h3>
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--w55)]" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search party, doc ID, or date…"
+            className="w-full pl-7 pr-7 py-1.5 text-xs bg-[rgba(255,255,255,.04)] border border-border rounded focus:outline-none focus:border-cyan"
+          />
+          {q && (
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--w55)] hover:text-white"
+              aria-label="Clear"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {q && (
+        <p className="text-[11px] text-[var(--w55)] mb-2">
+          {filtered.length} of {events.length} events match
+        </p>
+      )}
+
+      {filtered.length === 0 ? (
+        <p className="text-sm text-[var(--w55)] py-4">No events match "{q}".</p>
+      ) : (
+        <ol className="relative border-l border-border/60 ml-2 space-y-4">
+          {filtered.map((e, ei) => {
+            const meta = KIND_META[e.kind];
+            return (
+              <li key={ei} className="pl-5 relative">
+                <span
+                  className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full ring-2 ring-background"
+                  style={{ background: meta.color }}
+                />
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <time className="text-xs font-mono text-[var(--w55)]">{e.date}</time>
+                  <span
+                    className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border"
+                    style={{ color: meta.color, borderColor: `${meta.color}55`, background: `${meta.color}15` }}
+                  >
+                    {meta.label}
+                  </span>
+                  <span className="text-sm font-medium">{e.title}</span>
+                  {e.amount != null && e.amount > 0 && (
+                    <span className="text-sm text-cyan">${e.amount.toLocaleString()}</span>
+                  )}
+                </div>
+                {(e.from || e.to) && (
+                  <p className="text-xs text-[var(--w55)] mt-0.5">
+                    {e.from ?? "—"} <span className="opacity-60">→</span> {e.to ?? "—"}
+                  </p>
+                )}
+                {e.docId && (
+                  <p className="text-[10px] font-mono text-[var(--w55)] mt-0.5">Doc {e.docId}</p>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
     </div>
   );
 }
