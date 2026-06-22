@@ -9,6 +9,9 @@ import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
   head: () => ({ meta: [{ title: "Owners — PropAI" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    status: search.status === "pending" || search.status === "traced" ? search.status : undefined,
+  }),
   component: OwnersPage,
   errorComponent: ({ error }) => <div className="p-6 text-red-400">{error.message}</div>,
   notFoundComponent: () => <div className="p-6">Not found.</div>,
@@ -52,7 +55,16 @@ function OwnersPage() {
   const [bulkRunning, setBulkRunning] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  const ownerList = owners ?? [];
+  const { status: statusFilter } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const allOwners = owners ?? [];
+  const ownerList = useMemo(() => {
+    if (!statusFilter) return allOwners;
+    return allOwners.filter((o) => {
+      const s = (o.skip_trace_status ?? "pending") === "traced" ? "traced" : "pending";
+      return s === statusFilter;
+    });
+  }, [allOwners, statusFilter]);
   const allSelected = ownerList.length > 0 && ownerList.every((o) => selected.has(o.id));
   const someSelected = selected.size > 0 && !allSelected;
 
