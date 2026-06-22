@@ -258,13 +258,75 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           })}
         </div>
 
+        {(channel === "sms" || channel === "email") && (
+          <div className="space-y-2 border border-border rounded p-3 bg-[rgba(255,255,255,.02)]">
+            <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
+              Pick from skip-traced owners (optional)
+            </label>
+            <select
+              value={ownerId ?? ""}
+              onChange={(e) => {
+                const id = e.target.value || null;
+                setOwnerId(id);
+                setContactId(null);
+                if (!id) setTo("");
+              }}
+              className="w-full px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm"
+            >
+              <option value="">— manual entry —</option>
+              {ownerList.map((o) => {
+                const count = channel === "sms" ? o.phones.length : o.emails.length;
+                return (
+                  <option key={o.owner_id} value={o.owner_id} disabled={count === 0}>
+                    {o.full_name} {count === 0 ? `(no ${channel === "sms" ? "phone" : "email"})` : `· ${count} ${channel === "sms" ? "phone" : "email"}${count > 1 ? "s" : ""}`}
+                  </option>
+                );
+              })}
+            </select>
+            {selectedOwner && availableContacts.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {availableContacts.map((c) => {
+                  const active = contactId === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => { setContactId(c.id); setTo(c.value); }}
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] rounded border font-mono transition-colors ${
+                        active ? "bg-cyan/15 text-cyan border-cyan/40" : "border-border text-[var(--w55)] hover:bg-white/5"
+                      }`}
+                      title={c.is_verified ? "Verified" : "Unverified"}
+                    >
+                      {c.value}
+                      {c.confidence != null && (
+                        <span className="text-[9px] opacity-70">{c.confidence}%</span>
+                      )}
+                      {c.is_verified && <CheckCircle2 className="h-3 w-3 text-emerald-400" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {selectedOwner && availableContacts.length === 0 && (
+              <p className="text-[11px] text-[var(--w55)]">
+                This owner has no skip-traced {channel === "sms" ? "phone numbers" : "emails"}. Run skip trace from the Owners page first.
+              </p>
+            )}
+            {ownerList.length === 0 && (
+              <p className="text-[11px] text-[var(--w55)]">
+                No skip-traced contacts yet. Run skip trace on the Owners page to populate this list.
+              </p>
+            )}
+          </div>
+        )}
+
         <div>
           <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
             {channel === "sms" ? "Phone (E.164)" : channel === "email" ? "Email" : "Mailing address"}
           </label>
           <input
             value={to}
-            onChange={(e) => setTo(e.target.value)}
+            onChange={(e) => { setTo(e.target.value); setContactId(null); }}
             placeholder={channel === "sms" ? "+15551234567" : channel === "email" ? "owner@example.com" : "123 Main St, Phila PA 19103"}
             className="w-full mt-1 px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm font-mono"
           />
