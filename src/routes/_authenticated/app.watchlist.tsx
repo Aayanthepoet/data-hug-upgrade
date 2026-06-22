@@ -254,6 +254,7 @@ const TYPE_COLORS = {
 
 function AlertTrendChart() {
   const [range, setRange] = useState<7 | 30>(7);
+  const [day, setDay] = useState<string | null>(null);
   const fetchTrend = useServerFn(getAlertTrend);
   const { data, isLoading } = useQuery({
     queryKey: ["alert-trend", range],
