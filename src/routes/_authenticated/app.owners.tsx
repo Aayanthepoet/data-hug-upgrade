@@ -155,15 +155,39 @@ function OwnersPage() {
         }).join(","))
         .join("\r\n");
 
+      const filename = `owner-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
       const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `owner-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+
+      // Audit the export. Failure here must not block the download.
+      try {
+        await logAuditEvent({
+          data: {
+            action: "export.csv",
+            resource_type: "owner_contacts",
+            resource_ids: ids,
+            record_count: count,
+            metadata: {
+              filename,
+              owner_count: ids.length,
+              owner_names: ids
+                .map((id) => ownerById.get(id)?.full_name)
+                .filter(Boolean)
+                .slice(0, 25),
+            },
+          },
+        });
+        qc.invalidateQueries({ queryKey: ["audit-logs"] });
+      } catch (e) {
+        console.warn("audit log failed", e);
+      }
     } finally {
       setExporting(false);
     }
