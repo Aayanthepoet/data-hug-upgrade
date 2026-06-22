@@ -30,6 +30,7 @@ import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
+import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
@@ -152,6 +153,12 @@ const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
   path: '/owners',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppOutreachRoute =
+  AuthenticatedAppOutreachRouteImport.update({
+    id: '/outreach',
+    path: '/outreach',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -332,6 +341,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
@@ -445,6 +457,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
+    | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/scoring'
@@ -636,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOwnersRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/outreach': {
+      id: '/_authenticated/app/outreach'
+      path: '/outreach'
+      fullPath: '/app/outreach'
+      preLoaderRoute: typeof AuthenticatedAppOutreachRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/leads': {
       id: '/_authenticated/app/leads'
       path: '/leads'
@@ -797,6 +817,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
+  AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
@@ -813,6 +834,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
+  AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
