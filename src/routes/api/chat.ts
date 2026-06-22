@@ -107,7 +107,7 @@ export const Route = createFileRoute("/api/chat")({
             },
           }),
           create_task_plan: tool({
-            description: "Return a structured, actionable checklist for the user. Use when the user asks for a plan, next steps, or task mode. Group tasks into clear sections (e.g. 'Contacts to call', 'Outreach drafts', 'Auction steps', 'Research'). Each task is one concrete action.",
+            description: "Return a structured, actionable checklist for the user. Use when the user asks for a plan, next steps, or task mode. Group tasks into clear sections (e.g. 'Contacts to call', 'Outreach drafts', 'Follow-ups', 'Research'). Each task is one concrete action.",
             inputSchema: z.object({
               title: z.string().describe("Short title for this plan, e.g. 'Today's outreach plan'"),
               sections: z.array(z.object({
