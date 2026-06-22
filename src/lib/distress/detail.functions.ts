@@ -264,11 +264,11 @@ function friendlyDocType(code: string | undefined): string {
 
 // ----------------- Philly -----------------
 async function carto<T>(sql: string): Promise<T[]> {
-  const r = await fetch(`https://phl.carto.com/api/v2/sql?q=${encodeURIComponent(sql)}`, {
-    headers: { Accept: "application/json" },
+  const url = `https://phl.carto.com/api/v2/sql?q=${encodeURIComponent(sql)}`;
+  const j = await cachedJsonFetch<{ rows?: T[] }>(url, {
+    label: "philly:carto",
+    ttlMs: 10 * 60_000,
   });
-  if (!r.ok) throw new Error(`Carto ${r.status}`);
-  const j = (await r.json()) as { rows?: T[] };
   return j.rows ?? [];
 }
 
