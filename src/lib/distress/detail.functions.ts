@@ -15,12 +15,22 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const inputSchema = z.object({ propertyId: z.string().uuid() });
 
 export type DetailFact = { label: string; value: string | number | null };
+export type TimelineEvent = {
+  date: string;             // YYYY-MM-DD
+  kind: "deed" | "mortgage" | "satisfaction" | "lis_pendens" | "assignment" | "foreclosure" | "other";
+  title: string;
+  amount: number | null;
+  from: string | null;
+  to: string | null;
+  docId: string | null;
+};
 export type DetailGroup = {
   source: string;            // e.g. "NYC PLUTO (64uk-42ks)"
   sourceUrl: string;         // link to the dataset
   title: string;             // human-readable section title
   facts: DetailFact[];
   rows?: Record<string, string | number | null>[]; // tabular records
+  timeline?: TimelineEvent[];
 };
 
 export const getPropertyDetail = createServerFn({ method: "POST" })
