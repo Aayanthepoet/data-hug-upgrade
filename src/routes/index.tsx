@@ -58,7 +58,7 @@ function Index() {
               <span className="h-italic text-[0.72em]">Platform for Real Estate</span>
             </h1>
             <p className="mt-7 text-[18px] leading-[1.78] text-[var(--w55)] max-w-[520px] font-light fu fu-2">
-              PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, run auctions, and close more deals — all inside one platform built by AI Network Agency.
+              PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, and close more deals — all inside one platform built by AI Network Agency.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3 fu fu-3">
               <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary text-base px-7 py-4">
