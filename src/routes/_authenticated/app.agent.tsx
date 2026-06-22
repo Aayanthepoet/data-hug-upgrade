@@ -200,6 +200,19 @@ function AgentPage() {
                           output?: unknown;
                           errorText?: string;
                         };
+                        if (
+                          tp.type === "tool-create_task_plan" &&
+                          tp.output &&
+                          typeof tp.output === "object"
+                        ) {
+                          return (
+                            <TaskPlan
+                              key={tp.toolCallId ?? i}
+                              planId={tp.toolCallId ?? `${m.id}:${i}`}
+                              plan={tp.output as TaskPlanData}
+                            />
+                          );
+                        }
                         const state =
                           (tp.state as
                             | "input-streaming"
