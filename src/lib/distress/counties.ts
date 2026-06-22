@@ -2,7 +2,18 @@
 // Featured Northeast markets get real county lists. Other states use a coarser
 // default that still drives the dropdown.
 
-export type CountyInfo = { name: string; zips?: string[] };
+export type CountyInfo = { name: string; zips?: string[]; lat?: number; lng?: number };
+
+export const STATE_CENTERS: Record<string, { lat: number; lng: number; zoom: number }> = {
+  NY: { lat: 42.9, lng: -75.5, zoom: 7 },
+  NJ: { lat: 40.2, lng: -74.5, zoom: 8 },
+  CT: { lat: 41.6, lng: -72.7, zoom: 9 },
+  PA: { lat: 40.9, lng: -77.5, zoom: 7 },
+};
+
+// Approximate county centroids for featured Northeast markets.
+const C = (name: string, lat: number, lng: number, zips?: string[]): CountyInfo =>
+  ({ name, lat, lng, zips });
 
 export const COUNTIES_BY_STATE: Record<string, CountyInfo[]> = {
   NY: [
