@@ -86,6 +86,21 @@ function LeadDetailPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const { data: members = [] } = useTeamMembers();
+  const updateAssignee = useMutation({
+    mutationFn: async (assigneeId: string | null) => {
+      const { error } = await supabase
+        .from("leads").update({ assigned_to: assigneeId }).eq("id", leadId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["lead", leadId] });
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      toast.success("Assignment updated");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const [body, setBody] = useState("");
   const addNote = useMutation({
     mutationFn: async () => {
