@@ -228,7 +228,7 @@ function OwnersPage() {
             <div className="mt-2 inline-flex items-center gap-2 text-xs rounded-full border border-cyan/40 bg-cyan/10 text-cyan px-2.5 py-1">
               Showing {statusFilter} owners
               <button
-                onClick={() => navigate({ search: (p) => ({ ...p, status: undefined }) })}
+                onClick={() => navigate({ search: { status: undefined } })}
                 className="hover:text-white"
                 aria-label="Clear filter"
               >
