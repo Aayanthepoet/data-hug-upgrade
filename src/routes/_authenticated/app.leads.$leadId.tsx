@@ -173,18 +173,31 @@ function LeadDetailPage() {
             {lead.message || <span className="text-[var(--w55)]">No message provided.</span>}
           </div>
         </div>
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <div className="text-xs uppercase tracking-wider text-[var(--w55)]">Status</div>
           <Select
             value={lead.status || "new"}
             onValueChange={(v) => updateStatus.mutate(v)}
           >
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Badge variant="secondary">{lead.status || "new"}</Badge>
+
+          <div className="text-xs uppercase tracking-wider text-[var(--w55)] ml-2">Assignee</div>
+          <Select
+            value={lead.assigned_to ?? "unassigned"}
+            onValueChange={(v) => updateAssignee.mutate(v === "unassigned" ? null : v)}
+          >
+            <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {members.map((m) => (
+                <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </section>
 
