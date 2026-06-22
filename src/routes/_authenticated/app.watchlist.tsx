@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   listWatchlist,
+  getWatchlistStats,
   updateWatchlistItem,
   deleteWatchlistItem,
   type WatchlistItem,
 } from "@/lib/watchlist.functions";
-import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight } from "lucide-react";
+import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight, Bell, BellRing, Bookmark } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/watchlist")({
   head: () => ({ meta: [{ title: "Watchlist — PropAI" }] }),
