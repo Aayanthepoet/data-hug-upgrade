@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
@@ -90,6 +91,11 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLeadNotifyRoute = ApiPublicLeadNotifyRouteImport.update({
+  id: '/api/public/lead-notify',
+  path: '/api/public/lead-notify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRoute
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app/'
     | '/lovable/email/queue/process'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app'
     | '/lovable/email/queue/process'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/videos'
+    | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
     | '/lovable/email/queue/process'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -403,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/lead-notify': {
+      id: '/api/public/lead-notify'
+      path: '/api/public/lead-notify'
+      fullPath: '/api/public/lead-notify'
+      preLoaderRoute: typeof ApiPublicLeadNotifyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/videos': {
@@ -534,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
