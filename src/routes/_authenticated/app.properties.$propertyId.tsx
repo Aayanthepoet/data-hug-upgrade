@@ -7,7 +7,8 @@ import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
 import { upsertWatchlistItem } from "@/lib/watchlist.functions";
 import { createAuction } from "@/lib/auctions/auctions.functions";
-import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel } from "lucide-react";
+import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/comps/comps.functions";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
