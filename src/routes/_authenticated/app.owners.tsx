@@ -45,6 +45,7 @@ function OwnersPage() {
               <tr>
                 <th className="p-4 w-8"></th>
                 <th className="p-4">Owner</th>
+                <th className="p-4">Skip trace</th>
                 <th className="p-4">Property</th>
                 <th className="p-4">Mailing</th>
                 <th className="p-4">Contacts</th>
