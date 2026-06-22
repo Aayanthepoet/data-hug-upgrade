@@ -138,7 +138,7 @@ function PropertyDetailPage() {
           )}
 
           {g.timeline && g.timeline.length > 0 && (
-            <TimelineSection events={g.timeline} />
+            <TimelineSection events={g.timeline} address={p.address} />
           )}
 
           {g.rows && g.rows.length > 0 && (
@@ -182,7 +182,39 @@ function eventKey(e: TimelineEvent, idx: number): string {
   return e.docId ?? `${e.date}-${idx}`;
 }
 
-function TimelineSection({ events }: { events: TimelineEvent[] }) {
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function dateRange(events: { date: string }[]): string {
+  if (events.length === 0) return "";
+  const dates = events.map((e) => e.date).filter(Boolean).sort();
+  if (dates.length === 0) return "";
+  const a = dates[0].slice(0, 4);
+  const b = dates[dates.length - 1].slice(0, 4);
+  return a === b ? a : `${a}-${b}`;
+}
+
+function buildShareTitle(
+  address: string,
+  filteredEvents: TimelineEvent[],
+  selected: TimelineEvent | null,
+): string {
+  const range = dateRange(filteredEvents);
+  const parts = [address];
+  if (range) parts.push(range);
+  if (selected) {
+    const meta = KIND_META[selected.kind];
+    parts.push(`${meta.label} ${selected.date}`);
+  }
+  return parts.join(" · ");
+}
+
+function TimelineSection({ events, address }: { events: TimelineEvent[]; address: string }) {
   const { q, event: selectedKey } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -213,6 +245,26 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
     );
   }, [events, q]);
 
+  const selectedEvent = useMemo(() => {
+    if (!selectedKey) return null;
+    return filtered.find(({ key }) => key === selectedKey)?.e
+      ?? events.find((e, i) => eventKey(e, i) === selectedKey)
+      ?? null;
+  }, [selectedKey, filtered, events]);
+
+  const shareTitle = useMemo(
+    () => buildShareTitle(address, filtered.map((f) => f.e), selectedEvent),
+    [address, filtered, selectedEvent],
+  );
+
+  // Reflect the human-readable view title in the browser tab too
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const prev = document.title;
+    document.title = `${shareTitle} — PropAI`;
+    return () => { document.title = prev; };
+  }, [shareTitle]);
+
   const selectedRef = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     if (selectedKey && selectedRef.current) {
@@ -221,13 +273,38 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
   }, [selectedKey]);
 
   const [copied, setCopied] = useState<string | null>(null);
-  const copyShareLink = async (key: string) => {
+  const buildShareUrl = (key: string | null, evt: TimelineEvent | null): string => {
     const url = new URL(window.location.href);
-    url.searchParams.set("event", key);
+    if (key) url.searchParams.set("event", key);
+    else url.searchParams.delete("event");
     if (q) url.searchParams.set("q", q);
     else url.searchParams.delete("q");
+    // Human-readable hash slug — ignored by the router, but visible to humans
+    // and to link-preview crawlers that show the URL itself.
+    const title = buildShareTitle(address, filtered.map((f) => f.e), evt);
+    url.hash = slugify(title);
+    return url.toString();
+  };
+
+  const copyShareLink = async (key: string, evt: TimelineEvent) => {
+    const shareUrl = buildShareUrl(key, evt);
+    const title = buildShareTitle(address, filtered.map((f) => f.e), evt);
+    // Prefer native share sheet (mobile) — it shows the title in the preview card
+    const nav = navigator as Navigator & {
+      share?: (data: { title?: string; text?: string; url?: string }) => Promise<void>;
+    };
+    if (nav.share) {
+      try {
+        await nav.share({ title, text: title, url: shareUrl });
+        setCopied(key);
+        setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
+        return;
+      } catch {
+        /* user cancelled — fall through to clipboard */
+      }
+    }
     try {
-      await navigator.clipboard.writeText(url.toString());
+      await navigator.clipboard.writeText(`${title}\n${shareUrl}`);
       setCopied(key);
       setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
     } catch {
@@ -314,7 +391,7 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
                   )}
                   <button
                     type="button"
-                    onClick={() => copyShareLink(key)}
+                    onClick={() => copyShareLink(key, e)}
                     className="ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan"
                     title="Copy shareable link to this event"
                   >
