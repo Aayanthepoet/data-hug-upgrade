@@ -34,6 +34,7 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -168,6 +169,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAppPropertiesSearchRoute =
+  AuthenticatedAppPropertiesSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
+  } as any)
 const AuthenticatedAppLeadsLeadIdRoute =
   AuthenticatedAppLeadsLeadIdRouteImport.update({
     id: '/$leadId',
@@ -192,12 +199,13 @@ export interface FileRoutesByFullPath {
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/owners': typeof AuthenticatedAppOwnersRoute
-  '/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -218,12 +226,13 @@ export interface FileRoutesByTo {
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/owners': typeof AuthenticatedAppOwnersRoute
-  '/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -247,12 +256,13 @@ export interface FileRoutesById {
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
-  '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRoute
+  '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/app/'
     | '/app/leads/$leadId'
+    | '/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/app'
     | '/app/leads/$leadId'
+    | '/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -336,6 +348,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
     | '/_authenticated/app/leads/$leadId'
+    | '/_authenticated/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -534,6 +547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/properties/search': {
+      id: '/_authenticated/app/properties/search'
+      path: '/search'
+      fullPath: '/app/properties/search'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
+    }
     '/_authenticated/app/leads/$leadId': {
       id: '/_authenticated/app/leads/$leadId'
       path: '/$leadId'
@@ -557,6 +577,21 @@ const AuthenticatedAppLeadsRouteWithChildren =
     AuthenticatedAppLeadsRouteChildren,
   )
 
+interface AuthenticatedAppPropertiesRouteChildren {
+  AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
+}
+
+const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteChildren =
+  {
+    AuthenticatedAppPropertiesSearchRoute:
+      AuthenticatedAppPropertiesSearchRoute,
+  }
+
+const AuthenticatedAppPropertiesRouteWithChildren =
+  AuthenticatedAppPropertiesRoute._addFileChildren(
+    AuthenticatedAppPropertiesRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRoute
   AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRoute
@@ -565,7 +600,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
-  AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRoute
+  AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -578,7 +613,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
-  AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRoute,
+  AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }

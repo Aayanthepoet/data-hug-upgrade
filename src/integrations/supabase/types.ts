@@ -193,6 +193,50 @@ export type Database = {
           },
         ]
       }
+      distress_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          event_date: string
+          event_type: Database["public"]["Enums"]["distress_type"]
+          id: string
+          note: string | null
+          property_id: string
+          source_provider: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          event_date?: string
+          event_type: Database["public"]["Enums"]["distress_type"]
+          id?: string
+          note?: string | null
+          property_id: string
+          source_provider?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          event_date?: string
+          event_type?: Database["public"]["Enums"]["distress_type"]
+          id?: string
+          note?: string | null
+          property_id?: string
+          source_provider?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distress_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -672,24 +716,35 @@ export type Database = {
       properties: {
         Row: {
           address: string
+          auction_date: string | null
           baths: number | null
           beds: number | null
           city: string | null
           county: string | null
           created_at: string
+          days_on_market: number | null
+          distress_type: Database["public"]["Enums"]["distress_type"]
           equity: number | null
           estimated_value: number | null
           id: string
           is_absentee: boolean
           is_preforeclosure: boolean
           is_vacant: boolean
+          last_synced_at: string | null
           lead_score: number | null
+          lien_amount: number | null
+          list_date: string | null
+          list_price: number | null
+          listing_status: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft: number | null
           notes: string | null
           parcel_id: string | null
           property_type: string | null
+          source_provider: string | null
+          source_record_id: string | null
           sqft: number | null
           state: string | null
+          tax_owed: number | null
           updated_at: string
           user_id: string
           year_built: number | null
@@ -697,24 +752,35 @@ export type Database = {
         }
         Insert: {
           address: string
+          auction_date?: string | null
           baths?: number | null
           beds?: number | null
           city?: string | null
           county?: string | null
           created_at?: string
+          days_on_market?: number | null
+          distress_type?: Database["public"]["Enums"]["distress_type"]
           equity?: number | null
           estimated_value?: number | null
           id?: string
           is_absentee?: boolean
           is_preforeclosure?: boolean
           is_vacant?: boolean
+          last_synced_at?: string | null
           lead_score?: number | null
+          lien_amount?: number | null
+          list_date?: string | null
+          list_price?: number | null
+          listing_status?: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft?: number | null
           notes?: string | null
           parcel_id?: string | null
           property_type?: string | null
+          source_provider?: string | null
+          source_record_id?: string | null
           sqft?: number | null
           state?: string | null
+          tax_owed?: number | null
           updated_at?: string
           user_id: string
           year_built?: number | null
@@ -722,28 +788,75 @@ export type Database = {
         }
         Update: {
           address?: string
+          auction_date?: string | null
           baths?: number | null
           beds?: number | null
           city?: string | null
           county?: string | null
           created_at?: string
+          days_on_market?: number | null
+          distress_type?: Database["public"]["Enums"]["distress_type"]
           equity?: number | null
           estimated_value?: number | null
           id?: string
           is_absentee?: boolean
           is_preforeclosure?: boolean
           is_vacant?: boolean
+          last_synced_at?: string | null
           lead_score?: number | null
+          lien_amount?: number | null
+          list_date?: string | null
+          list_price?: number | null
+          listing_status?: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft?: number | null
           notes?: string | null
           parcel_id?: string | null
           property_type?: string | null
+          source_provider?: string | null
+          source_record_id?: string | null
           sqft?: number | null
           state?: string | null
+          tax_owed?: number | null
           updated_at?: string
           user_id?: string
           year_built?: number | null
           zip?: string | null
+        }
+        Relationships: []
+      }
+      saved_searches: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          is_scheduled: boolean
+          last_match_count: number | null
+          last_run_at: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_scheduled?: boolean
+          last_match_count?: number | null
+          last_run_at?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_scheduled?: boolean
+          last_match_count?: number | null
+          last_run_at?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -879,6 +992,23 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      distress_type:
+        | "reo"
+        | "preforeclosure"
+        | "auction"
+        | "tax_lien"
+        | "tax_delinquent"
+        | "fsbo_stale"
+        | "vacant"
+        | "absentee"
+        | "none"
+      listing_status:
+        | "active"
+        | "pending"
+        | "sold"
+        | "off_market"
+        | "auction_scheduled"
+        | "foreclosed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1007,6 +1137,25 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      distress_type: [
+        "reo",
+        "preforeclosure",
+        "auction",
+        "tax_lien",
+        "tax_delinquent",
+        "fsbo_stale",
+        "vacant",
+        "absentee",
+        "none",
+      ],
+      listing_status: [
+        "active",
+        "pending",
+        "sold",
+        "off_market",
+        "auction_scheduled",
+        "foreclosed",
+      ],
     },
   },
 } as const
