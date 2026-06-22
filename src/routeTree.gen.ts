@@ -22,6 +22,8 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
+import { Route as ApiEnginesVisionRouteImport } from './routes/api/engines/vision'
+import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
@@ -99,6 +101,16 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
 const ApiPublicLeadNotifyRoute = ApiPublicLeadNotifyRouteImport.update({
   id: '/api/public/lead-notify',
   path: '/api/public/lead-notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEnginesVisionRoute = ApiEnginesVisionRouteImport.update({
+  id: '/api/engines/vision',
+  path: '/api/engines/vision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
+  id: '/api/engines/tts',
+  path: '/api/engines/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
@@ -201,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -228,6 +242,8 @@ export interface FileRoutesByTo {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -258,6 +274,8 @@ export interface FileRoutesById {
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
+  '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -288,6 +306,8 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/api/engines/tts'
+    | '/api/engines/vision'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app/'
@@ -315,6 +335,8 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/api/engines/tts'
+    | '/api/engines/vision'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app'
@@ -344,6 +366,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/videos'
+    | '/api/engines/tts'
+    | '/api/engines/vision'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
@@ -363,6 +387,8 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ApiEnginesTtsRoute: typeof ApiEnginesTtsRoute
+  ApiEnginesVisionRoute: typeof ApiEnginesVisionRoute
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -461,6 +487,20 @@ declare module '@tanstack/react-router' {
       path: '/api/public/lead-notify'
       fullPath: '/api/public/lead-notify'
       preLoaderRoute: typeof ApiPublicLeadNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/engines/vision': {
+      id: '/api/engines/vision'
+      path: '/api/engines/vision'
+      fullPath: '/api/engines/vision'
+      preLoaderRoute: typeof ApiEnginesVisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/engines/tts': {
+      id: '/api/engines/tts'
+      path: '/api/engines/tts'
+      fullPath: '/api/engines/tts'
+      preLoaderRoute: typeof ApiEnginesTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/videos': {
@@ -643,6 +683,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ApiEnginesTtsRoute: ApiEnginesTtsRoute,
+  ApiEnginesVisionRoute: ApiEnginesVisionRoute,
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
