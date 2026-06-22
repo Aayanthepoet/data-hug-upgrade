@@ -83,9 +83,10 @@ const NYC_BASE = "https://data.cityofnewyork.us/resource";
 async function soql<T>(dataset: string, params: Record<string, string>): Promise<T[]> {
   const url = new URL(`${NYC_BASE}/${dataset}.json`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const r = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!r.ok) throw new Error(`NYC ${dataset} ${r.status}`);
-  return (await r.json()) as T[];
+  return cachedJsonFetch<T[]>(url.toString(), {
+    label: `nyc:${dataset}`,
+    ttlMs: 10 * 60_000,
+  });
 }
 
 async function fetchNYC(bbl: string): Promise<DetailGroup[]> {
