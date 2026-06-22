@@ -42,7 +42,8 @@ export const resolveOwnerContacts = createServerFn({ method: "POST" })
       contact_type: c.contact_type,
       value: c.value,
       confidence: Math.round(c.confidence),
-      source: "ai_resolver" as const,
+      user_id: context.userId,
+      notes: `AI Contact Resolver: ${c.rationale}`,
     }));
     if (rows.length) {
       await supabase.from("contacts").insert(rows as never);
