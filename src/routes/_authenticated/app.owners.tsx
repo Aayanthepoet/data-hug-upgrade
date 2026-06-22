@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { listOwners, listOwnerContacts, runSkipTrace } from "@/lib/skiptrace/skiptrace.functions";
-import { Search, ChevronDown, ChevronRight, Phone, Mail, Users, Loader2, CheckCircle2, AlertCircle, X } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Phone, Mail, Users, Loader2, CheckCircle2, AlertCircle, X, Download } from "lucide-react";
 import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
