@@ -30,9 +30,9 @@ export const getPropertyDetail = createServerFn({ method: "POST" })
     const { data: prop, error } = await context.supabase
       .from("properties")
       .select(
-        "id, address, city, state, zip, county, source_provider, source_record_id, " +
-          "estimated_value, equity, lead_score, distress_type, list_price, days_on_market, " +
-          "tax_owed, lien_amount, beds, baths, sqft, year_built, property_type",
+        `id, address, city, state, zip, county, source_provider, source_record_id,
+         estimated_value, equity, lead_score, distress_type, list_price, days_on_market,
+         tax_owed, lien_amount, beds, baths, sqft, year_built, property_type`,
       )
       .eq("id", data.propertyId)
       .eq("user_id", context.userId)
@@ -83,15 +83,14 @@ async function fetchNYC(bbl: string): Promise<DetailGroup[]> {
   const block = bbl.slice(1, 6).replace(/^0+/, "") || "0";
   const lot = bbl.slice(6).replace(/^0+/, "") || "0";
 
-  const [pluto, legals, prefn] = await Promise.all([
-    soql<any>("64uk-42ks", { $where: `bbl = '${bbl}'`, $limit: "1" }).catch(() => []),
+  const [pluto, legals] = await Promise.all([
+    soql<any>("64uk-42ks", { $where: `bbl = '${bbl}'`, $limit: "1" }).catch(() => [] as any[]),
     soql<any>("8h5j-fqxa", {
       $where: `borough = '${borough}' AND block = '${block}' AND lot = '${lot}'`,
       $select: "document_id, street_number, street_name, unit, good_through_date",
       $order: "good_through_date DESC",
       $limit: "25",
-    }).catch(() => []),
-    pluto.length === 0 ? Promise.resolve([]) : Promise.resolve([]),
+    }).catch(() => [] as any[]),
   ]);
 
   const groups: DetailGroup[] = [];

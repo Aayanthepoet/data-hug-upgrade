@@ -37,6 +37,7 @@ import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lova
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
+import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -186,6 +187,12 @@ const AuthenticatedAppPropertiesSearchRoute =
     path: '/search',
     getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
+const AuthenticatedAppPropertiesPropertyIdRoute =
+  AuthenticatedAppPropertiesPropertyIdRouteImport.update({
+    id: '/$propertyId',
+    path: '/$propertyId',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
+  } as any)
 const AuthenticatedAppLeadsLeadIdRoute =
   AuthenticatedAppLeadsLeadIdRouteImport.update({
     id: '/$leadId',
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -247,6 +255,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -279,6 +288,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
+  '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/app/'
     | '/app/leads/$leadId'
+    | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/app'
     | '/app/leads/$leadId'
+    | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -371,6 +383,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
     | '/_authenticated/app/leads/$leadId'
+    | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -593,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
       parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
+    '/_authenticated/app/properties/$propertyId': {
+      id: '/_authenticated/app/properties/$propertyId'
+      path: '/$propertyId'
+      fullPath: '/app/properties/$propertyId'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesPropertyIdRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
+    }
     '/_authenticated/app/leads/$leadId': {
       id: '/_authenticated/app/leads/$leadId'
       path: '/$leadId'
@@ -617,11 +637,14 @@ const AuthenticatedAppLeadsRouteWithChildren =
   )
 
 interface AuthenticatedAppPropertiesRouteChildren {
+  AuthenticatedAppPropertiesPropertyIdRoute: typeof AuthenticatedAppPropertiesPropertyIdRoute
   AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
 }
 
 const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteChildren =
   {
+    AuthenticatedAppPropertiesPropertyIdRoute:
+      AuthenticatedAppPropertiesPropertyIdRoute,
     AuthenticatedAppPropertiesSearchRoute:
       AuthenticatedAppPropertiesSearchRoute,
   }
