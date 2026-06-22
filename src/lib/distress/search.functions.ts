@@ -50,14 +50,17 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => filtersSchema.parse(data))
   .handler(async ({ data }) => {
-    const { getProvider } = await import("./mock-provider.server");
-    const provider = getProvider();
-    const records = await provider.searchDistressed(data);
-    return records.map((r) => ({
-      ...r,
-      leadScore: score(r),
-      sourceProvider: provider.name,
-    }));
+    const { searchDistressedViaRouter } = await import("./router.server");
+    const { records, provider, usedFallback } = await searchDistressedViaRouter(data);
+    return {
+      records: records.map((r) => ({
+        ...r,
+        leadScore: score(r),
+        sourceProvider: usedFallback ? "mock" : provider,
+      })),
+      provider,
+      usedFallback,
+    };
   });
 
 const importSchema = z.object({
