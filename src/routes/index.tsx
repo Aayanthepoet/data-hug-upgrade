@@ -7,9 +7,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PropAI — The Complete Intelligence Platform for Real Estate" },
-      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, auctions, and video marketing. Built for real estate professionals by AI Network Agency." },
+      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, and video marketing. Built for real estate professionals by AI Network Agency." },
       { property: "og:title", content: "PropAI — Intelligence Platform for Real Estate" },
-      { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, run auctions, close more deals — one AI platform." },
+      { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, and close more deals — one AI platform." },
     ],
   }),
   component: Index,
@@ -37,7 +37,7 @@ const workflow = [
   { n: 3, t: "Score the Lead", d: "Language Engine scores motivation 0–100 from equity, distress, history.", tag: "Language Engine" },
   { n: 4, t: "Send AI-Personalized Outreach", d: "Outreach Engine writes a letter specific to this owner's situation.", tag: "Outreach Engine" },
   { n: 5, t: "Present with AI Visuals", d: "Vision Studio renders redesigns. Video Studio creates the tour video.", tag: "Vision + Video Studio" },
-  { n: 6, t: "Close the Deal", d: "Auction Engine runs live bidding. PropAI Agent coaches negotiation.", tag: "Auction + Agent" },
+  { n: 6, t: "Close the Deal", d: "PropAI Agent coaches negotiation and tracks every touchpoint.", tag: "PropAI Agent" },
 ];
 
 function Index() {
@@ -58,7 +58,7 @@ function Index() {
               <span className="h-italic text-[0.72em]">Platform for Real Estate</span>
             </h1>
             <p className="mt-7 text-[18px] leading-[1.78] text-[var(--w55)] max-w-[520px] font-light fu fu-2">
-              PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, run auctions, and close more deals — all inside one platform built by AI Network Agency.
+              PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, and close more deals — all inside one platform built by AI Network Agency.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3 fu fu-3">
               <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary text-base px-7 py-4">
@@ -100,7 +100,7 @@ function Index() {
                 <div className="font-bold text-sm mb-3">Prop<span className="text-cyan">AI</span></div>
                 {[
                   ["⊞","Dashboard", true],["🔍","Owner Finder"],["📨","Outreach"],
-                  ["🏠","Listings"],["✨","Redesign"],["🔨","Auctions"],["🎬","Video"],["🤖","Agent"],
+                  ["🏠","Listings"],["✨","Redesign"],["🎬","Video"],["🤖","Agent"],
                 ].map(([ic, n, on]) => (
                   <div key={n as string} className={`flex items-center gap-2 text-[11px] px-2 py-1.5 rounded ${on ? "bg-cyan-d text-cyan" : "text-[var(--w55)]"}`}>
                     <span>{ic}</span>{n}

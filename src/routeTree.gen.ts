@@ -32,7 +32,6 @@ import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
 import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
-import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
 import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticated/app.agent'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -158,12 +157,6 @@ const AuthenticatedAppCampaignsRoute =
     path: '/campaigns',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppAuctionsRoute =
-  AuthenticatedAppAuctionsRouteImport.update({
-    id: '/auctions',
-    path: '/auctions',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
 const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
   id: '/agent',
   path: '/agent',
@@ -211,7 +204,6 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRoute
-  '/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -241,7 +233,6 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRoute
-  '/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -274,7 +265,6 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/app/agent': typeof AuthenticatedAppAgentRoute
-  '/_authenticated/app/auctions': typeof AuthenticatedAppAuctionsRoute
   '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -307,7 +297,6 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/app/agent'
-    | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/lead-lists'
@@ -337,7 +326,6 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/app/agent'
-    | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/lead-lists'
@@ -369,7 +357,6 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/_authenticated/app/agent'
-    | '/_authenticated/app/auctions'
     | '/_authenticated/app/campaigns'
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
@@ -571,13 +558,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCampaignsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/auctions': {
-      id: '/_authenticated/app/auctions'
-      path: '/auctions'
-      fullPath: '/app/auctions'
-      preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
     '/_authenticated/app/agent': {
       id: '/_authenticated/app/agent'
       path: '/agent'
@@ -653,7 +633,6 @@ const AuthenticatedAppPropertiesRouteWithChildren =
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRoute
-  AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRoute
   AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
@@ -667,7 +646,6 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgentRoute: AuthenticatedAppAgentRoute,
-  AuthenticatedAppAuctionsRoute: AuthenticatedAppAuctionsRoute,
   AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,

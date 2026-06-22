@@ -24,7 +24,7 @@ const tiers = [
   {
     name: "Pro Team", tag: "For growing teams and small brokerages", featured: true,
     price: 399, period: "/month",
-    features: ["Unlimited owner searches", "1,500 skip-traces / month", "Unlimited AI outreach", "Vision Studio (250 redesigns)", "Video AI generator", "Live auction engine", "Priority support", "Up to 5 seats"],
+    features: ["Unlimited owner searches", "1,500 skip-traces / month", "Unlimited AI outreach", "Vision Studio (250 redesigns)", "Video AI generator", "Priority support", "Up to 5 seats"],
     cta: "Start free trial",
   },
   {

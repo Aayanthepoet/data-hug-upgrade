@@ -17,7 +17,7 @@ import {
   PhoneCall,
   ListChecks,
   Megaphone,
-  Gavel,
+  
   Clapperboard,
   Bot,
   Inbox,
@@ -37,7 +37,7 @@ const items = [
   { title: "Campaigns (Language)", url: "/app/campaigns", icon: Megaphone },
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
-  { title: "Auctions (Live)", url: "/app/auctions", icon: Gavel },
+  
 ];
 
 export function AppSidebar() {

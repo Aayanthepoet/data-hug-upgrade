@@ -6,9 +6,9 @@ export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
       { title: "Features — PropAI Platform" },
-      { name: "description", content: "Seven AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, video marketing, and live auctions." },
-      { property: "og:title", content: "PropAI Features — Seven AI engines for real estate" },
-      { property: "og:description", content: "AI-powered owner search, skip tracing, outreach, vision studio, video studio, and auctions." },
+      { name: "description", content: "Six AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, and video marketing." },
+      { property: "og:title", content: "PropAI Features — Six AI engines for real estate" },
+      { property: "og:description", content: "AI-powered owner search, skip tracing, outreach, vision studio, and video studio." },
     ],
   }),
   component: Features,
@@ -20,7 +20,7 @@ const engines = [
   { icon: "👤", name: "Contact Resolver", role: "Phone, email, social skip tracing", badge: "Skip Trace", color: "var(--violet)" },
   { icon: "👁️", name: "Vision Studio", role: "Property redesign, room detection, upscaling", badge: "Image AI", color: "var(--cyan)" },
   { icon: "🎙️", name: "Voice & Video", role: "AI voiceover, video assembly, brand overlay", badge: "Video AI", color: "var(--red)" },
-  { icon: "⚡", name: "Live Engine", role: "Real-time auction bidding, fraud detection", badge: "Real-time", color: "var(--green)" },
+  
   { icon: "🤖", name: "PropAI Agent", role: "Conversational AI assistant with full account context", badge: "AI Agent", color: "var(--violet)" },
 ];
 
