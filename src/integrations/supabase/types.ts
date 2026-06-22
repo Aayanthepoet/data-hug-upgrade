@@ -312,6 +312,47 @@ export type Database = {
           },
         ]
       }
+      lead_emails: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          lead_id: string
+          recipient_email: string
+          recipient_id: string | null
+          sent_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id: string
+          recipient_email: string
+          recipient_id?: string | null
+          sent_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string
+          recipient_email?: string
+          recipient_id?: string | null
+          sent_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_list_items: {
         Row: {
           created_at: string
