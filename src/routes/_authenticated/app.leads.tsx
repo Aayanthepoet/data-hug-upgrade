@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,7 +142,15 @@ function LeadsPage() {
             <tbody>
               {filtered.map((l) => (
                 <tr key={l.id} className="border-t border-border align-top hover:bg-[rgba(255,255,255,.02)]">
-                  <td className="px-4 py-3 font-medium">{l.full_name || "—"}</td>
+                  <td className="px-4 py-3 font-medium">
+                    <Link
+                      to="/app/leads/$leadId"
+                      params={{ leadId: l.id }}
+                      className="hover:text-cyan"
+                    >
+                      {l.full_name || "—"}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3">
                     {l.email ? (
                       <a href={`mailto:${l.email}`} className="text-cyan hover:underline">{l.email}</a>
