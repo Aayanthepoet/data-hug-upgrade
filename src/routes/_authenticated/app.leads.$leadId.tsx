@@ -164,17 +164,52 @@ function LeadDetailPage() {
     );
   }
 
+  function handleExportCsv() {
+    const memberName = (id: string | null) =>
+      id ? memberLabel(members.find((m) => m.id === id)) : "Unassigned";
+    const lines: string[][] = [];
+    lines.push(["Section", "Field", "Value"]);
+    lines.push(["Lead", "ID", lead!.id]);
+    lines.push(["Lead", "Name", lead!.full_name ?? ""]);
+    lines.push(["Lead", "Email", lead!.email ?? ""]);
+    lines.push(["Lead", "Phone", lead!.phone ?? ""]);
+    lines.push(["Lead", "Company", lead!.company ?? ""]);
+    lines.push(["Lead", "Source", lead!.source ?? ""]);
+    lines.push(["Lead", "Status", lead!.status ?? ""]);
+    lines.push(["Lead", "Assignee", memberName(lead!.assigned_to)]);
+    lines.push(["Lead", "Message", lead!.message ?? ""]);
+    lines.push(["Lead", "Submitted", lead!.created_at]);
+    lines.push([]);
+    lines.push(["Assignment history", "When", "Assigned to", "Assigned by"]);
+    (historyQuery.data ?? []).forEach((h) => {
+      lines.push([
+        "Assignment",
+        h.created_at,
+        memberName(h.assigned_to),
+        h.assigned_by ? memberName(h.assigned_by) : "system",
+      ]);
+    });
+    downloadCsv(`lead-${lead!.id}.csv`, lines);
+  }
+
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
         <Link to="/app/leads" className="text-sm text-cyan hover:underline inline-flex items-center gap-1">
           <ArrowLeft className="h-4 w-4" /> Back to leads
         </Link>
-        <h1 className="text-3xl font-bold mt-3">{lead.full_name || "Unnamed lead"}</h1>
-        <p className="text-sm text-[var(--w55)] mt-1">
-          Submitted {new Date(lead.created_at).toLocaleString()}
-          {lead.source ? ` · via ${lead.source}` : ""}
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3 mt-3">
+          <div>
+            <h1 className="text-3xl font-bold">{lead.full_name || "Unnamed lead"}</h1>
+            <p className="text-sm text-[var(--w55)] mt-1">
+              Submitted {new Date(lead.created_at).toLocaleString()}
+              {lead.source ? ` · via ${lead.source}` : ""}
+            </p>
+          </div>
+          <Button variant="outline" onClick={handleExportCsv} className="gap-2">
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <section className="border border-border rounded-lg p-6 space-y-4">
