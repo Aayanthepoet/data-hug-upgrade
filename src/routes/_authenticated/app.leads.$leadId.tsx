@@ -100,6 +100,26 @@ function LeadDetailPage() {
     },
   });
 
+  const emailsQuery = useQuery({
+    queryKey: ["lead-emails", leadId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("lead_emails").select("*").eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        lead_id: string;
+        recipient_id: string | null;
+        recipient_email: string;
+        sent_by: string | null;
+        status: "queued" | "sent" | "failed";
+        error_message: string | null;
+        created_at: string;
+      }>;
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
       const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
