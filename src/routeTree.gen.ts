@@ -39,6 +39,7 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
@@ -203,6 +204,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksOutreachReplyRoute =
+  ApiPublicHooksOutreachReplyRouteImport.update({
+    id: '/api/public/hooks/outreach-reply',
+    path: '/api/public/hooks/outreach-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCloseAuctionsRoute =
   ApiPublicHooksCloseAuctionsRouteImport.update({
     id: '/api/public/hooks/close-auctions',
@@ -266,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -339,6 +348,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -377,6 +387,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -412,6 +423,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -449,6 +461,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -468,6 +481,7 @@ export interface RootRouteChildren {
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
+  ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -685,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/outreach-reply': {
+      id: '/api/public/hooks/outreach-reply'
+      path: '/api/public/hooks/outreach-reply'
+      fullPath: '/api/public/hooks/outreach-reply'
+      preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/close-auctions': {
       id: '/api/public/hooks/close-auctions'
       path: '/api/public/hooks/close-auctions'
@@ -831,6 +852,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
+  ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
