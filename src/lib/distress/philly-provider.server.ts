@@ -20,14 +20,15 @@ export function isPhilly(filters: DistressSearchFilters): boolean {
   return false;
 }
 
+import { cachedJsonFetch } from "./cached-fetch.server";
+
 async function cartoQuery<T>(sql: string): Promise<T[]> {
   const url = new URL("https://phl.carto.com/api/v2/sql");
   url.searchParams.set("q", sql);
-  const res = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!res.ok) {
-    throw new Error(`Philly Carto ${res.status}: ${await res.text().catch(() => "")}`);
-  }
-  const json = (await res.json()) as { rows?: T[]; error?: string[] };
+  const json = await cachedJsonFetch<{ rows?: T[]; error?: string[] }>(url.toString(), {
+    label: "philly:carto",
+    ttlMs: 10 * 60_000,
+  });
   if (json.error) throw new Error(`Philly Carto: ${json.error.join("; ")}`);
   return json.rows ?? [];
 }
