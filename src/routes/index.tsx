@@ -100,7 +100,7 @@ function Index() {
                 <div className="font-bold text-sm mb-3">Prop<span className="text-cyan">AI</span></div>
                 {[
                   ["⊞","Dashboard", true],["🔍","Owner Finder"],["📨","Outreach"],
-                  ["🏠","Listings"],["✨","Redesign"],["🔨","Auctions"],["🎬","Video"],["🤖","Agent"],
+                  ["🏠","Listings"],["✨","Redesign"],["🎬","Video"],["🤖","Agent"],
                 ].map(([ic, n, on]) => (
                   <div key={n as string} className={`flex items-center gap-2 text-[11px] px-2 py-1.5 rounded ${on ? "bg-cyan-d text-cyan" : "text-[var(--w55)]"}`}>
                     <span>{ic}</span>{n}
