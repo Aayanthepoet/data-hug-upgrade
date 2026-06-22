@@ -122,6 +122,10 @@ function PropertyDetailPage() {
         <Stat label="Days on market" value={p.days_on_market ?? "—"} />
       </section>
 
+      <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
+
+
+
       {data.groups.length === 0 && (
         <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
           No live source records returned for this property. This typically means the source
