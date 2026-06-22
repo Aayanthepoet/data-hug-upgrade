@@ -168,12 +168,31 @@ function Stat({ label, value, accent }: { label: string; value: React.ReactNode;
 
 function SendMessageDialog({ onSent }: { onSent: () => void }) {
   const sendFn = useServerFn(sendOutreach);
+  const reachableFn = useServerFn(listReachableOwners);
   const [open, setOpen] = useState(false);
   const [channel, setChannel] = useState<Channel>("sms");
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [contactId, setContactId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  const { data: owners } = useQuery({
+    queryKey: ["reachable-owners"],
+    queryFn: () => reachableFn(),
+    enabled: open,
+  });
+
+  const ownerList = owners ?? [];
+  const selectedOwner = ownerId ? ownerList.find((o) => o.owner_id === ownerId) ?? null : null;
+  const availableContacts = !selectedOwner
+    ? []
+    : channel === "sms"
+      ? selectedOwner.phones
+      : channel === "email"
+        ? selectedOwner.emails
+        : [];
 
   const mut = useMutation({
     mutationFn: () =>
@@ -183,11 +202,14 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           to: to.trim(),
           subject: channel === "email" ? subject.trim() || null : null,
           body: body.trim(),
+          owner_id: ownerId,
+          contact_id: contactId,
         },
       }),
     onSuccess: () => {
       setOpen(false);
       setTo(""); setSubject(""); setBody("");
+      setOwnerId(null); setContactId(null);
       onSent();
     },
     onError: (e: Error) => setErr(e.message),
