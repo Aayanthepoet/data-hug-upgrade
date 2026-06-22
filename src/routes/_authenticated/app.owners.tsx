@@ -224,6 +224,18 @@ function OwnersPage() {
           <p className="text-[var(--w55)] text-sm mt-1">
             People and entities behind your saved properties. Run skip trace to surface phones, emails, and relatives.
           </p>
+          {statusFilter && (
+            <div className="mt-2 inline-flex items-center gap-2 text-xs rounded-full border border-cyan/40 bg-cyan/10 text-cyan px-2.5 py-1">
+              Showing {statusFilter} owners
+              <button
+                onClick={() => navigate({ search: (p) => ({ ...p, status: undefined }) })}
+                className="hover:text-white"
+                aria-label="Clear filter"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
