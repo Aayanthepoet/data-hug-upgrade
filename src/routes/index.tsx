@@ -37,7 +37,7 @@ const workflow = [
   { n: 3, t: "Score the Lead", d: "Language Engine scores motivation 0–100 from equity, distress, history.", tag: "Language Engine" },
   { n: 4, t: "Send AI-Personalized Outreach", d: "Outreach Engine writes a letter specific to this owner's situation.", tag: "Outreach Engine" },
   { n: 5, t: "Present with AI Visuals", d: "Vision Studio renders redesigns. Video Studio creates the tour video.", tag: "Vision + Video Studio" },
-  { n: 6, t: "Close the Deal", d: "Auction Engine runs live bidding. PropAI Agent coaches negotiation.", tag: "Auction + Agent" },
+  { n: 6, t: "Close the Deal", d: "PropAI Agent coaches negotiation and tracks every touchpoint.", tag: "PropAI Agent" },
 ];
 
 function Index() {
