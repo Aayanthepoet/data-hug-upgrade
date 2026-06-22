@@ -293,7 +293,14 @@ function AlertTrendChart() {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+              onClick={(e: { activeLabel?: string } | null) => {
+                if (e?.activeLabel) setDay(e.activeLabel);
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <defs>
                 {(Object.keys(TYPE_COLORS) as Array<keyof typeof TYPE_COLORS>).map((k) => (
                   <linearGradient key={k} id={`g-${k}`} x1="0" y1="0" x2="0" y2="1">
