@@ -247,7 +247,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
               <button
                 key={c}
                 type="button"
-                onClick={() => setChannel(c)}
+                onClick={() => { setChannel(c); setContactId(null); setTo(""); }}
                 className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded border transition-colors ${
                   channel === c ? "bg-cyan/15 text-cyan border-cyan/40" : "border-border text-[var(--w55)] hover:bg-white/5"
                 }`}
