@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -18,8 +18,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, Save, Download, RefreshCw } from "lucide-react";
+import { Search, Save, Download, RefreshCw, Map as MapIcon, List } from "lucide-react";
 import { getCountiesForState } from "@/lib/distress/counties";
+import type { MapPin } from "@/components/app/DistressMap";
+
+// Leaflet imports CSS + accesses window — only load client-side.
+const DistressMap = lazy(() =>
+  import("@/components/app/DistressMap").then((m) => ({ default: m.DistressMap })),
+);
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
   head: () => ({ meta: [{ title: "Find Distressed Properties — PropAI" }] }),
