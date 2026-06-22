@@ -24,6 +24,7 @@ import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/em
 import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
 import { Route as ApiEnginesVisionRouteImport } from './routes/api/engines/vision'
 import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
+import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
@@ -112,6 +113,11 @@ const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
   id: '/api/engines/tts',
   path: '/api/engines/tts',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppVisionRoute = AuthenticatedAppVisionRouteImport.update({
+  id: '/vision',
+  path: '/vision',
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
   id: '/videos',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app/vision': typeof AuthenticatedAppVisionRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
+  '/app/vision': typeof AuthenticatedAppVisionRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -274,6 +282,7 @@ export interface FileRoutesById {
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
+  '/_authenticated/app/vision': typeof AuthenticatedAppVisionRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/engines/vision': typeof ApiEnginesVisionRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/app/vision'
     | '/api/engines/tts'
     | '/api/engines/vision'
     | '/api/public/lead-notify'
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/videos'
+    | '/app/vision'
     | '/api/engines/tts'
     | '/api/engines/vision'
     | '/api/public/lead-notify'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/videos'
+    | '/_authenticated/app/vision'
     | '/api/engines/tts'
     | '/api/engines/vision'
     | '/api/public/lead-notify'
@@ -502,6 +514,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/engines/tts'
       preLoaderRoute: typeof ApiEnginesTtsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app/vision': {
+      id: '/_authenticated/app/vision'
+      path: '/vision'
+      fullPath: '/app/vision'
+      preLoaderRoute: typeof AuthenticatedAppVisionRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/videos': {
       id: '/_authenticated/app/videos'
@@ -642,6 +661,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
+  AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -655,6 +675,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
+  AuthenticatedAppVisionRoute: AuthenticatedAppVisionRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
