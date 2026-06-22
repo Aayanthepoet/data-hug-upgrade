@@ -39,6 +39,7 @@ function OwnersPage() {
   const fetchOwners = useServerFn(listOwners);
   const qc = useQueryClient();
   const traceFn = useServerFn(runSkipTrace);
+  const fetchContacts = useServerFn(listOwnerContacts);
 
   const { data: owners, isLoading } = useQuery({
     queryKey: ["owners"],
@@ -48,6 +49,7 @@ function OwnersPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState<Record<string, BulkProgress>>({});
   const [bulkRunning, setBulkRunning] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const ownerList = owners ?? [];
   const allSelected = ownerList.length > 0 && ownerList.every((o) => selected.has(o.id));
