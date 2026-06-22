@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Download, FileText, Mail } from "lucide-react";
+import { ArrowLeft, Trash2, Download, FileText, Mail, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useTeamMembers, memberLabel } from "@/hooks/use-team-members";
 import { jsPDF } from "jspdf";
 
@@ -95,6 +95,26 @@ function LeadDetailPage() {
         id: string;
         assigned_to: string | null;
         assigned_by: string | null;
+        created_at: string;
+      }>;
+    },
+  });
+
+  const emailsQuery = useQuery({
+    queryKey: ["lead-emails", leadId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("lead_emails").select("*").eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        lead_id: string;
+        recipient_id: string | null;
+        recipient_email: string;
+        sent_by: string | null;
+        status: "queued" | "sent" | "failed";
+        error_message: string | null;
         created_at: string;
       }>;
     },
@@ -413,6 +433,23 @@ function LeadDetailPage() {
         ),
       );
 
+      // 5. Record delivery status per recipient
+      const records = recipients.map((m, i) => {
+        const r = results[i];
+        const success = r.status === "fulfilled";
+        return {
+          lead_id: lead!.id,
+          recipient_id: m.id,
+          recipient_email: m.email!,
+          sent_by: user?.id ?? null,
+          status: success ? "queued" : "failed",
+          error_message: success ? null : String((r as PromiseRejectedResult).reason?.message ?? (r as any).reason ?? "Send failed"),
+        };
+      });
+      const { error: logErr } = await (supabase as any).from("lead_emails").insert(records);
+      if (logErr) console.error("Failed to log lead_emails", logErr);
+      qc.invalidateQueries({ queryKey: ["lead-emails", leadId] });
+
       const failed = results.filter((r) => r.status === "rejected").length;
       const ok = results.length - failed;
       if (ok > 0) toast.success(`Emailed PDF to ${ok} recipient${ok === 1 ? "" : "s"}`);
@@ -645,6 +682,61 @@ function LeadDetailPage() {
               );
             })}
           </ol>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Email delivery</h2>
+        {emailsQuery.isLoading ? (
+          <p className="text-sm text-[var(--w55)]">Loading delivery status…</p>
+        ) : (emailsQuery.data?.length ?? 0) === 0 ? (
+          <p className="text-sm text-[var(--w55)]">No PDF emails sent yet.</p>
+        ) : (
+          <ul className="border border-border rounded-md divide-y divide-border">
+            {emailsQuery.data!.map((e) => {
+              const m = e.recipient_id ? members.find((x) => x.id === e.recipient_id) : null;
+              const name = m ? memberLabel(m) : e.recipient_email;
+              const isSent = e.status === "sent" || e.status === "queued";
+              const isFailed = e.status === "failed";
+              return (
+                <li key={e.id} className="px-4 py-3 text-sm flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    {isFailed ? (
+                      <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    ) : e.status === "sent" ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{name}</div>
+                      <div className="text-xs text-[var(--w55)] truncate">{e.recipient_email}</div>
+                      {isFailed && e.error_message ? (
+                        <div className="text-xs text-red-400 mt-1 break-words">{e.error_message}</div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={
+                        "text-xs px-2 py-0.5 rounded-full border " +
+                        (isFailed
+                          ? "border-red-500/40 text-red-300 bg-red-500/10"
+                          : e.status === "sent"
+                            ? "border-emerald-500/40 text-emerald-300 bg-emerald-500/10"
+                            : "border-amber-500/40 text-amber-300 bg-amber-500/10")
+                      }
+                    >
+                      {isFailed ? "Failed" : e.status === "sent" ? "Sent" : "Queued"}
+                    </span>
+                    <span className="text-xs text-[var(--w55)] whitespace-nowrap">
+                      {new Date(e.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
     </div>
