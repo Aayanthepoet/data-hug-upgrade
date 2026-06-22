@@ -1,9 +1,16 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { z } from "zod";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft, Search, X } from "lucide-react";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check } from "lucide-react";
+
+const searchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  event: fallback(z.string(), "").default(""),
+});
 
 const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }> = {
   deed: { label: "Deed", color: "#06b6d4" },
@@ -16,6 +23,7 @@ const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }>
 };
 
 export const Route = createFileRoute("/_authenticated/app/properties/$propertyId")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Property detail — PropAI" }] }),
   component: PropertyDetailPage,
   errorComponent: ({ error, reset }) => {
