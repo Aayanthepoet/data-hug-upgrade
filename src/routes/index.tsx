@@ -7,9 +7,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PropAI — The Complete Intelligence Platform for Real Estate" },
-      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, auctions, and video marketing. Built for real estate professionals by AI Network Agency." },
+      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, and video marketing. Built for real estate professionals by AI Network Agency." },
       { property: "og:title", content: "PropAI — Intelligence Platform for Real Estate" },
-      { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, run auctions, close more deals — one AI platform." },
+      { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, and close more deals — one AI platform." },
     ],
   }),
   component: Index,
