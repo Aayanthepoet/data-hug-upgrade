@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      arv_estimates: {
+        Row: {
+          arv: number
+          arv_high: number
+          arv_low: number
+          comp_count: number
+          computed_at: string
+          confidence: number
+          created_at: string
+          id: string
+          method: string
+          price_per_sqft: number | null
+          property_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          arv: number
+          arv_high: number
+          arv_low: number
+          comp_count: number
+          computed_at?: string
+          confidence: number
+          created_at?: string
+          id?: string
+          method?: string
+          price_per_sqft?: number | null
+          property_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          arv?: number
+          arv_high?: number
+          arv_low?: number
+          comp_count?: number
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          id?: string
+          method?: string
+          price_per_sqft?: number | null
+          property_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arv_estimates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auctions: {
         Row: {
           created_at: string
@@ -155,6 +211,80 @@ export type Database = {
             columns: ["lead_list_id"]
             isOneToOne: false
             referencedRelation: "lead_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comps: {
+        Row: {
+          address: string
+          baths: number | null
+          beds: number | null
+          city: string | null
+          created_at: string
+          distance_miles: number | null
+          id: string
+          property_type: string | null
+          sale_date: string
+          sale_price: number
+          similarity_score: number | null
+          source_provider: string
+          source_record_id: string | null
+          sqft: number | null
+          state: string | null
+          subject_property_id: string
+          user_id: string
+          year_built: number | null
+          zip: string | null
+        }
+        Insert: {
+          address: string
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          created_at?: string
+          distance_miles?: number | null
+          id?: string
+          property_type?: string | null
+          sale_date: string
+          sale_price: number
+          similarity_score?: number | null
+          source_provider?: string
+          source_record_id?: string | null
+          sqft?: number | null
+          state?: string | null
+          subject_property_id: string
+          user_id: string
+          year_built?: number | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string
+          baths?: number | null
+          beds?: number | null
+          city?: string | null
+          created_at?: string
+          distance_miles?: number | null
+          id?: string
+          property_type?: string | null
+          sale_date?: string
+          sale_price?: number
+          similarity_score?: number | null
+          source_provider?: string
+          source_record_id?: string | null
+          sqft?: number | null
+          state?: string | null
+          subject_property_id?: string
+          user_id?: string
+          year_built?: number | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comps_subject_property_id_fkey"
+            columns: ["subject_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
