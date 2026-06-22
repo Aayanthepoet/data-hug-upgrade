@@ -26,6 +26,7 @@ import {
   Flame,
   Gavel,
   Send,
+  ScrollText,
 } from "lucide-react";
 
 const items = [
