@@ -521,3 +521,95 @@ function TimelineSection({ events, address }: { events: TimelineEvent[]; address
     </div>
   );
 }
+
+function ListForAuctionButton({ propertyId, defaultTitle }: { propertyId: string; defaultTitle: string }) {
+  const navigate = useNavigate();
+  const createFn = useServerFn(createAuction);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(defaultTitle);
+  const [description, setDescription] = useState("");
+  const [openingBid, setOpeningBid] = useState("");
+  // default ends_at = +7 days, ISO local for datetime-local input
+  const defaultEnds = useMemo(() => {
+    const d = new Date(Date.now() + 7 * 86_400_000);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }, []);
+  const [endsAt, setEndsAt] = useState(defaultEnds);
+  const [err, setErr] = useState<string | null>(null);
+
+  const mut = useMutation({
+    mutationFn: () => createFn({
+      data: {
+        propertyId,
+        title,
+        description: description || null,
+        openingBid: Number(openingBid),
+        endsAt: new Date(endsAt).toISOString(),
+      },
+    }),
+    onSuccess: (r) => {
+      setOpen(false);
+      navigate({ to: "/app/auctions/$auctionId", params: { auctionId: r.id } });
+    },
+    onError: (e: Error) => setErr(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5">
+          <Gavel className="h-3.5 w-3.5 text-amber-400" /> List for auction
+        </button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>List property for auction</DialogTitle>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setErr(null);
+            if (!title.trim() || !openingBid || !endsAt) { setErr("Title, opening bid, and end time are required."); return; }
+            if (Number(openingBid) <= 0) { setErr("Opening bid must be positive."); return; }
+            if (new Date(endsAt).getTime() <= Date.now()) { setErr("End time must be in the future."); return; }
+            mut.mutate();
+          }}
+          className="space-y-3"
+        >
+          <div>
+            <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">Title</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)}
+              className="w-full mt-1 px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm" />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">Description (optional)</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}
+              className="w-full mt-1 px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">Opening bid ($)</label>
+              <input type="number" min={1} value={openingBid} onChange={(e) => setOpeningBid(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">Ends at</label>
+              <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm" />
+            </div>
+          </div>
+          {err && <p className="text-red-400 text-xs">{err}</p>}
+          <DialogFooter>
+            <button type="button" onClick={() => setOpen(false)}
+              className="px-3 py-1.5 text-xs rounded border border-border">Cancel</button>
+            <button type="submit" disabled={mut.isPending}
+              className="px-3 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50">
+              {mut.isPending ? "Creating…" : "Create auction"}
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
