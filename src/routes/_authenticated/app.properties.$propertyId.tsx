@@ -193,6 +193,52 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function SaveToWatchlistButton(props: {
+  propertyKey: string;
+  address: string;
+  city: string | null;
+  state: string | null;
+  county: string | null;
+}) {
+  const saveFn = useServerFn(upsertWatchlistItem);
+  const [saved, setSaved] = useState(false);
+  const mut = useMutation({
+    mutationFn: () =>
+      saveFn({
+        data: {
+          property_key: props.propertyKey,
+          address: props.address,
+          city: props.city,
+          state: props.state,
+          county: props.county,
+          alert_foreclosure: true,
+          alert_lis_pendens: true,
+          alert_deed_transfer: false,
+        },
+      }),
+    onSuccess: () => setSaved(true),
+  });
+  return (
+    <button
+      onClick={() => mut.mutate()}
+      disabled={mut.isPending}
+      className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
+      title="Save this property to your watchlist"
+    >
+      {saved ? (
+        <>
+          <BookmarkCheck className="h-3.5 w-3.5 text-emerald-400" /> Saved to watchlist
+        </>
+      ) : (
+        <>
+          <Bookmark className="h-3.5 w-3.5 text-cyan" />
+          {mut.isPending ? "Saving…" : "Save to watchlist"}
+        </>
+      )}
+    </button>
+  );
+}
+
 function eventKey(e: TimelineEvent, idx: number): string {
   return e.docId ?? `${e.date}-${idx}`;
 }
