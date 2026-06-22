@@ -37,7 +37,9 @@ export const logAuditEvent = createServerFn({ method: "POST" })
 const ListInput = z.object({
   action: z.string().optional().nullable(),
   resource_type: z.string().optional().nullable(),
-  limit: z.number().int().min(1).max(500).default(100),
+  from: z.string().datetime().optional().nullable(),
+  to: z.string().datetime().optional().nullable(),
+  limit: z.number().int().min(1).max(5000).default(100),
 });
 
 export const listAuditEvents = createServerFn({ method: "GET" })
@@ -51,6 +53,8 @@ export const listAuditEvents = createServerFn({ method: "GET" })
       .limit(data.limit);
     if (data.action) q = q.eq("action", data.action);
     if (data.resource_type) q = q.eq("resource_type", data.resource_type);
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
