@@ -138,7 +138,7 @@ function PropertyDetailPage() {
           )}
 
           {g.timeline && g.timeline.length > 0 && (
-            <TimelineSection events={g.timeline} />
+            <TimelineSection events={g.timeline} address={p.address} />
           )}
 
           {g.rows && g.rows.length > 0 && (
