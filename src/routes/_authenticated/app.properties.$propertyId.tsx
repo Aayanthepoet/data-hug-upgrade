@@ -193,7 +193,7 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
     const id = setTimeout(() => {
       if (draft !== q) {
         navigate({
-          search: (prev) => ({ ...prev, q: draft }),
+          search: (prev: { q: string; event: string }) => ({ ...prev, q: draft }),
           replace: true,
           resetScroll: false,
         });
@@ -237,7 +237,7 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
 
   const selectEvent = (key: string) => {
     navigate({
-      search: (prev) => ({ ...prev, event: prev.event === key ? "" : key }),
+      search: (prev: { q: string; event: string }) => ({ ...prev, event: prev.event === key ? "" : key }),
       replace: false,
       resetScroll: false,
     });
