@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Download, FileText, Mail } from "lucide-react";
+import { ArrowLeft, Trash2, Download, FileText, Mail, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useTeamMembers, memberLabel } from "@/hooks/use-team-members";
 import { jsPDF } from "jspdf";
 
