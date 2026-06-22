@@ -433,6 +433,23 @@ function LeadDetailPage() {
         ),
       );
 
+      // 5. Record delivery status per recipient
+      const records = recipients.map((m, i) => {
+        const r = results[i];
+        const success = r.status === "fulfilled";
+        return {
+          lead_id: lead!.id,
+          recipient_id: m.id,
+          recipient_email: m.email!,
+          sent_by: user?.id ?? null,
+          status: success ? "queued" : "failed",
+          error_message: success ? null : String((r as PromiseRejectedResult).reason?.message ?? (r as any).reason ?? "Send failed"),
+        };
+      });
+      const { error: logErr } = await (supabase as any).from("lead_emails").insert(records);
+      if (logErr) console.error("Failed to log lead_emails", logErr);
+      qc.invalidateQueries({ queryKey: ["lead-emails", leadId] });
+
       const failed = results.filter((r) => r.status === "rejected").length;
       const ok = results.length - failed;
       if (ok > 0) toast.success(`Emailed PDF to ${ok} recipient${ok === 1 ? "" : "s"}`);
