@@ -117,3 +117,40 @@ export const recordReply = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// Owners with skip-traced phone/email contacts, used by the Send dialog so
+// the SMS/email path picks from real verified numbers instead of free text.
+export const listReachableOwners = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: contacts, error } = await context.supabase
+      .from("contacts")
+      .select("id, owner_id, contact_type, value, confidence, is_verified, do_not_contact, owners!inner(id, full_name)")
+      .in("contact_type", ["phone", "email"])
+      .eq("do_not_contact", false)
+      .order("confidence", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+
+    type Row = (typeof contacts)[number] & { owners: { id: string; full_name: string } | null };
+    const byOwner = new Map<string, {
+      owner_id: string;
+      full_name: string;
+      phones: Array<{ id: string; value: string; confidence: number | null; is_verified: boolean }>;
+      emails: Array<{ id: string; value: string; confidence: number | null; is_verified: boolean }>;
+    }>();
+
+    for (const c of (contacts ?? []) as Row[]) {
+      if (!c.owners || !c.owner_id) continue;
+      let g = byOwner.get(c.owner_id);
+      if (!g) {
+        g = { owner_id: c.owner_id, full_name: c.owners.full_name, phones: [], emails: [] };
+        byOwner.set(c.owner_id, g);
+      }
+      const entry = { id: c.id, value: c.value, confidence: c.confidence ? Number(c.confidence) : null, is_verified: c.is_verified };
+      if (c.contact_type === "phone") g.phones.push(entry);
+      else if (c.contact_type === "email") g.emails.push(entry);
+    }
+
+    return Array.from(byOwner.values()).sort((a, b) => a.full_name.localeCompare(b.full_name));
+  });
