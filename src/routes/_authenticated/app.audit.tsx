@@ -29,12 +29,23 @@ function toIsoEnd(d: string | null) {
 function AuditPage() {
   const listFn = useServerFn(listAuditEvents);
   const logFn = useServerFn(logAuditEvent);
+  const exportFn = useServerFn(exportAuditEvents);
+  const permsFn = useServerFn(getMyAuditPermissions);
   const qc = useQueryClient();
 
   const [filter, setFilter] = useState<string>("all");
   const [from, setFrom] = useState<string>(""); // yyyy-mm-dd
   const [to, setTo] = useState<string>("");
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const { data: perms } = useQuery({
+    queryKey: ["audit-permissions"],
+    queryFn: () => permsFn(),
+    staleTime: 60_000,
+  });
+  const canExport = perms?.canExport ?? false;
+  const allowedRoles = perms?.allowedRoles ?? ["admin"];
 
   const queryInput = useMemo(
     () => ({
