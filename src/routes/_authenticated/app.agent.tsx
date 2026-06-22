@@ -252,10 +252,23 @@ function AgentPage() {
         <div className="border-t border-border p-3">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
-              placeholder="Ask about your leads, or draft outreach…"
+              placeholder={taskMode ? "Describe what you need a plan for…" : "Ask about your leads, or draft outreach…"}
               autoFocus
             />
-            <PromptInputFooter className="justify-end">
+            <PromptInputFooter className="justify-between">
+              <button
+                type="button"
+                onClick={() => setTaskMode((v) => !v)}
+                className={`inline-flex items-center gap-2 text-xs rounded-lg px-3 py-1.5 border transition ${
+                  taskMode
+                    ? "border-cyan bg-[var(--cyan-d)] text-cyan"
+                    : "border-border text-[var(--w55)] hover:text-foreground"
+                }`}
+                aria-pressed={taskMode}
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+                Task mode {taskMode ? "on" : "off"}
+              </button>
               <PromptInputSubmit
                 status={status}
                 onClick={isLoading ? () => stop() : undefined}
