@@ -816,6 +816,8 @@ export type Database = {
           mailing_zip: string | null
           notes: string | null
           property_id: string | null
+          skip_trace_last_run_at: string | null
+          skip_trace_status: string
           updated_at: string
           user_id: string
         }
@@ -830,6 +832,8 @@ export type Database = {
           mailing_zip?: string | null
           notes?: string | null
           property_id?: string | null
+          skip_trace_last_run_at?: string | null
+          skip_trace_status?: string
           updated_at?: string
           user_id: string
         }
@@ -844,6 +848,8 @@ export type Database = {
           mailing_zip?: string | null
           notes?: string | null
           property_id?: string | null
+          skip_trace_last_run_at?: string | null
+          skip_trace_status?: string
           updated_at?: string
           user_id?: string
         }
