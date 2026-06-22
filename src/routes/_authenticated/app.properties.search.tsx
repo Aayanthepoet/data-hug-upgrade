@@ -19,6 +19,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Search, Save, Download, RefreshCw } from "lucide-react";
+import { getCountiesForState } from "@/lib/distress/counties";
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
   head: () => ({ meta: [{ title: "Find Distressed Properties — PropAI" }] }),
@@ -52,6 +53,7 @@ function PropertySearch() {
   const saveFn = useServerFn(saveSearch);
 
   const [state, setState] = useState("NY");
+  const [county, setCounty] = useState<string>("");
   const [zip, setZip] = useState("");
   const [city, setCity] = useState("");
   const [types, setTypes] = useState<DistressType[]>(["preforeclosure","reo","tax_lien","fsbo_stale"]);
@@ -62,8 +64,13 @@ function PropertySearch() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchName, setSearchName] = useState("");
 
+  const counties = getCountiesForState(state);
+  const activeCounty = counties.find((c) => c.name === county);
+  const zipSuggestions = activeCounty?.zips ?? [];
+
   const filters = (): DistressFilters => ({
     state: state || undefined,
+    county: county || undefined,
     zip: zip.trim() || undefined,
     city: city.trim() || undefined,
     distressTypes: types.length ? types : undefined,
