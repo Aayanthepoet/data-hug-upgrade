@@ -69,6 +69,7 @@ function PropertySearch() {
   const [maxPrice, setMaxPrice] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchName, setSearchName] = useState("");
+  const [view, setView] = useState<"list" | "map">("list");
 
   const counties = getCountiesForState(state);
   const activeCounty = counties.find((c) => c.name === county);
@@ -258,68 +259,122 @@ function PropertySearch() {
 
       {/* Results */}
       {results.length > 0 && (
-        <div className="border border-border rounded-lg overflow-x-auto">
+        <div className="border border-border rounded-lg">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="text-sm">
               <span className="font-medium">{results.length}</span>
               <span className="text-[var(--w55)]"> properties found</span>
               {selected.size > 0 && <span className="text-cyan ml-3">{selected.size} selected</span>}
             </div>
-            <Button
-              size="sm"
-              onClick={() => importMutation.mutate()}
-              disabled={importMutation.isPending || selected.size === 0}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Import selected
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex border border-border rounded-md p-0.5">
+                <button
+                  onClick={() => setView("list")}
+                  className={`px-2.5 py-1 text-xs rounded inline-flex items-center gap-1 ${view === "list" ? "bg-cyan text-black" : "text-[var(--w55)] hover:text-white"}`}
+                >
+                  <List className="h-3.5 w-3.5" /> List
+                </button>
+                <button
+                  onClick={() => setView("map")}
+                  className={`px-2.5 py-1 text-xs rounded inline-flex items-center gap-1 ${view === "map" ? "bg-cyan text-black" : "text-[var(--w55)] hover:text-white"}`}
+                >
+                  <MapIcon className="h-3.5 w-3.5" /> Map
+                </button>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => importMutation.mutate()}
+                disabled={importMutation.isPending || selected.size === 0}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Import selected
+              </Button>
+            </div>
           </div>
-          <table className="w-full text-sm">
-            <thead className="bg-[rgba(255,255,255,.03)] text-left text-xs uppercase tracking-wider text-[var(--w55)]">
-              <tr>
-                <th className="px-4 py-3"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></th>
-                <th className="px-4 py-3">Address</th>
-                <th className="px-4 py-3">Distress</th>
-                <th className="px-4 py-3">Value</th>
-                <th className="px-4 py-3">Equity</th>
-                <th className="px-4 py-3">List $</th>
-                <th className="px-4 py-3">DOM</th>
-                <th className="px-4 py-3">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r) => (
-                <tr key={r.sourceRecordId} className="border-t border-border hover:bg-[rgba(255,255,255,.02)]">
-                  <td className="px-4 py-3">
-                    <Checkbox
-                      checked={selected.has(r.sourceRecordId)}
-                      onCheckedChange={(c) => {
-                        setSelected((prev) => {
-                          const next = new Set(prev);
-                          if (c) next.add(r.sourceRecordId); else next.delete(r.sourceRecordId);
-                          return next;
-                        });
-                      }}
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{r.address}</div>
-                    <div className="text-xs text-[var(--w55)]">{r.city}, {r.state} {r.zip}</div>
-                  </td>
-                  <td className="px-4 py-3"><Badge variant="secondary">{r.distressType.replace("_"," ")}</Badge></td>
-                  <td className="px-4 py-3">${r.estimatedValue?.toLocaleString()}</td>
-                  <td className="px-4 py-3">${r.equity?.toLocaleString()}</td>
-                  <td className="px-4 py-3">{r.listPrice ? `$${r.listPrice.toLocaleString()}` : "—"}</td>
-                  <td className="px-4 py-3">{r.daysOnMarket ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`font-mono ${r.leadScore >= 70 ? "text-emerald-400" : r.leadScore >= 40 ? "text-yellow-400" : "text-[var(--w55)]"}`}>
-                      {r.leadScore}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+          {view === "map" ? (
+            <div className="p-4">
+              <Suspense fallback={<div className="h-[520px] grid place-items-center text-sm text-[var(--w55)]">Loading map…</div>}>
+                <DistressMap
+                  state={state}
+                  pins={
+                    results
+                      .filter((r) => r.lat != null && r.lng != null)
+                      .map<MapPin>((r) => ({
+                        id: r.sourceRecordId,
+                        lat: r.lat as number,
+                        lng: r.lng as number,
+                        address: r.address,
+                        city: r.city,
+                        state: r.state,
+                        zip: r.zip,
+                        county: r.county,
+                        distressType: r.distressType,
+                        estimatedValue: r.estimatedValue,
+                        equity: r.equity,
+                        listPrice: r.listPrice,
+                        daysOnMarket: r.daysOnMarket,
+                        leadScore: r.leadScore,
+                      }))
+                  }
+                />
+              </Suspense>
+              <p className="text-xs text-[var(--w55)] mt-2">
+                Coordinates available for featured Northeast markets (NY / NJ / CT / PA). Other states render in the list view.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[rgba(255,255,255,.03)] text-left text-xs uppercase tracking-wider text-[var(--w55)]">
+                  <tr>
+                    <th className="px-4 py-3"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></th>
+                    <th className="px-4 py-3">Address</th>
+                    <th className="px-4 py-3">County</th>
+                    <th className="px-4 py-3">Distress</th>
+                    <th className="px-4 py-3">Value</th>
+                    <th className="px-4 py-3">Equity</th>
+                    <th className="px-4 py-3">List $</th>
+                    <th className="px-4 py-3">DOM</th>
+                    <th className="px-4 py-3">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((r) => (
+                    <tr key={r.sourceRecordId} className="border-t border-border hover:bg-[rgba(255,255,255,.02)]">
+                      <td className="px-4 py-3">
+                        <Checkbox
+                          checked={selected.has(r.sourceRecordId)}
+                          onCheckedChange={(c) => {
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              if (c) next.add(r.sourceRecordId); else next.delete(r.sourceRecordId);
+                              return next;
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{r.address}</div>
+                        <div className="text-xs text-[var(--w55)]">{r.city}, {r.state} {r.zip}</div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-[var(--w55)]">{r.county ?? "—"}</td>
+                      <td className="px-4 py-3"><Badge variant="secondary">{r.distressType.replace("_"," ")}</Badge></td>
+                      <td className="px-4 py-3">${r.estimatedValue?.toLocaleString()}</td>
+                      <td className="px-4 py-3">${r.equity?.toLocaleString()}</td>
+                      <td className="px-4 py-3">{r.listPrice ? `$${r.listPrice.toLocaleString()}` : "—"}</td>
+                      <td className="px-4 py-3">{r.daysOnMarket ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`font-mono ${r.leadScore >= 70 ? "text-emerald-400" : r.leadScore >= 40 ? "text-yellow-400" : "text-[var(--w55)]"}`}>
+                          {r.leadScore}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
