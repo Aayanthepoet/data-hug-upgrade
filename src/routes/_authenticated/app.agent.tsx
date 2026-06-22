@@ -92,11 +92,12 @@ function AgentPage() {
   }, [messages]);
 
   const isLoading = status === "submitted" || status === "streaming";
+  const [taskMode, setTaskMode] = useState(false);
 
   async function handleSubmit(message: PromptInputMessage) {
     const text = message.text?.trim();
     if (!text || isLoading) return;
-    await sendMessage({ text });
+    await sendMessage({ text: taskMode ? `[TASK MODE] ${text}` : text });
   }
 
   function newConversation() {
