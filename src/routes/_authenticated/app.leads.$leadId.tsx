@@ -73,6 +73,22 @@ function LeadDetailPage() {
     },
   });
 
+  const historyQuery = useQuery({
+    queryKey: ["lead-assignments", leadId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lead_assignments").select("*").eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        assigned_to: string | null;
+        assigned_by: string | null;
+        created_at: string;
+      }>;
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
       const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
