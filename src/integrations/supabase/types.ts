@@ -952,6 +952,54 @@ export type Database = {
           },
         ]
       }
+      watchlist_items: {
+        Row: {
+          address: string
+          alert_deed_transfer: boolean
+          alert_foreclosure: boolean
+          alert_lis_pendens: boolean
+          city: string | null
+          county: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          property_key: string
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          alert_deed_transfer?: boolean
+          alert_foreclosure?: boolean
+          alert_lis_pendens?: boolean
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          property_key: string
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          alert_deed_transfer?: boolean
+          alert_foreclosure?: boolean
+          alert_lis_pendens?: boolean
+          city?: string | null
+          county?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          property_key?: string
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

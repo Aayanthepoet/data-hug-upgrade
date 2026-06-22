@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useRouter, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode } from "lucide-react";
+import { upsertWatchlistItem } from "@/lib/watchlist.functions";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
@@ -83,11 +84,23 @@ function PropertyDetailPage() {
             <span className="text-xs text-[var(--w55)]">Lead score {p.lead_score}/100</span>
           )}
         </div>
-        <h1 className="text-3xl font-bold">{p.address}</h1>
-        <p className="text-[var(--w55)]">
-          {[p.city, p.state, p.zip].filter(Boolean).join(", ")} · {p.county}
-        </p>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold">{p.address}</h1>
+            <p className="text-[var(--w55)]">
+              {[p.city, p.state, p.zip].filter(Boolean).join(", ")} · {p.county}
+            </p>
+          </div>
+          <SaveToWatchlistButton
+            propertyKey={propertyId}
+            address={p.address}
+            city={p.city ?? null}
+            state={p.state ?? null}
+            county={p.county ?? null}
+          />
+        </div>
       </header>
+
 
       {/* Quick stats from our stored row */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -177,6 +190,52 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
       <p className="text-[10px] uppercase tracking-wider text-[var(--w55)]">{label}</p>
       <p className="text-sm font-medium mt-1">{value}</p>
     </div>
+  );
+}
+
+function SaveToWatchlistButton(props: {
+  propertyKey: string;
+  address: string;
+  city: string | null;
+  state: string | null;
+  county: string | null;
+}) {
+  const saveFn = useServerFn(upsertWatchlistItem);
+  const [saved, setSaved] = useState(false);
+  const mut = useMutation({
+    mutationFn: () =>
+      saveFn({
+        data: {
+          property_key: props.propertyKey,
+          address: props.address,
+          city: props.city,
+          state: props.state,
+          county: props.county,
+          alert_foreclosure: true,
+          alert_lis_pendens: true,
+          alert_deed_transfer: false,
+        },
+      }),
+    onSuccess: () => setSaved(true),
+  });
+  return (
+    <button
+      onClick={() => mut.mutate()}
+      disabled={mut.isPending}
+      className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
+      title="Save this property to your watchlist"
+    >
+      {saved ? (
+        <>
+          <BookmarkCheck className="h-3.5 w-3.5 text-emerald-400" /> Saved to watchlist
+        </>
+      ) : (
+        <>
+          <Bookmark className="h-3.5 w-3.5 text-cyan" />
+          {mut.isPending ? "Saving…" : "Save to watchlist"}
+        </>
+      )}
+    </button>
   );
 }
 

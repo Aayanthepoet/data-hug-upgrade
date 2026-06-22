@@ -17,12 +17,12 @@ import {
   PhoneCall,
   ListChecks,
   Megaphone,
-  
   Clapperboard,
   Bot,
   Inbox,
   Search,
   Eye,
+  Bookmark,
 } from "lucide-react";
 
 const items = [
@@ -31,13 +31,13 @@ const items = [
   { title: "Leads", url: "/app/leads", icon: Inbox },
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
+  { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },
   { title: "Owners", url: "/app/owners", icon: Users },
   { title: "Contacts (Resolver)", url: "/app/contacts", icon: PhoneCall },
   { title: "Lead Lists", url: "/app/lead-lists", icon: ListChecks },
   { title: "Campaigns (Language)", url: "/app/campaigns", icon: Megaphone },
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
-  
 ];
 
 export function AppSidebar() {
