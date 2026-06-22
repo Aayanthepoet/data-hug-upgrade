@@ -28,6 +28,85 @@ export const listWatchlist = createServerFn({ method: "GET" })
     return (data ?? []) as WatchlistItem[];
   });
 
+export type WatchlistStats = {
+  watching: number;
+  alertsToday: number;
+  alertsThisWeek: number;
+  alertsByType: { foreclosure: number; lis_pendens: number; deed_transfer: number };
+};
+
+export const getWatchlistStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<WatchlistStats> => {
+    const { supabase, userId } = context;
+
+    const { data: items, error: itemsErr } = await supabase
+      .from("watchlist_items")
+      .select("property_key, alert_foreclosure, alert_lis_pendens, alert_deed_transfer")
+      .eq("user_id", userId);
+    if (itemsErr) throw new Error(itemsErr.message);
+
+    const watching = items?.length ?? 0;
+    const keys = (items ?? []).map((i) => i.property_key);
+    const prefs = new Map(
+      (items ?? []).map((i) => [
+        i.property_key,
+        {
+          foreclosure: i.alert_foreclosure,
+          lis_pendens: i.alert_lis_pendens,
+          deed_transfer: i.alert_deed_transfer,
+        },
+      ]),
+    );
+
+    if (keys.length === 0) {
+      return {
+        watching: 0,
+        alertsToday: 0,
+        alertsThisWeek: 0,
+        alertsByType: { foreclosure: 0, lis_pendens: 0, deed_transfer: 0 },
+      };
+    }
+
+    // property_key in this app is the properties.id (uuid string).
+    const weekStart = new Date();
+    weekStart.setUTCDate(weekStart.getUTCDate() - 7);
+    const dayStart = new Date();
+    dayStart.setUTCHours(0, 0, 0, 0);
+
+    const { data: events, error: evErr } = await supabase
+      .from("distress_events")
+      .select("property_id, event_type, created_at")
+      .in("property_id", keys as string[])
+      .gte("created_at", weekStart.toISOString());
+    if (evErr) throw new Error(evErr.message);
+
+    // Map DB event_type → preference key. Treat any unknown as a deed_transfer.
+    const typeKey = (t: string): "foreclosure" | "lis_pendens" | "deed_transfer" => {
+      const v = (t || "").toLowerCase();
+      if (v.includes("foreclos")) return "foreclosure";
+      if (v.includes("lis")) return "lis_pendens";
+      return "deed_transfer";
+    };
+
+    let today = 0;
+    let week = 0;
+    const byType = { foreclosure: 0, lis_pendens: 0, deed_transfer: 0 };
+
+    for (const e of events ?? []) {
+      const pref = prefs.get(e.property_id as string);
+      if (!pref) continue;
+      const k = typeKey(e.event_type as string);
+      if (!pref[k]) continue; // user disabled this alert type
+      week += 1;
+      byType[k] += 1;
+      if (new Date(e.created_at as string) >= dayStart) today += 1;
+    }
+
+    return { watching, alertsToday: today, alertsThisWeek: week, alertsByType: byType };
+  });
+
+
 const upsertSchema = z.object({
   property_key: z.string().min(1).max(200),
   address: z.string().min(1).max(300),
