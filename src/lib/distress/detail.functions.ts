@@ -15,12 +15,22 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const inputSchema = z.object({ propertyId: z.string().uuid() });
 
 export type DetailFact = { label: string; value: string | number | null };
+export type TimelineEvent = {
+  date: string;             // YYYY-MM-DD
+  kind: "deed" | "mortgage" | "satisfaction" | "lis_pendens" | "assignment" | "foreclosure" | "other";
+  title: string;
+  amount: number | null;
+  from: string | null;
+  to: string | null;
+  docId: string | null;
+};
 export type DetailGroup = {
   source: string;            // e.g. "NYC PLUTO (64uk-42ks)"
   sourceUrl: string;         // link to the dataset
   title: string;             // human-readable section title
   facts: DetailFact[];
   rows?: Record<string, string | number | null>[]; // tabular records
+  timeline?: TimelineEvent[];
 };
 
 export const getPropertyDetail = createServerFn({ method: "POST" })
@@ -161,11 +171,56 @@ async function fetchNYC(bbl: string): Promise<DetailGroup[]> {
       };
     });
 
+    // Build a chronological timeline summarizing deed/mortgage activity
+    const timeline: TimelineEvent[] = masters
+      .filter((m: any) => m.document_date)
+      .map((m: any) => {
+        const ps = partyByDoc.get(m.document_id) ?? [];
+        const grantor = titleCase(ps.find((p) => p.party_type === "1")?.name ?? "") || null;
+        const grantee = titleCase(ps.find((p) => p.party_type === "2")?.name ?? "") || null;
+        const code = (m.doc_type ?? "").toUpperCase();
+        const kind: TimelineEvent["kind"] =
+          code.startsWith("DEED") ? "deed"
+          : code === "FCD" ? "foreclosure"
+          : code === "MTGE" ? "mortgage"
+          : code === "AMTG" ? "assignment"
+          : code === "SATM" ? "satisfaction"
+          : code === "LP" ? "lis_pendens"
+          : "other";
+        return {
+          date: m.document_date.slice(0, 10),
+          kind,
+          title: friendlyDocType(m.doc_type),
+          amount: numOrNull(m.document_amt),
+          from: grantor,
+          to: grantee,
+          docId: m.document_id ?? null,
+        };
+      })
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    // Summary stats for the timeline header
+    const deeds = timeline.filter((e) => e.kind === "deed" || e.kind === "foreclosure");
+    const mortgages = timeline.filter((e) => e.kind === "mortgage");
+    const satisfactions = timeline.filter((e) => e.kind === "satisfaction");
+    const lisPendens = timeline.filter((e) => e.kind === "lis_pendens");
+    const lastSale = deeds.find((e) => e.amount && e.amount > 1);
+    const totalMortgaged = mortgages.reduce((s, e) => s + (e.amount ?? 0), 0);
+
     groups.push({
       source: "NYC ACRIS Real Property (bnx9-e6tj + 636b-3b5g + 8h5j-fqxa)",
       sourceUrl: "https://www.nyc.gov/site/finance/property/acris.page",
-      title: `Recorded documents (deeds, mortgages, liens) — ${docRows.length}`,
-      facts: [],
+      title: `Title & lien timeline — ${timeline.length} events`,
+      facts: [
+        { label: "Recorded documents", value: timeline.length },
+        { label: "Deed transfers", value: deeds.length },
+        { label: "Mortgages originated", value: mortgages.length },
+        { label: "Mortgages satisfied", value: satisfactions.length },
+        { label: "Lis pendens (preforeclosure)", value: lisPendens.length },
+        { label: "Last sale", value: lastSale ? `${lastSale.date} · ${dollars(lastSale.amount)}` : null },
+        { label: "Total mortgages recorded", value: totalMortgaged ? dollars(totalMortgaged) : null },
+      ],
+      timeline,
       rows: docRows,
     });
   }
