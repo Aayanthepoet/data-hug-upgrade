@@ -131,49 +131,14 @@ export const placeBid = createServerFn({ method: "POST" })
   });
 
 // ---------- auto-close helpers ----------
-
-async function closeAuctionRow(supabase: any, auctionId: string) {
-  // Find top bid (if any).
-  const { data: top } = await supabase
-    .from("bids")
-    .select("id, bidder_id, amount")
-    .eq("auction_id", auctionId)
-    .order("amount", { ascending: false })
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  await supabase
-    .from("auctions")
-    .update({
-      status: top ? "sold" : "ended",
-      winner_id: top?.bidder_id ?? null,
-      winning_bid_id: top?.id ?? null,
-      ended_at: new Date().toISOString(),
-    })
-    .eq("id", auctionId)
-    .eq("status", "active"); // only flip if still active
-}
+// These delegate to two SECURITY DEFINER Postgres functions that use
+// SELECT ... FOR UPDATE SKIP LOCKED, so concurrent callers (on-read +
+// cron) can never close the same auction twice.
 
 async function closeIfExpired(supabase: any, auctionId: string): Promise<void> {
-  const { data: a } = await supabase
-    .from("auctions")
-    .select("id, status, ends_at")
-    .eq("id", auctionId)
-    .maybeSingle();
-  if (!a) return;
-  if (a.status !== "active") return;
-  if (new Date(a.ends_at).getTime() > Date.now()) return;
-  await closeAuctionRow(supabase, auctionId);
+  await supabase.rpc("close_auction_if_expired", { _auction_id: auctionId });
 }
 
 async function closeExpired(supabase: any): Promise<void> {
-  const { data: expired } = await supabase
-    .from("auctions")
-    .select("id")
-    .eq("status", "active")
-    .lt("ends_at", new Date().toISOString())
-    .limit(50);
-  if (!expired?.length) return;
-  await Promise.all(expired.map((r: { id: string }) => closeAuctionRow(supabase, r.id)));
+  await supabase.rpc("close_expired_auctions", { _limit: 50 });
 }

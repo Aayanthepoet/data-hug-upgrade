@@ -17,46 +17,14 @@ export const Route = createFileRoute("/api/public/hooks/close-auctions")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const nowIso = new Date().toISOString();
-
-        const { data: expired, error } = await supabaseAdmin
-          .from("auctions")
-          .select("id")
-          .eq("status", "active")
-          .lt("ends_at", nowIso)
-          .limit(500);
+        const { data: closed, error } = await supabaseAdmin
+          .rpc("close_expired_auctions", { _limit: 500 });
         if (error) {
           return new Response(JSON.stringify({ error: error.message }), {
             status: 500, headers: { "Content-Type": "application/json" },
           });
         }
-
-        let closed = 0;
-        let sold = 0;
-        for (const row of expired ?? []) {
-          const { data: top } = await supabaseAdmin
-            .from("bids")
-            .select("id, bidder_id, amount")
-            .eq("auction_id", row.id)
-            .order("amount", { ascending: false })
-            .order("created_at", { ascending: true })
-            .limit(1)
-            .maybeSingle();
-
-          const { error: uErr } = await supabaseAdmin
-            .from("auctions")
-            .update({
-              status: top ? "sold" : "ended",
-              winner_id: top?.bidder_id ?? null,
-              winning_bid_id: top?.id ?? null,
-              ended_at: nowIso,
-            })
-            .eq("id", row.id)
-            .eq("status", "active");
-          if (!uErr) { closed++; if (top) sold++; }
-        }
-
-        return new Response(JSON.stringify({ ok: true, closed, sold, scanned: expired?.length ?? 0 }), {
+        return new Response(JSON.stringify({ ok: true, closed: closed ?? 0 }), {
           headers: { "Content-Type": "application/json" },
         });
       },
