@@ -73,6 +73,8 @@ type OwnerRowProps = {
     mailing_state: string | null;
     mailing_zip: string | null;
     contact_count: number;
+    skip_trace_status?: string | null;
+    skip_trace_last_run_at?: string | null;
     properties: { address: string } | { address: string }[] | null;
   };
 };
