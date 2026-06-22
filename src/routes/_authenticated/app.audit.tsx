@@ -73,8 +73,8 @@ function AuditPage() {
     setExporting(true);
     setExportError(null);
     try {
-      // Server re-checks the role and returns rows (or throws Forbidden).
-      const serverRows = await exportFn({ data: queryInput });
+      // Server re-checks the role and enforces the row cap.
+      const { rows: serverRows, matched, limit } = await exportFn({ data: queryInput });
 
       if (serverRows.length === 0) {
         setExportError("No audit events match the current filters.");
@@ -136,6 +136,8 @@ function AuditPage() {
             record_count: serverRows.length,
             metadata: {
               filename,
+              matched_total: matched,
+              row_limit: limit,
               filters: { action: filter, from: from || null, to: to || null },
             },
           },
