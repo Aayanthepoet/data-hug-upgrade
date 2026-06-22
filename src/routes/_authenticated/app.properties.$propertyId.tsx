@@ -196,6 +196,114 @@ function PropertyDetailPage() {
   );
 }
 
+function fmtMoney(n: number | null | undefined): string {
+  if (n == null || !isFinite(Number(n))) return "—";
+  return `$${Number(n).toLocaleString()}`;
+}
+
+function CompsSection({ propertyId, subjectSqft }: { propertyId: string; subjectSqft: number | null }) {
+  const fetchFn = useServerFn(getComps);
+  const runFn = useServerFn(runComps);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["comps", propertyId],
+    queryFn: () => fetchFn({ data: { propertyId } }),
+  });
+
+  const mut = useMutation({
+    mutationFn: () => runFn({ data: { propertyId } }),
+    onSuccess: () => { refetch(); },
+  });
+
+  const comps: CompRow[] = data?.comps ?? [];
+  const arv: ArvEstimateRow | null = data?.arv ?? null;
+  const hasData = comps.length > 0 || arv != null;
+
+  return (
+    <section className="border border-border rounded-lg">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Calculator className="h-4 w-4 text-cyan" />
+          <h2 className="font-medium">Comps & ARV</h2>
+          {arv && (
+            <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
+              · {arv.confidence}% confidence · {arv.comp_count} comps
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => mut.mutate()}
+          disabled={mut.isPending}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 text-cyan ${mut.isPending ? "animate-spin" : ""}`} />
+          {mut.isPending ? "Pulling comps…" : hasData ? "Refresh comps" : "Pull comps"}
+        </button>
+      </header>
+
+      {isLoading ? (
+        <p className="p-4 text-sm text-[var(--w55)]">Loading…</p>
+      ) : !hasData ? (
+        <p className="p-4 text-sm text-[var(--w55)]">
+          No comps yet. Click "Pull comps" to find recent comparable sales and estimate ARV.
+        </p>
+      ) : (
+        <>
+          {arv && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-border/60">
+              <Stat label="ARV" value={fmtMoney(arv.arv)} />
+              <Stat label="ARV range" value={`${fmtMoney(arv.arv_low)} — ${fmtMoney(arv.arv_high)}`} />
+              <Stat label="$/sqft (median)" value={arv.price_per_sqft ? `$${arv.price_per_sqft}` : "—"} />
+              <Stat label="Subject sqft" value={subjectSqft ? subjectSqft.toLocaleString() : "—"} />
+            </div>
+          )}
+          {comps.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-[rgba(255,255,255,.03)] text-left uppercase tracking-wider text-[var(--w55)]">
+                  <tr>
+                    <th className="px-4 py-2 font-normal">Address</th>
+                    <th className="px-4 py-2 font-normal">Sale price</th>
+                    <th className="px-4 py-2 font-normal">$/sqft</th>
+                    <th className="px-4 py-2 font-normal">Sold</th>
+                    <th className="px-4 py-2 font-normal">Sqft</th>
+                    <th className="px-4 py-2 font-normal">Bd/Ba</th>
+                    <th className="px-4 py-2 font-normal">Dist.</th>
+                    <th className="px-4 py-2 font-normal">Match</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comps.map((c) => {
+                    const ppsf = c.sqft && c.sqft > 0 ? Math.round(c.sale_price / c.sqft) : null;
+                    return (
+                      <tr key={c.id} className="border-t border-border">
+                        <td className="px-4 py-2">{c.address}{c.city ? `, ${c.city}` : ""}</td>
+                        <td className="px-4 py-2">{fmtMoney(c.sale_price)}</td>
+                        <td className="px-4 py-2">{ppsf ? `$${ppsf}` : "—"}</td>
+                        <td className="px-4 py-2 font-mono text-[var(--w55)]">{c.sale_date}</td>
+                        <td className="px-4 py-2">{c.sqft?.toLocaleString() ?? "—"}</td>
+                        <td className="px-4 py-2">{c.beds ?? "—"} / {c.baths ?? "—"}</td>
+                        <td className="px-4 py-2">{c.distance_miles != null ? `${c.distance_miles} mi` : "—"}</td>
+                        <td className="px-4 py-2">
+                          <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider bg-cyan/15 text-cyan border border-cyan/30">
+                            {c.similarity_score ?? "—"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {mut.isError && (
+            <p className="p-3 text-xs text-red-400">{(mut.error as Error).message}</p>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="border border-border rounded-md p-3">
