@@ -20,11 +20,13 @@ import {
   Gavel,
   Clapperboard,
   Bot,
+  Inbox,
 } from "lucide-react";
 
 const items = [
   { title: "Overview", url: "/app", icon: LayoutDashboard, exact: true },
   { title: "PropAI Agent", url: "/app/agent", icon: Bot },
+  { title: "Leads", url: "/app/leads", icon: Inbox },
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Owners", url: "/app/owners", icon: Users },
   { title: "Contacts", url: "/app/contacts", icon: PhoneCall },
