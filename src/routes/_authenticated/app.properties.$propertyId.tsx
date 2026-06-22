@@ -1,9 +1,16 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { z } from "zod";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft, Search, X } from "lucide-react";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check } from "lucide-react";
+
+const searchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  event: fallback(z.string(), "").default(""),
+});
 
 const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }> = {
   deed: { label: "Deed", color: "#06b6d4" },
@@ -16,6 +23,7 @@ const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }>
 };
 
 export const Route = createFileRoute("/_authenticated/app/properties/$propertyId")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Property detail — PropAI" }] }),
   component: PropertyDetailPage,
   errorComponent: ({ error, reset }) => {
@@ -170,34 +178,87 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function eventKey(e: TimelineEvent, idx: number): string {
+  return e.docId ?? `${e.date}-${idx}`;
+}
+
 function TimelineSection({ events }: { events: TimelineEvent[] }) {
-  const [q, setQ] = useState("");
+  const { q, event: selectedKey } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  // Debounce URL updates while typing so each keystroke doesn't push history
+  const [draft, setDraft] = useState(q);
+  useEffect(() => setDraft(q), [q]);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (draft !== q) {
+        navigate({
+          search: (prev: { q: string; event: string }) => ({ ...prev, q: draft }),
+          replace: true,
+          resetScroll: false,
+        });
+      }
+    }, 200);
+    return () => clearTimeout(id);
+  }, [draft, q, navigate]);
+
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return events;
-    return events.filter((e) =>
+    const indexed = events.map((e, idx) => ({ e, key: eventKey(e, idx) }));
+    if (!term) return indexed;
+    return indexed.filter(({ e }) =>
       [e.from, e.to, e.docId, e.date, e.title, KIND_META[e.kind].label]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term)),
     );
   }, [events, q]);
 
+  const selectedRef = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    if (selectedKey && selectedRef.current) {
+      selectedRef.current.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  }, [selectedKey]);
+
+  const [copied, setCopied] = useState<string | null>(null);
+  const copyShareLink = async (key: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("event", key);
+    if (q) url.searchParams.set("q", q);
+    else url.searchParams.delete("q");
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setCopied(key);
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
+
+  const selectEvent = (key: string) => {
+    navigate({
+      search: (prev: { q: string; event: string }) => ({ ...prev, event: prev.event === key ? "" : key }),
+      replace: false,
+      resetScroll: false,
+    });
+  };
+
   return (
     <div className="p-4 border-t border-border">
-      <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         <h3 className="text-xs uppercase tracking-wider text-[var(--w55)]">Timeline</h3>
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--w55)]" />
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
             placeholder="Search party, doc ID, or date…"
             className="w-full pl-7 pr-7 py-1.5 text-xs bg-[rgba(255,255,255,.04)] border border-border rounded focus:outline-none focus:border-cyan"
           />
-          {q && (
+          {draft && (
             <button
               type="button"
-              onClick={() => setQ("")}
+              onClick={() => setDraft("")}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--w55)] hover:text-white"
               aria-label="Clear"
             >
@@ -209,7 +270,7 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
 
       {q && (
         <p className="text-[11px] text-[var(--w55)] mb-2">
-          {filtered.length} of {events.length} events match
+          {filtered.length} of {events.length} events match · URL updates live so you can share it
         </p>
       )}
 
@@ -217,16 +278,30 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
         <p className="text-sm text-[var(--w55)] py-4">No events match "{q}".</p>
       ) : (
         <ol className="relative border-l border-border/60 ml-2 space-y-4">
-          {filtered.map((e, ei) => {
+          {filtered.map(({ e, key }) => {
             const meta = KIND_META[e.kind];
+            const isSelected = selectedKey === key;
             return (
-              <li key={ei} className="pl-5 relative">
+              <li
+                key={key}
+                ref={isSelected ? selectedRef : undefined}
+                className={`pl-5 relative rounded-md transition-colors ${
+                  isSelected ? "bg-cyan/5 ring-1 ring-cyan/40 -mx-2 px-2 py-2" : ""
+                }`}
+              >
                 <span
-                  className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full ring-2 ring-background"
-                  style={{ background: meta.color }}
+                  className="absolute top-1.5 h-3 w-3 rounded-full ring-2 ring-background"
+                  style={{ background: meta.color, left: isSelected ? "1px" : "-7px" }}
                 />
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <time className="text-xs font-mono text-[var(--w55)]">{e.date}</time>
+                  <button
+                    type="button"
+                    onClick={() => selectEvent(key)}
+                    className="text-xs font-mono text-[var(--w55)] hover:text-cyan"
+                    title="Select this event (updates URL)"
+                  >
+                    {e.date}
+                  </button>
                   <span
                     className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border"
                     style={{ color: meta.color, borderColor: `${meta.color}55`, background: `${meta.color}15` }}
@@ -237,6 +312,18 @@ function TimelineSection({ events }: { events: TimelineEvent[] }) {
                   {e.amount != null && e.amount > 0 && (
                     <span className="text-sm text-cyan">${e.amount.toLocaleString()}</span>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => copyShareLink(key)}
+                    className="ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan"
+                    title="Copy shareable link to this event"
+                  >
+                    {copied === key ? (
+                      <><Check className="h-3 w-3" /> Copied</>
+                    ) : (
+                      <><Link2 className="h-3 w-3" /> Share</>
+                    )}
+                  </button>
                 </div>
                 {(e.from || e.to) && (
                   <p className="text-xs text-[var(--w55)] mt-0.5">
