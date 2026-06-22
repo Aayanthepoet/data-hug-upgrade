@@ -73,8 +73,8 @@ function AuditPage() {
     setExporting(true);
     setExportError(null);
     try {
-      // Server re-checks the role and returns rows (or throws Forbidden).
-      const serverRows = await exportFn({ data: queryInput });
+      // Server re-checks the role and enforces the row cap.
+      const { rows: serverRows, matched, limit } = await exportFn({ data: queryInput });
 
       if (serverRows.length === 0) {
         setExportError("No audit events match the current filters.");
@@ -136,6 +136,8 @@ function AuditPage() {
             record_count: serverRows.length,
             metadata: {
               filename,
+              matched_total: matched,
+              row_limit: limit,
               filters: { action: filter, from: from || null, to: to || null },
             },
           },
@@ -184,13 +186,18 @@ function AuditPage() {
             )}
             {canExport ? `Export CSV (${rows.length})` : "Export restricted"}
           </button>
+          {canExport && perms?.exportRowLimit && (
+            <p className="text-[10px] text-[var(--w55)]">
+              Max {perms.exportRowLimit.toLocaleString()} rows per export
+            </p>
+          )}
           {!canExport && perms && (
             <p className="text-[10px] text-[var(--w55)]">
               Admin role required to download
             </p>
           )}
           {exportError && (
-            <p className="text-[10px] text-red-400 max-w-[260px] text-right">{exportError}</p>
+            <p className="text-[10px] text-red-400 max-w-[320px] text-right">{exportError}</p>
           )}
         </div>
       </header>

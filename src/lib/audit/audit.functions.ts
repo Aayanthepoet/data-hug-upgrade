@@ -60,10 +60,26 @@ export const listAuditEvents = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
-// Roles allowed to download the raw audit log as CSV. Keep narrow on purpose
-// — exports can include another user's actions (admins see all rows) and
-// shouldn't be downloadable by every signed-in user.
 const EXPORT_ALLOWED_ROLES = ["admin"] as const;
+
+// Hard cap on rows returned per CSV export. Keeps a single download from
+// pulling unbounded history; users must narrow filters / date range instead.
+export const AUDIT_EXPORT_ROW_LIMIT = 1000;
+
+export class AuditExportLimitError extends Error {
+  matched: number;
+  limit: number;
+  constructor(matched: number, limit: number) {
+    super(
+      `Export too large: ${matched.toLocaleString()} rows match the current filters, ` +
+        `but a single export is capped at ${limit.toLocaleString()}. ` +
+        `Narrow the date range or pick a specific action and try again.`,
+    );
+    this.name = "AuditExportLimitError";
+    this.matched = matched;
+    this.limit = limit;
+  }
+}
 
 export const getMyAuditPermissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -76,7 +92,12 @@ export const getMyAuditPermissions = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const roles = (data ?? []).map((r) => r.role as string);
     const canExport = roles.some((r) => (EXPORT_ALLOWED_ROLES as readonly string[]).includes(r));
-    return { roles, canExport, allowedRoles: [...EXPORT_ALLOWED_ROLES] };
+    return {
+      roles,
+      canExport,
+      allowedRoles: [...EXPORT_ALLOWED_ROLES],
+      exportRowLimit: AUDIT_EXPORT_ROW_LIMIT,
+    };
   });
 
 export const exportAuditEvents = createServerFn({ method: "POST" })
@@ -85,7 +106,6 @@ export const exportAuditEvents = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    // Server-side role check — do NOT rely on the UI hiding the button.
     const { data: isAdmin, error: roleErr } = await supabase
       .rpc("has_role", { _user_id: userId, _role: "admin" });
     if (roleErr) throw new Error(roleErr.message);
@@ -93,16 +113,33 @@ export const exportAuditEvents = createServerFn({ method: "POST" })
       throw new Error("Forbidden: audit log export requires the admin role.");
     }
 
+    // Count matching rows first so we can give a precise error before
+    // returning a truncated export.
+    let countQ = supabase
+      .from("audit_logs")
+      .select("id", { count: "exact", head: true });
+    if (data.action) countQ = countQ.eq("action", data.action);
+    if (data.resource_type) countQ = countQ.eq("resource_type", data.resource_type);
+    if (data.from) countQ = countQ.gte("created_at", data.from);
+    if (data.to) countQ = countQ.lte("created_at", data.to);
+    const { count, error: countErr } = await countQ;
+    if (countErr) throw new Error(countErr.message);
+
+    const matched = count ?? 0;
+    if (matched > AUDIT_EXPORT_ROW_LIMIT) {
+      throw new AuditExportLimitError(matched, AUDIT_EXPORT_ROW_LIMIT);
+    }
+
     let q = supabase
       .from("audit_logs")
       .select("id, action, resource_type, resource_ids, record_count, metadata, created_at, user_id")
       .order("created_at", { ascending: false })
-      .limit(data.limit);
+      .limit(AUDIT_EXPORT_ROW_LIMIT);
     if (data.action) q = q.eq("action", data.action);
     if (data.resource_type) q = q.eq("resource_type", data.resource_type);
     if (data.from) q = q.gte("created_at", data.from);
     if (data.to) q = q.lte("created_at", data.to);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return rows ?? [];
+    return { rows: rows ?? [], matched, limit: AUDIT_EXPORT_ROW_LIMIT };
   });
