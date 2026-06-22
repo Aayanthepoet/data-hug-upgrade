@@ -198,3 +198,34 @@ function AlertChip({
     </button>
   );
 }
+
+function StatCard({
+  label,
+  value,
+  icon,
+  hint,
+  accent,
+}: {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ReactNode;
+  hint?: string;
+  accent?: "amber";
+}) {
+  return (
+    <div
+      className="border rounded-lg p-3"
+      style={{
+        borderColor: accent === "amber" ? "rgba(251,191,36,0.4)" : "var(--border, rgba(255,255,255,0.1))",
+        background: accent === "amber" ? "rgba(251,191,36,0.06)" : "transparent",
+      }}
+    >
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[var(--w55)]">
+        {icon}
+        {label}
+      </div>
+      <div className="text-2xl font-bold mt-1">{value}</div>
+      {hint && <div className="text-[10px] text-[var(--w55)] mt-0.5">{hint}</div>}
+    </div>
+  );
+}
