@@ -19,6 +19,12 @@ const STREETS = [
 ];
 
 const CITIES_BY_STATE: Record<string, string[]> = {
+  // Featured Northeast markets
+  NY: ["New York", "Brooklyn", "Queens", "Bronx", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany"],
+  NJ: ["Newark", "Jersey City", "Paterson", "Elizabeth", "Trenton", "Camden", "Atlantic City", "Edison"],
+  CT: ["Bridgeport", "New Haven", "Hartford", "Stamford", "Waterbury", "Norwalk", "Danbury"],
+  PA: ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading", "Scranton", "Bethlehem"],
+  // Other states
   TX: ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth"],
   FL: ["Miami", "Orlando", "Tampa", "Jacksonville", "Fort Lauderdale"],
   CA: ["Los Angeles", "San Diego", "Sacramento", "Fresno", "Bakersfield"],
@@ -27,6 +33,11 @@ const CITIES_BY_STATE: Record<string, string[]> = {
   NV: ["Las Vegas", "Reno", "Henderson", "North Las Vegas"],
   OH: ["Cleveland", "Columbus", "Cincinnati", "Toledo", "Akron"],
   NC: ["Charlotte", "Raleigh", "Greensboro", "Durham"],
+  MA: ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge"],
+  MD: ["Baltimore", "Silver Spring", "Frederick", "Rockville"],
+  VA: ["Virginia Beach", "Norfolk", "Richmond", "Arlington", "Alexandria"],
+  IL: ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville"],
+  MI: ["Detroit", "Grand Rapids", "Warren", "Flint", "Lansing"],
 };
 
 const ALL_TYPES: DistressType[] = [

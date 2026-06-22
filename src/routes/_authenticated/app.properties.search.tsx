@@ -38,7 +38,12 @@ const TYPE_OPTIONS: { value: DistressType; label: string }[] = [
   { value: "absentee", label: "Absentee owner" },
 ];
 
-const STATES = ["TX","FL","CA","GA","AZ","NV","OH","NC"];
+const FEATURED_STATES = ["NY", "NJ", "CT", "PA"];
+const OTHER_STATES = [
+  "AL","AK","AZ","AR","CA","CO","DE","FL","GA","HI","ID","IL","IN","IA","KS",
+  "KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NM","NC",
+  "ND","OH","OK","OR","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
+];
 
 function PropertySearch() {
   const qc = useQueryClient();
@@ -46,7 +51,7 @@ function PropertySearch() {
   const importFn = useServerFn(importDistressedProperties);
   const saveFn = useServerFn(saveSearch);
 
-  const [state, setState] = useState("TX");
+  const [state, setState] = useState("NY");
   const [zip, setZip] = useState("");
   const [city, setCity] = useState("");
   const [types, setTypes] = useState<DistressType[]>(["preforeclosure","reo","tax_lien","fsbo_stale"]);
@@ -146,8 +151,15 @@ function PropertySearch() {
             <Label>State</Label>
             <Select value={state} onValueChange={setState}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              <SelectContent className="max-h-80">
+                <div className="px-2 py-1 text-xs uppercase tracking-wider text-[var(--w55)]">Featured markets</div>
+                {FEATURED_STATES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s} {s === "PA" ? "— incl. Philadelphia" : s === "NY" ? "— incl. NYC" : ""}
+                  </SelectItem>
+                ))}
+                <div className="px-2 py-1 mt-1 text-xs uppercase tracking-wider text-[var(--w55)] border-t border-border">All states</div>
+                {OTHER_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
