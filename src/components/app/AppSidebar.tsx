@@ -21,6 +21,7 @@ import {
   Clapperboard,
   Bot,
   Inbox,
+  Search,
 } from "lucide-react";
 
 const items = [
@@ -28,6 +29,7 @@ const items = [
   { title: "PropAI Agent", url: "/app/agent", icon: Bot },
   { title: "Leads", url: "/app/leads", icon: Inbox },
   { title: "Properties", url: "/app/properties", icon: Building2 },
+  { title: "Find Distressed", url: "/app/properties/search", icon: Search },
   { title: "Owners", url: "/app/owners", icon: Users },
   { title: "Contacts", url: "/app/contacts", icon: PhoneCall },
   { title: "Lead Lists", url: "/app/lead-lists", icon: ListChecks },
