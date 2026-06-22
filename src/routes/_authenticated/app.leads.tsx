@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, Inbox } from "lucide-react";
+import { useTeamMembers, memberLabel, type TeamMember } from "@/hooks/use-team-members";
 
 export const Route = createFileRoute("/_authenticated/app/leads")({
   head: () => ({ meta: [{ title: "Leads — PropAI" }] }),
@@ -27,6 +28,7 @@ type Lead = {
   message: string | null;
   source: string | null;
   status: string | null;
+  assigned_to: string | null;
   created_at: string;
 };
 
@@ -34,6 +36,7 @@ function LeadsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [source, setSource] = useState<string>("all");
+  const [assignee, setAssignee] = useState<string>("all");
 
   const { data: leads = [], isLoading, error } = useQuery({
     queryKey: ["leads"],
@@ -46,6 +49,13 @@ function LeadsPage() {
       return data as Lead[];
     },
   });
+
+  const { data: members = [] } = useTeamMembers();
+  const memberMap = useMemo(() => {
+    const m = new Map<string, TeamMember>();
+    members.forEach((x) => m.set(x.id, x));
+    return m;
+  }, [members]);
 
   const sources = useMemo(
     () => Array.from(new Set(leads.map((l) => l.source).filter(Boolean))) as string[],
@@ -61,11 +71,13 @@ function LeadsPage() {
     return leads.filter((l) => {
       if (status !== "all" && l.status !== status) return false;
       if (source !== "all" && l.source !== source) return false;
+      if (assignee === "unassigned" && l.assigned_to) return false;
+      if (assignee !== "all" && assignee !== "unassigned" && l.assigned_to !== assignee) return false;
       if (!q) return true;
       return [l.full_name, l.email, l.company, l.phone, l.message]
         .some((v) => v?.toLowerCase().includes(q));
     });
-  }, [leads, search, status, source]);
+  }, [leads, search, status, source, assignee]);
 
   return (
     <div className="space-y-6">
@@ -75,7 +87,7 @@ function LeadsPage() {
           Submitted <span className="h-italic">leads</span>
         </h1>
         <p className="text-sm text-[var(--w55)] mt-2">
-          Browse, search and filter every lead captured from your site.
+          Browse, search, filter and assign every lead captured from your site.
         </p>
       </div>
 
@@ -90,7 +102,7 @@ function LeadsPage() {
           />
         </div>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="md:w-44"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="md:w-40"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {statuses.map((s) => (
@@ -99,11 +111,21 @@ function LeadsPage() {
           </SelectContent>
         </Select>
         <Select value={source} onValueChange={setSource}>
-          <SelectTrigger className="md:w-44"><SelectValue placeholder="Source" /></SelectTrigger>
+          <SelectTrigger className="md:w-40"><SelectValue placeholder="Source" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All sources</SelectItem>
             {sources.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={assignee} onValueChange={setAssignee}>
+          <SelectTrigger className="md:w-48"><SelectValue placeholder="Assignee" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All assignees</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+            {members.map((m) => (
+              <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -136,6 +158,7 @@ function LeadsPage() {
                 <th className="px-4 py-3">Company</th>
                 <th className="px-4 py-3">Source</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Assignee</th>
                 <th className="px-4 py-3">Submitted</th>
               </tr>
             </thead>
@@ -160,6 +183,13 @@ function LeadsPage() {
                   <td className="px-4 py-3">{l.source || "—"}</td>
                   <td className="px-4 py-3">
                     <Badge variant="secondary">{l.status || "new"}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {l.assigned_to ? (
+                      memberLabel(memberMap.get(l.assigned_to))
+                    ) : (
+                      <span className="text-[var(--w55)]">Unassigned</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-[var(--w55)] whitespace-nowrap">
                     {new Date(l.created_at).toLocaleString()}
