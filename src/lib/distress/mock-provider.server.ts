@@ -129,6 +129,8 @@ function buildRecord(
     ownerName: `${pick(["James","Maria","Robert","Linda","Michael","Patricia","David","Jennifer"], seed)} ${pick(["Smith","Garcia","Johnson","Lee","Brown","Davis","Miller","Wilson"], seed >> 9)}`,
     isAbsentee: distressType === "absentee" || (seed % 5 === 0),
     isVacant: distressType === "vacant" || (seed % 7 === 0),
+    lat: null,
+    lng: null,
   };
 }
 
@@ -165,6 +167,17 @@ export class MockProvider implements PropertyProvider {
         : String(10_000 + ((hash(state + city) + i) % 89_999)).slice(0, 5);
       const distressType = pick(types, i);
       const rec = buildRecord(state, city, zip, county, i, distressType);
+
+      // Attach jittered lat/lng around the county centroid (when known)
+      const center = countyMatch
+        ?? counties.find((c) => c.name === county);
+      if (center?.lat != null && center?.lng != null) {
+        const seed = hash(`${state}-${zip}-${i}-${distressType}`);
+        const jitterLat = (((seed % 200) - 100) / 100) * 0.05; // ~5km
+        const jitterLng = ((((seed >> 7) % 200) - 100) / 100) * 0.05;
+        rec.lat = +(center.lat + jitterLat).toFixed(6);
+        rec.lng = +(center.lng + jitterLng).toFixed(6);
+      }
 
       if (filters.minEquity != null && (rec.equity ?? 0) < filters.minEquity) { i++; continue; }
       if (filters.minDaysOnMarket != null && (rec.daysOnMarket ?? 0) < filters.minDaysOnMarket) { i++; continue; }

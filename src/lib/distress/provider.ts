@@ -58,6 +58,8 @@ export interface DistressedPropertyRecord {
   ownerName: string | null;
   isAbsentee: boolean;
   isVacant: boolean;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface PropertyProvider {

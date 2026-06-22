@@ -87,6 +87,8 @@ const importSchema = z.object({
     isAbsentee: z.boolean(),
     isVacant: z.boolean(),
     leadScore: z.number().nullable().optional(),
+    lat: z.number().nullable().optional(),
+    lng: z.number().nullable().optional(),
   })).min(1).max(200),
 });
 
