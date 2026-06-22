@@ -19,6 +19,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Search, Save, Download, RefreshCw } from "lucide-react";
+import { getCountiesForState } from "@/lib/distress/counties";
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
   head: () => ({ meta: [{ title: "Find Distressed Properties — PropAI" }] }),
@@ -52,6 +53,7 @@ function PropertySearch() {
   const saveFn = useServerFn(saveSearch);
 
   const [state, setState] = useState("NY");
+  const [county, setCounty] = useState<string>("");
   const [zip, setZip] = useState("");
   const [city, setCity] = useState("");
   const [types, setTypes] = useState<DistressType[]>(["preforeclosure","reo","tax_lien","fsbo_stale"]);
@@ -62,8 +64,13 @@ function PropertySearch() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchName, setSearchName] = useState("");
 
+  const counties = getCountiesForState(state);
+  const activeCounty = counties.find((c) => c.name === county);
+  const zipSuggestions = activeCounty?.zips ?? [];
+
   const filters = (): DistressFilters => ({
     state: state || undefined,
+    county: county || undefined,
     zip: zip.trim() || undefined,
     city: city.trim() || undefined,
     distressTypes: types.length ? types : undefined,
@@ -149,7 +156,10 @@ function PropertySearch() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <Label>State</Label>
-            <Select value={state} onValueChange={setState}>
+            <Select
+              value={state}
+              onValueChange={(v) => { setState(v); setCounty(""); setZip(""); }}
+            >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="max-h-80">
                 <div className="px-2 py-1 text-xs uppercase tracking-wider text-[var(--w55)]">Featured markets</div>
@@ -163,8 +173,40 @@ function PropertySearch() {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>County</Label>
+            {counties.length > 0 ? (
+              <Select
+                value={county || "__all"}
+                onValueChange={(v) => { setCounty(v === "__all" ? "" : v); setZip(""); }}
+              >
+                <SelectTrigger><SelectValue placeholder="All counties" /></SelectTrigger>
+                <SelectContent className="max-h-80">
+                  <SelectItem value="__all">All counties</SelectItem>
+                  {counties.map((c) => (
+                    <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={county} onChange={(e) => setCounty(e.target.value)} placeholder="e.g. Harris" />
+            )}
+          </div>
           <div><Label>City</Label><Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="optional" /></div>
-          <div><Label>ZIP</Label><Input value={zip} onChange={(e) => setZip(e.target.value)} placeholder="optional" /></div>
+          <div>
+            <Label>ZIP {zipSuggestions.length > 0 && <span className="text-[var(--w55)] text-xs">(suggestions)</span>}</Label>
+            <Input
+              value={zip}
+              onChange={(e) => setZip(e.target.value)}
+              placeholder="optional"
+              list="zip-suggestions"
+            />
+            {zipSuggestions.length > 0 && (
+              <datalist id="zip-suggestions">
+                {zipSuggestions.map((z) => <option key={z} value={z} />)}
+              </datalist>
+            )}
+          </div>
           <div><Label>Min equity ($)</Label><Input type="number" value={minEquity} onChange={(e) => setMinEquity(e.target.value)} placeholder="50000" /></div>
           <div><Label>Min days on market</Label><Input type="number" value={minDom} onChange={(e) => setMinDom(e.target.value)} placeholder="60" /></div>
           <div><Label>Min price ($)</Label><Input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} /></div>
@@ -297,7 +339,8 @@ function PropertySearch() {
                   variant="outline"
                   onClick={() => {
                     const f = s.filters as DistressFilters;
-                    setState(f.state ?? "TX");
+                    setState(f.state ?? "NY");
+                    setCounty(f.county ?? "");
                     setCity(f.city ?? "");
                     setZip(f.zip ?? "");
                     setTypes(f.distressTypes ?? []);

@@ -11,6 +11,7 @@ import type {
   DistressedPropertyRecord,
   PropertyProvider,
 } from "./provider";
+import { COUNTIES_BY_STATE } from "./counties";
 
 const STREETS = [
   "Maple Ave", "Oak St", "Pine Rd", "Cedar Ln", "Elm Dr", "Birch Way",
@@ -74,10 +75,11 @@ function buildRecord(
   state: string,
   city: string,
   zip: string,
+  county: string,
   idx: number,
   distressType: DistressType,
 ): DistressedPropertyRecord {
-  const seed = hash(`${state}-${city}-${zip}-${idx}-${distressType}`);
+  const seed = hash(`${state}-${county}-${city}-${zip}-${idx}-${distressType}`);
   const streetNum = 100 + (seed % 9800);
   const street = pick(STREETS, seed >> 3);
   const address = `${streetNum} ${street}`;
@@ -108,7 +110,7 @@ function buildRecord(
     city,
     state,
     zip,
-    county: `${city} County`,
+    county,
     propertyType: pick(["single_family", "duplex", "townhouse", "condo"], seed >> 11),
     beds: 2 + (seed % 4),
     baths: 1 + (seed % 3),
@@ -134,10 +136,21 @@ export class MockProvider implements PropertyProvider {
   readonly name = "mock";
 
   async searchDistressed(filters: DistressSearchFilters): Promise<DistressedPropertyRecord[]> {
-    const state = (filters.state || "TX").toUpperCase();
+    const state = (filters.state || "NY").toUpperCase();
+    const counties = COUNTIES_BY_STATE[state] ?? [];
+    const countyMatch = filters.county
+      ? counties.find((c) => c.name.toLowerCase().includes(filters.county!.toLowerCase()))
+      : undefined;
+
     const cities = filters.city
       ? [filters.city]
       : CITIES_BY_STATE[state] ?? ["Springfield"];
+
+    // ZIP pool: explicit zip wins; else county zips; else synthesized
+    const zipPool: string[] | undefined = filters.zip
+      ? [filters.zip]
+      : countyMatch?.zips;
+
     const types = filters.distressTypes?.length ? filters.distressTypes : ALL_TYPES;
     const limit = Math.min(filters.limit ?? 50, 200);
 
@@ -145,9 +158,13 @@ export class MockProvider implements PropertyProvider {
     let i = 0;
     while (out.length < limit) {
       const city = filters.city ?? pick(cities, i);
-      const zip = filters.zip ?? String(70_000 + ((hash(state + city) + i) % 9999)).slice(0, 5);
+      const county = countyMatch?.name
+        ?? (filters.county ?? `${city} County`);
+      const zip = zipPool
+        ? pick(zipPool, i)
+        : String(10_000 + ((hash(state + city) + i) % 89_999)).slice(0, 5);
       const distressType = pick(types, i);
-      const rec = buildRecord(state, city, zip, i, distressType);
+      const rec = buildRecord(state, city, zip, county, i, distressType);
 
       if (filters.minEquity != null && (rec.equity ?? 0) < filters.minEquity) { i++; continue; }
       if (filters.minDaysOnMarket != null && (rec.daysOnMarket ?? 0) < filters.minDaysOnMarket) { i++; continue; }
