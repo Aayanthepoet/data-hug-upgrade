@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { listOwners, listOwnerContacts, runSkipTrace } from "@/lib/skiptrace/skiptrace.functions";
 import { Search, ChevronDown, ChevronRight, Phone, Mail, Users } from "lucide-react";
+import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
   head: () => ({ meta: [{ title: "Owners — PropAI" }] }),
