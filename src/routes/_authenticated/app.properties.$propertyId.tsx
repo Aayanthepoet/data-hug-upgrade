@@ -6,8 +6,12 @@ import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
 import { upsertWatchlistItem } from "@/lib/watchlist.functions";
-import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck } from "lucide-react";
+import { createAuction } from "@/lib/auctions/auctions.functions";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+} from "@/components/ui/dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const searchSchema = z.object({
