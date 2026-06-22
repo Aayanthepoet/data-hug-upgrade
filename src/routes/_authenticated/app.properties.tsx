@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyModule } from "@/components/app/EmptyModule";
@@ -42,8 +42,12 @@ function PropertiesPage() {
           </thead>
           <tbody>
             {data.map((p) => (
-              <tr key={p.id} className="border-t border-border">
-                <td className="p-4">{p.address}</td>
+              <tr key={p.id} className="border-t border-border hover:bg-[rgba(255,255,255,.02)]">
+                <td className="p-4">
+                  <Link to="/app/properties/$propertyId" params={{ propertyId: p.id }} className="text-cyan hover:underline">
+                    {p.address}
+                  </Link>
+                </td>
                 <td className="p-4">{p.city}, {p.state} {p.zip}</td>
                 <td className="p-4">{p.estimated_value ? `$${Number(p.estimated_value).toLocaleString()}` : "—"}</td>
                 <td className="p-4">{p.lead_score ?? "—"}</td>
