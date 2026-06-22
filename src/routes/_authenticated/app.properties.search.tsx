@@ -95,7 +95,7 @@ function PropertySearch() {
 
   const importMutation = useMutation({
     mutationFn: async () => {
-      const records = runMutation.data?.filter((r) => selected.has(r.sourceRecordId)) ?? [];
+      const records = runMutation.data?.records.filter((r) => selected.has(r.sourceRecordId)) ?? [];
       if (!records.length) throw new Error("Select at least one property");
       return importFn({ data: { records } });
     },
@@ -136,7 +136,9 @@ function PropertySearch() {
     setTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
   };
 
-  const results = runMutation.data ?? [];
+  const results = runMutation.data?.records ?? [];
+  const providerName = runMutation.data?.provider;
+  const usedFallback = runMutation.data?.usedFallback;
   const allSelected = results.length > 0 && results.every((r) => selected.has(r.sourceRecordId));
   const toggleAll = () => {
     if (allSelected) setSelected(new Set());
