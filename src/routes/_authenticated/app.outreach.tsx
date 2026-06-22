@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Send, Mail, MessageSquare, MapPin, Reply, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { listOutreach, sendOutreach, recordReply, listReachableOwners } from "@/lib/outreach/outreach.functions";
+import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/app/outreach")({
   head: () => ({ meta: [{ title: "Outreach — PropAI" }] }),
@@ -260,9 +262,15 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
 
         {(channel === "sms" || channel === "email") && (
           <div className="space-y-2 border border-border rounded p-3 bg-[rgba(255,255,255,.02)]">
-            <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
-              Pick from skip-traced owners (optional)
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
+                Pick from skip-traced owners (optional)
+              </label>
+              <div className="flex items-center gap-2 text-[10px] text-[var(--w55)]">
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" /> Verified</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" /> Pending</span>
+              </div>
+            </div>
             <select
               value={ownerId ?? ""}
               onChange={(e) => {
@@ -274,15 +282,51 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
               className="w-full px-3 py-2 bg-[rgba(255,255,255,.04)] border border-border rounded text-sm"
             >
               <option value="">— manual entry —</option>
-              {ownerList.map((o) => {
-                const count = channel === "sms" ? o.phones.length : o.emails.length;
-                return (
-                  <option key={o.owner_id} value={o.owner_id} disabled={count === 0}>
-                    {o.full_name} {count === 0 ? `(no ${channel === "sms" ? "phone" : "email"})` : `· ${count} ${channel === "sms" ? "phone" : "email"}${count > 1 ? "s" : ""}`}
-                  </option>
-                );
-              })}
+              {(() => {
+                const channelKey = channel === "sms" ? "phones" : "emails";
+                const groups: Array<{ key: string; label: string }> = [
+                  { key: "traced", label: "Verified (skip-traced)" },
+                  { key: "pending", label: "Pending skip trace" },
+                  { key: "no_hit", label: "No hits" },
+                  { key: "failed", label: "Failed" },
+                ];
+                return groups.map((g) => {
+                  const items = ownerList.filter((o) => (o.skip_trace_status ?? "pending") === g.key);
+                  if (items.length === 0) return null;
+                  return (
+                    <optgroup key={g.key} label={g.label}>
+                      {items.map((o) => {
+                        const count = o[channelKey].length;
+                        const disabled = count === 0;
+                        const suffix = disabled
+                          ? ` — no ${channel === "sms" ? "phone" : "email"}`
+                          : ` · ${count} ${channel === "sms" ? "phone" : "email"}${count > 1 ? "s" : ""}`;
+                        return (
+                          <option key={o.owner_id} value={o.owner_id} disabled={disabled}>
+                            {o.full_name}{suffix}
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  );
+                });
+              })()}
             </select>
+
+            {selectedOwner && (
+              <div className="flex items-center justify-between gap-2">
+                <SkipTraceBadge
+                  status={selectedOwner.skip_trace_status}
+                  lastRunAt={selectedOwner.skip_trace_last_run_at}
+                />
+                {selectedOwner.skip_trace_status !== "traced" && (
+                  <Link to="/app/owners" className="text-[11px] text-cyan hover:underline">
+                    Run skip trace →
+                  </Link>
+                )}
+              </div>
+            )}
+
             {selectedOwner && availableContacts.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {availableContacts.map((c) => {
@@ -295,7 +339,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
                       className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] rounded border font-mono transition-colors ${
                         active ? "bg-cyan/15 text-cyan border-cyan/40" : "border-border text-[var(--w55)] hover:bg-white/5"
                       }`}
-                      title={c.is_verified ? "Verified" : "Unverified"}
+                      title={c.is_verified ? "Verified contact" : "Unverified contact"}
                     >
                       {c.value}
                       {c.confidence != null && (
@@ -307,14 +351,19 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
                 })}
               </div>
             )}
-            {selectedOwner && availableContacts.length === 0 && (
-              <p className="text-[11px] text-[var(--w55)]">
-                This owner has no skip-traced {channel === "sms" ? "phone numbers" : "emails"}. Run skip trace from the Owners page first.
+            {selectedOwner && availableContacts.length === 0 && selectedOwner.skip_trace_status === "traced" && (
+              <p className="text-[11px] text-amber-300">
+                Traced, but no {channel === "sms" ? "phone numbers" : "emails"} returned. Try the other channel.
+              </p>
+            )}
+            {selectedOwner && availableContacts.length === 0 && selectedOwner.skip_trace_status !== "traced" && (
+              <p className="text-[11px] text-amber-300">
+                This owner hasn't been skip-traced yet — verify {channel === "sms" ? "phone" : "email"} contact before sending.
               </p>
             )}
             {ownerList.length === 0 && (
               <p className="text-[11px] text-[var(--w55)]">
-                No skip-traced contacts yet. Run skip trace on the Owners page to populate this list.
+                No owners yet. Save a property to populate this list.
               </p>
             )}
           </div>

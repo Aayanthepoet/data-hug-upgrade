@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { listOwners, listOwnerContacts, runSkipTrace } from "@/lib/skiptrace/skiptrace.functions";
 import { Search, ChevronDown, ChevronRight, Phone, Mail, Users } from "lucide-react";
+import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
   head: () => ({ meta: [{ title: "Owners — PropAI" }] }),
@@ -44,6 +45,7 @@ function OwnersPage() {
               <tr>
                 <th className="p-4 w-8"></th>
                 <th className="p-4">Owner</th>
+                <th className="p-4">Skip trace</th>
                 <th className="p-4">Property</th>
                 <th className="p-4">Mailing</th>
                 <th className="p-4">Contacts</th>
@@ -71,6 +73,8 @@ type OwnerRowProps = {
     mailing_state: string | null;
     mailing_zip: string | null;
     contact_count: number;
+    skip_trace_status?: string | null;
+    skip_trace_last_run_at?: string | null;
     properties: { address: string } | { address: string }[] | null;
   };
 };
@@ -110,6 +114,9 @@ function OwnerRow({ owner }: OwnerRowProps) {
           <div className="font-medium">{owner.full_name}</div>
           {owner.entity_type && <div className="text-[10px] uppercase tracking-wider text-[var(--w55)] mt-0.5">{owner.entity_type}</div>}
         </td>
+        <td className="p-4">
+          <SkipTraceBadge status={owner.skip_trace_status} lastRunAt={owner.skip_trace_last_run_at} />
+        </td>
         <td className="p-4 text-[var(--w55)]">{prop?.address ?? "—"}</td>
         <td className="p-4 text-[var(--w55)]">
           {[owner.mailing_city, owner.mailing_state, owner.mailing_zip].filter(Boolean).join(", ") || "—"}
@@ -124,14 +131,14 @@ function OwnerRow({ owner }: OwnerRowProps) {
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
           >
             <Search className="h-3.5 w-3.5 text-cyan" />
-            {mut.isPending ? "Tracing…" : "Skip trace"}
+            {mut.isPending ? "Tracing…" : owner.skip_trace_status === "traced" ? "Re-trace" : "Skip trace"}
           </button>
           {mut.error && <p className="text-red-400 text-[10px] mt-1">{(mut.error as Error).message}</p>}
         </td>
       </tr>
       {open && (
         <tr className="border-t border-border bg-[rgba(255,255,255,.02)]">
-          <td colSpan={6} className="p-4">
+          <td colSpan={7} className="p-4">
             {isLoading && <p className="text-[var(--w55)] text-xs">Loading contacts…</p>}
             {!isLoading && contacts && contacts.length === 0 && (
               <p className="text-[var(--w55)] text-xs">No contacts yet. Run skip trace to populate.</p>
