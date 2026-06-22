@@ -26,6 +26,7 @@ import {
   Flame,
   Gavel,
   Send,
+  ScrollText,
 } from "lucide-react";
 
 const items = [
@@ -44,6 +45,7 @@ const items = [
   { title: "Outreach", url: "/app/outreach", icon: Send },
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
+  { title: "Audit Log", url: "/app/audit", icon: ScrollText },
 ];
 
 export function AppSidebar() {

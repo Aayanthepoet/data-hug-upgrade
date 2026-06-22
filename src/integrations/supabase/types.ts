@@ -139,6 +139,39 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json
+          record_count: number
+          resource_ids: string[]
+          resource_type: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          record_count?: number
+          resource_ids?: string[]
+          resource_type: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          record_count?: number
+          resource_ids?: string[]
+          resource_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bids: {
         Row: {
           amount: number
