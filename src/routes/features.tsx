@@ -6,9 +6,9 @@ export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
       { title: "Features — PropAI Platform" },
-      { name: "description", content: "Seven AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, video marketing, and live auctions." },
-      { property: "og:title", content: "PropAI Features — Seven AI engines for real estate" },
-      { property: "og:description", content: "AI-powered owner search, skip tracing, outreach, vision studio, video studio, and auctions." },
+      { name: "description", content: "Six AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, and video marketing." },
+      { property: "og:title", content: "PropAI Features — Six AI engines for real estate" },
+      { property: "og:description", content: "AI-powered owner search, skip tracing, outreach, vision studio, and video studio." },
     ],
   }),
   component: Features,
