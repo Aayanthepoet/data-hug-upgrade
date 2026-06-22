@@ -25,6 +25,7 @@ import {
   Bookmark,
   Flame,
   Gavel,
+  Send,
 } from "lucide-react";
 
 const items = [
@@ -40,6 +41,7 @@ const items = [
   { title: "Contacts (Resolver)", url: "/app/contacts", icon: PhoneCall },
   { title: "Lead Lists", url: "/app/lead-lists", icon: ListChecks },
   { title: "Campaigns (Language)", url: "/app/campaigns", icon: Megaphone },
+  { title: "Outreach", url: "/app/outreach", icon: Send },
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
 ];

@@ -30,6 +30,7 @@ import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
+import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
@@ -39,6 +40,7 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
@@ -151,6 +153,12 @@ const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
   path: '/owners',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppOutreachRoute =
+  AuthenticatedAppOutreachRouteImport.update({
+    id: '/outreach',
+    path: '/outreach',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -203,6 +211,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksOutreachReplyRoute =
+  ApiPublicHooksOutreachReplyRouteImport.update({
+    id: '/api/public/hooks/outreach-reply',
+    path: '/api/public/hooks/outreach-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCloseAuctionsRoute =
   ApiPublicHooksCloseAuctionsRouteImport.update({
     id: '/api/public/hooks/close-auctions',
@@ -250,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -266,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -285,6 +301,7 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -301,6 +318,7 @@ export interface FileRoutesByTo {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -323,6 +341,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
@@ -339,6 +358,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -361,6 +381,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
@@ -377,6 +398,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -396,6 +418,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
@@ -412,6 +435,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -433,6 +457,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
+    | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/scoring'
@@ -449,6 +474,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/outreach-reply'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -468,6 +494,7 @@ export interface RootRouteChildren {
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
+  ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -622,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOwnersRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/outreach': {
+      id: '/_authenticated/app/outreach'
+      path: '/outreach'
+      fullPath: '/app/outreach'
+      preLoaderRoute: typeof AuthenticatedAppOutreachRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/leads': {
       id: '/_authenticated/app/leads'
       path: '/leads'
@@ -683,6 +717,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/queue/process'
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/outreach-reply': {
+      id: '/api/public/hooks/outreach-reply'
+      path: '/api/public/hooks/outreach-reply'
+      fullPath: '/api/public/hooks/outreach-reply'
+      preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/close-auctions': {
@@ -776,6 +817,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
+  AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
@@ -792,6 +834,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
+  AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
@@ -831,6 +874,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
+  ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
@@ -838,3 +882,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
