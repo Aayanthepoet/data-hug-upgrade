@@ -1021,6 +1021,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      close_auction_if_expired: {
+        Args: { _auction_id: string }
+        Returns: boolean
+      }
+      close_expired_auctions: { Args: { _limit?: number }; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
