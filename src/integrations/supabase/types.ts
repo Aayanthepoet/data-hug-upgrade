@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           current_bid: number
           description: string | null
+          ended_at: string | null
           ends_at: string
           id: string
           opening_bid: number
@@ -28,11 +29,14 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          winner_id: string | null
+          winning_bid_id: string | null
         }
         Insert: {
           created_at?: string
           current_bid?: number
           description?: string | null
+          ended_at?: string | null
           ends_at: string
           id?: string
           opening_bid?: number
@@ -42,11 +46,14 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          winner_id?: string | null
+          winning_bid_id?: string | null
         }
         Update: {
           created_at?: string
           current_bid?: number
           description?: string | null
+          ended_at?: string | null
           ends_at?: string
           id?: string
           opening_bid?: number
@@ -56,6 +63,8 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          winner_id?: string | null
+          winning_bid_id?: string | null
         }
         Relationships: [
           {
@@ -63,6 +72,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auctions_winning_bid_id_fkey"
+            columns: ["winning_bid_id"]
+            isOneToOne: false
+            referencedRelation: "bids"
             referencedColumns: ["id"]
           },
         ]
