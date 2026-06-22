@@ -123,34 +123,56 @@ export const recordReply = createServerFn({ method: "POST" })
 export const listReachableOwners = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: contacts, error } = await context.supabase
-      .from("contacts")
-      .select("id, owner_id, contact_type, value, confidence, is_verified, do_not_contact, owners!inner(id, full_name)")
-      .in("contact_type", ["phone", "email"])
-      .eq("do_not_contact", false)
-      .order("confidence", { ascending: false })
+    // Pull all owners so the dialog can also show pending/no-hit entries,
+    // not just owners that already have phone/email rows.
+    const { data: ownerRows, error: oErr } = await context.supabase
+      .from("owners")
+      .select("id, full_name, skip_trace_status, skip_trace_last_run_at")
+      .order("full_name", { ascending: true })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (oErr) throw new Error(oErr.message);
 
-    type Row = (typeof contacts)[number] & { owners: { id: string; full_name: string } | null };
-    const byOwner = new Map<string, {
-      owner_id: string;
-      full_name: string;
-      phones: Array<{ id: string; value: string; confidence: number | null; is_verified: boolean }>;
-      emails: Array<{ id: string; value: string; confidence: number | null; is_verified: boolean }>;
-    }>();
-
-    for (const c of (contacts ?? []) as Row[]) {
-      if (!c.owners || !c.owner_id) continue;
-      let g = byOwner.get(c.owner_id);
-      if (!g) {
-        g = { owner_id: c.owner_id, full_name: c.owners.full_name, phones: [], emails: [] };
-        byOwner.set(c.owner_id, g);
-      }
-      const entry = { id: c.id, value: c.value, confidence: c.confidence ? Number(c.confidence) : null, is_verified: c.is_verified };
-      if (c.contact_type === "phone") g.phones.push(entry);
-      else if (c.contact_type === "email") g.emails.push(entry);
+    const ownerIds = (ownerRows ?? []).map((o) => o.id);
+    let contacts: Array<{
+      id: string; owner_id: string | null; contact_type: string; value: string;
+      confidence: number | null; is_verified: boolean;
+    }> = [];
+    if (ownerIds.length) {
+      const { data: cRows, error: cErr } = await context.supabase
+        .from("contacts")
+        .select("id, owner_id, contact_type, value, confidence, is_verified, do_not_contact")
+        .in("owner_id", ownerIds)
+        .in("contact_type", ["phone", "email"])
+        .eq("do_not_contact", false)
+        .order("confidence", { ascending: false })
+        .limit(2000);
+      if (cErr) throw new Error(cErr.message);
+      contacts = (cRows ?? []).map((c) => ({
+        id: c.id,
+        owner_id: c.owner_id,
+        contact_type: c.contact_type,
+        value: c.value,
+        confidence: c.confidence != null ? Number(c.confidence) : null,
+        is_verified: c.is_verified,
+      }));
     }
 
-    return Array.from(byOwner.values()).sort((a, b) => a.full_name.localeCompare(b.full_name));
+    type ContactEntry = { id: string; value: string; confidence: number | null; is_verified: boolean };
+    return (ownerRows ?? []).map((o) => {
+      const mine = contacts.filter((c) => c.owner_id === o.id);
+      const phones: ContactEntry[] = mine
+        .filter((c) => c.contact_type === "phone")
+        .map(({ id, value, confidence, is_verified }) => ({ id, value, confidence, is_verified }));
+      const emails: ContactEntry[] = mine
+        .filter((c) => c.contact_type === "email")
+        .map(({ id, value, confidence, is_verified }) => ({ id, value, confidence, is_verified }));
+      return {
+        owner_id: o.id,
+        full_name: o.full_name,
+        skip_trace_status: (o.skip_trace_status ?? "pending") as "pending" | "traced" | "no_hit" | "failed",
+        skip_trace_last_run_at: o.skip_trace_last_run_at as string | null,
+        phones,
+        emails,
+      };
+    });
   });
