@@ -112,6 +112,7 @@ function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", leadId] });
       qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["lead-assignments", leadId] });
       toast.success("Assignment updated");
     },
     onError: (e: any) => toast.error(e.message),
