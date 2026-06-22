@@ -205,6 +205,15 @@ function OwnersPage() {
             {bulkRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
             Skip trace selected ({selected.size})
           </button>
+          <button
+            onClick={() => exportContacts(Array.from(selected))}
+            disabled={exporting || selected.size === 0}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-xs hover:bg-white/5 disabled:opacity-50"
+            title="Download verified phone & email contacts for the selected owners"
+          >
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5 text-cyan" />}
+            Export CSV ({selected.size})
+          </button>
         </div>
       </header>
 
