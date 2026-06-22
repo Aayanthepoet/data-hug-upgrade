@@ -391,18 +391,53 @@ function TimelineSection({ events, address }: { events: TimelineEvent[]; address
                   {e.amount != null && e.amount > 0 && (
                     <span className="text-sm text-cyan">${e.amount.toLocaleString()}</span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => copyShareLink(key, e)}
-                    className="ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan"
-                    title="Copy shareable link to this event"
-                  >
-                    {copied === key ? (
-                      <><Check className="h-3 w-3" /> Copied</>
-                    ) : (
-                      <><Link2 className="h-3 w-3" /> Share</>
-                    )}
-                  </button>
+                  <div className="ml-auto flex items-center gap-3">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan transition-colors cursor-pointer"
+                          title="Show QR Code for this event and filtered view"
+                        >
+                          <QrCode className="h-3.5 w-3.5" /> QR Code
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-4 flex flex-col items-center gap-3 bg-zinc-950 border-zinc-800 text-zinc-100 shadow-xl">
+                        <div className="text-center space-y-1">
+                          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--w55)]">Scan QR Code</h4>
+                          <p className="text-[11px] text-zinc-400 leading-snug line-clamp-2">
+                            {e.title} ({e.date})
+                          </p>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg shadow-inner">
+                          <QRCodeSVG
+                            value={buildShareUrl(key, e)}
+                            size={160}
+                            bgColor={"#ffffff"}
+                            fgColor={"#000000"}
+                            level={"M"}
+                            includeMargin={false}
+                          />
+                        </div>
+                        <p className="text-[9px] text-center text-zinc-500 leading-normal">
+                          Scan to instantly load this filtered timeline event on another device.
+                        </p>
+                      </PopoverContent>
+                    </Popover>
+
+                    <button
+                      type="button"
+                      onClick={() => copyShareLink(key, e)}
+                      className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan transition-colors"
+                      title="Copy shareable link to this event"
+                    >
+                      {copied === key ? (
+                        <><Check className="h-3 w-3" /> Copied</>
+                      ) : (
+                        <><Link2 className="h-3 w-3" /> Share</>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 {(e.from || e.to) && (
                   <p className="text-xs text-[var(--w55)] mt-0.5">
