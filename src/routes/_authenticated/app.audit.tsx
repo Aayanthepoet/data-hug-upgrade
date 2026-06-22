@@ -65,15 +65,28 @@ function AuditPage() {
   const rows = data ?? [];
 
   async function exportCsv() {
-    if (exporting || rows.length === 0) return;
+    if (exporting) return;
+    if (!canExport) {
+      setExportError(`Access denied. Audit log export requires one of: ${allowedRoles.join(", ")}.`);
+      return;
+    }
     setExporting(true);
+    setExportError(null);
     try {
+      // Server re-checks the role and returns rows (or throws Forbidden).
+      const serverRows = await exportFn({ data: queryInput });
+
+      if (serverRows.length === 0) {
+        setExportError("No audit events match the current filters.");
+        return;
+      }
+
       const header = [
         "created_at", "action", "resource_type", "record_count",
         "resource_count", "filename", "owner_names", "user_id", "id",
       ];
       const csvRows: string[][] = [header];
-      for (const r of rows) {
+      for (const r of serverRows) {
         const md = (r.metadata ?? {}) as Record<string, unknown>;
         const filename = typeof md.filename === "string" ? md.filename : "";
         const ownerNames = Array.isArray(md.owner_names) ? (md.owner_names as string[]).join("; ") : "";
@@ -120,14 +133,10 @@ function AuditPage() {
             action: "export.csv",
             resource_type: "audit_logs",
             resource_ids: [],
-            record_count: rows.length,
+            record_count: serverRows.length,
             metadata: {
               filename,
-              filters: {
-                action: filter,
-                from: from || null,
-                to: to || null,
-              },
+              filters: { action: filter, from: from || null, to: to || null },
             },
           },
         });
@@ -135,6 +144,8 @@ function AuditPage() {
       } catch (e) {
         console.warn("audit log failed", e);
       }
+    } catch (e) {
+      setExportError((e as Error).message);
     } finally {
       setExporting(false);
     }
