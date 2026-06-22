@@ -29,11 +29,18 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
     }
     setLoading(true);
     const { error } = await supabase.from("leads").insert({ ...parsed.data, source });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error("Couldn't submit. Try again.");
       return;
     }
+    // Fire-and-forget notification email to the team. Never block UX on this.
+    fetch("/api/public/lead-notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...parsed.data, source }),
+    }).catch(() => {});
+    setLoading(false);
     setDone(true);
     toast.success("Thanks! We'll be in touch within 24 hours.");
   }
