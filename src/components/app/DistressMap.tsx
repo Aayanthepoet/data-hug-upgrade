@@ -1,7 +1,10 @@
-import { useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { useEffect, useMemo, useRef } from "react";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster";
 import { STATE_CENTERS } from "@/lib/distress/counties";
 
 export type MapPin = {
@@ -32,13 +35,87 @@ const COLOR_BY_TYPE: Record<string, string> = {
   absentee: "#64748b",
 };
 
-function FitBounds({ pins }: { pins: MapPin[] }) {
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!),
+  );
+}
+
+function popupHtml(p: MapPin, color: string) {
+  const list = p.listPrice
+    ? `<div style="font-size:11px;color:#374151">List $${p.listPrice.toLocaleString()} · ${p.daysOnMarket ?? 0}d on market</div>`
+    : "";
+  return `
+    <div style="font-size:12px;line-height:1.4">
+      <div style="font-weight:600">${escapeHtml(p.address)}</div>
+      <div style="font-size:11px;color:#4b5563">${escapeHtml(p.city ?? "")}, ${escapeHtml(p.state ?? "")} ${escapeHtml(p.zip ?? "")} · ${escapeHtml(p.county ?? "")}</div>
+      <div style="font-size:11px;margin-top:2px">
+        <span style="display:inline-block;padding:1px 6px;border-radius:3px;color:#fff;background:${color}">
+          ${escapeHtml(p.distressType.replace("_", " "))}
+        </span>
+        <span style="margin-left:6px">Score ${p.leadScore}</span>
+      </div>
+      <div style="font-size:11px;color:#374151">
+        Value $${p.estimatedValue?.toLocaleString() ?? "—"} · Equity $${p.equity?.toLocaleString() ?? "—"}
+      </div>
+      ${list}
+    </div>`;
+}
+
+function ClusterLayer({ pins }: { pins: MapPin[] }) {
   const map = useMap();
+  const groupRef = useRef<L.MarkerClusterGroup | null>(null);
+
   useEffect(() => {
+    const group = (L as any).markerClusterGroup({
+      chunkedLoading: true,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      maxClusterRadius: 55,
+      iconCreateFunction: (cluster: L.MarkerCluster) => {
+        const count = cluster.getChildCount();
+        const size = count < 10 ? 32 : count < 50 ? 38 : count < 200 ? 46 : 54;
+        const bg =
+          count < 10 ? "#06b6d4" : count < 50 ? "#a855f7" : count < 200 ? "#f97316" : "#ef4444";
+        return L.divIcon({
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;border:2px solid rgba(255,255,255,0.85);box-shadow:0 0 0 4px ${bg}33">${count}</div>`,
+          className: "distress-cluster-icon",
+          iconSize: L.point(size, size),
+        });
+      },
+    }) as L.MarkerClusterGroup;
+    groupRef.current = group;
+    map.addLayer(group);
+    return () => {
+      map.removeLayer(group);
+      groupRef.current = null;
+    };
+  }, [map]);
+
+  useEffect(() => {
+    const group = groupRef.current;
+    if (!group) return;
+    group.clearLayers();
     if (!pins.length) return;
+    const markers: L.CircleMarker[] = [];
+    for (const p of pins) {
+      const color = COLOR_BY_TYPE[p.distressType] ?? "#06b6d4";
+      const radius = 6 + Math.min(8, Math.round(p.leadScore / 12));
+      const m = L.circleMarker([p.lat, p.lng], {
+        radius,
+        color,
+        fillColor: color,
+        fillOpacity: 0.75,
+        weight: 1.5,
+      });
+      m.bindPopup(popupHtml(p, color));
+      markers.push(m);
+    }
+    group.addLayers(markers);
     const bounds = L.latLngBounds(pins.map((p) => [p.lat, p.lng] as [number, number]));
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
   }, [pins, map]);
+
   return null;
 }
 
@@ -72,51 +149,7 @@ export function DistressMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
-        {placeable.map((p) => {
-          const color = COLOR_BY_TYPE[p.distressType] ?? "#06b6d4";
-          const radius = 6 + Math.min(8, Math.round(p.leadScore / 12));
-          return (
-            <CircleMarker
-              key={p.id}
-              center={[p.lat, p.lng]}
-              radius={radius}
-              pathOptions={{
-                color,
-                fillColor: color,
-                fillOpacity: 0.7,
-                weight: 1.5,
-              }}
-            >
-              <Popup>
-                <div className="text-sm space-y-1">
-                  <div className="font-semibold">{p.address}</div>
-                  <div className="text-xs text-gray-600">
-                    {p.city}, {p.state} {p.zip} · {p.county}
-                  </div>
-                  <div className="text-xs">
-                    <span
-                      className="inline-block px-1.5 py-0.5 rounded text-white"
-                      style={{ background: color }}
-                    >
-                      {p.distressType.replace("_", " ")}
-                    </span>
-                    <span className="ml-2">Score {p.leadScore}</span>
-                  </div>
-                  <div className="text-xs text-gray-700">
-                    Value ${p.estimatedValue?.toLocaleString() ?? "—"} ·
-                    Equity ${p.equity?.toLocaleString() ?? "—"}
-                  </div>
-                  {p.listPrice && (
-                    <div className="text-xs text-gray-700">
-                      List ${p.listPrice.toLocaleString()} · {p.daysOnMarket ?? 0}d on market
-                    </div>
-                  )}
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
-        <FitBounds pins={placeable} />
+        <ClusterLayer pins={placeable} />
       </MapContainer>
 
       {/* Legend */}
