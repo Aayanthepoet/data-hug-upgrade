@@ -339,7 +339,8 @@ function PropertySearch() {
                   variant="outline"
                   onClick={() => {
                     const f = s.filters as DistressFilters;
-                    setState(f.state ?? "TX");
+                    setState(f.state ?? "NY");
+                    setCounty(f.county ?? "");
                     setCity(f.city ?? "");
                     setZip(f.zip ?? "");
                     setTypes(f.distressTypes ?? []);
