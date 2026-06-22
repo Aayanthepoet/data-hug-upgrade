@@ -129,6 +129,8 @@ function buildRecord(
     ownerName: `${pick(["James","Maria","Robert","Linda","Michael","Patricia","David","Jennifer"], seed)} ${pick(["Smith","Garcia","Johnson","Lee","Brown","Davis","Miller","Wilson"], seed >> 9)}`,
     isAbsentee: distressType === "absentee" || (seed % 5 === 0),
     isVacant: distressType === "vacant" || (seed % 7 === 0),
+    lat: null,
+    lng: null,
   };
 }
 
