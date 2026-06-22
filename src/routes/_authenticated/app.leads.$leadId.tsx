@@ -193,6 +193,140 @@ function LeadDetailPage() {
     downloadCsv(`lead-${lead!.id}.csv`, lines);
   }
 
+  function handleExportPdf() {
+    const memberName = (id: string | null) =>
+      id ? memberLabel(members.find((m) => m.id === id)) : "Unassigned";
+
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 56;
+    let y = 64;
+
+    const ensureSpace = (needed: number) => {
+      if (y + needed > pageHeight - 56) {
+        doc.addPage();
+        y = 64;
+      }
+    };
+
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Lead Summary", marginX, y);
+    y += 26;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(`Generated ${new Date().toLocaleString()}`, marginX, y);
+    y += 24;
+    doc.setTextColor(0);
+
+    // Name + meta
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(lead!.full_name || "Unnamed lead", marginX, y);
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(
+      `Submitted ${new Date(lead!.created_at).toLocaleString()}${lead!.source ? ` · via ${lead!.source}` : ""}`,
+      marginX,
+      y,
+    );
+    y += 24;
+    doc.setTextColor(0);
+
+    // Details section
+    const drawSectionTitle = (title: string) => {
+      ensureSpace(28);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(title, marginX, y);
+      y += 6;
+      doc.setDrawColor(220);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 14;
+    };
+
+    const drawRow = (label: string, value: string) => {
+      const labelW = 110;
+      const valueW = pageWidth - marginX * 2 - labelW;
+      const wrapped = doc.splitTextToSize(value || "—", valueW);
+      const rowH = Math.max(14, wrapped.length * 12 + 2);
+      ensureSpace(rowH);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(label, marginX, y + 10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0);
+      doc.text(wrapped, marginX + labelW, y + 10);
+      y += rowH;
+    };
+
+    drawSectionTitle("Lead details");
+    drawRow("Name", lead!.full_name ?? "");
+    drawRow("Email", lead!.email ?? "");
+    drawRow("Phone", lead!.phone ?? "");
+    drawRow("Company", lead!.company ?? "");
+    drawRow("Source", lead!.source ?? "");
+    drawRow("Status", lead!.status ?? "new");
+    drawRow("Assignee", memberName(lead!.assigned_to));
+    drawRow("Lead ID", lead!.id);
+    y += 8;
+    drawSectionTitle("Message");
+    const msg = lead!.message?.trim() || "No message provided.";
+    const msgLines = doc.splitTextToSize(msg, pageWidth - marginX * 2);
+    ensureSpace(msgLines.length * 12 + 6);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(msgLines, marginX, y + 10);
+    y += msgLines.length * 12 + 16;
+
+    drawSectionTitle("Assignment history");
+    const history = historyQuery.data ?? [];
+    if (history.length === 0) {
+      ensureSpace(16);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor(120);
+      doc.text("No assignment changes yet.", marginX, y + 10);
+      doc.setTextColor(0);
+      y += 18;
+    } else {
+      history.forEach((h) => {
+        const when = new Date(h.created_at).toLocaleString();
+        const to = h.assigned_to ? memberName(h.assigned_to) : "Unassigned";
+        const by = h.assigned_by ? memberName(h.assigned_by) : "system";
+        const line = `Assigned to ${to}  ·  by ${by}`;
+        ensureSpace(28);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(120);
+        doc.text(when, marginX, y + 10);
+        doc.setTextColor(0);
+        doc.text(line, marginX, y + 24);
+        y += 32;
+      });
+    }
+
+    // Footer page numbers
+    const pages = doc.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(150);
+      doc.text(`Page ${i} of ${pages}`, pageWidth - marginX, pageHeight - 32, { align: "right" });
+      doc.text("PropAI — Lead Summary", marginX, pageHeight - 32);
+    }
+
+    doc.save(`lead-${lead!.id}.pdf`);
+  }
+
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
