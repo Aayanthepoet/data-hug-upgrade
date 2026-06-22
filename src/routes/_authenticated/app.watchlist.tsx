@@ -338,6 +338,88 @@ function AlertTrendChart() {
           </ResponsiveContainer>
         )}
       </div>
+      <p className="text-[10px] text-[var(--w55)] mt-2">Tip: click a day to see which properties triggered alerts.</p>
+      <DayDrilldown date={day} onClose={() => setDay(null)} />
     </section>
+  );
+}
+
+const TYPE_LABEL = {
+  foreclosure: "Foreclosure",
+  lis_pendens: "Lis pendens",
+  deed_transfer: "Deed transfer",
+} as const;
+
+function DayDrilldown({ date, onClose }: { date: string | null; onClose: () => void }) {
+  const fetchDay = useServerFn(getAlertsForDay);
+  const { data, isLoading } = useQuery({
+    queryKey: ["alerts-day", date],
+    queryFn: () => fetchDay({ data: { date: date! } }),
+    enabled: !!date,
+  });
+
+  const pretty = date
+    ? new Date(date + "T00:00:00Z").toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+
+  return (
+    <Dialog open={!!date} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Alerts on {pretty}</DialogTitle>
+        </DialogHeader>
+        {isLoading && <div className="text-sm text-[var(--w55)]">Loading…</div>}
+        {!isLoading && data && data.length === 0 && (
+          <div className="text-sm text-[var(--w55)] py-4">
+            No alerts for the enabled types on this day.
+          </div>
+        )}
+        <div className="space-y-3">
+          {data?.map((p) => (
+            <div key={p.property_key} className="border border-border rounded-lg p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{p.address}</div>
+                  <div className="text-xs text-[var(--w55)] truncate">
+                    {[p.city, p.state].filter(Boolean).join(", ") || "—"}
+                  </div>
+                </div>
+                <Link
+                  to="/app/properties/$propertyId"
+                  params={{ propertyId: p.property_key }}
+                  className="text-xs text-cyan inline-flex items-center gap-1 hover:underline shrink-0"
+                  onClick={onClose}
+                >
+                  Open <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <ul className="mt-2 space-y-1">
+                {p.events.map((ev, i) => (
+                  <li key={i} className="text-xs flex items-center gap-2">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ background: TYPE_COLORS[ev.type] }}
+                    />
+                    <span className="text-white">{TYPE_LABEL[ev.type]}</span>
+                    {ev.amount != null && (
+                      <span className="text-[var(--w55)]">· ${Number(ev.amount).toLocaleString()}</span>
+                    )}
+                    {ev.note && <span className="text-[var(--w55)] truncate">· {ev.note}</span>}
+                    <span className="text-[var(--w55)] ml-auto">
+                      {new Date(ev.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
