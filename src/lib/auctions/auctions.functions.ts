@@ -51,6 +51,8 @@ export const createAuction = createServerFn({ method: "POST" })
 export const listActiveAuctions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    // Close any expired auctions before listing.
+    await closeExpired(context.supabase);
     const { data, error } = await context.supabase
       .from("auctions")
       .select("id, title, current_bid, opening_bid, ends_at, status, property_id, properties(address, city, state)")
@@ -64,6 +66,8 @@ export const getAuction = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
+    // Close this auction if it has expired before reading it.
+    await closeIfExpired(context.supabase, data.id);
     const { data: a, error } = await context.supabase
       .from("auctions")
       .select(
