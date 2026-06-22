@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, Search, X } from "lucide-react";
 
 const KIND_META: Record<TimelineEvent["kind"], { label: string; color: string }> = {
   deed: { label: "Deed", color: "#06b6d4" },
