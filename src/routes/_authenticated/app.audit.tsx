@@ -7,6 +7,11 @@ import { listAuditEvents, logAuditEvent, exportAuditEvents, getMyAuditPermission
 
 export const Route = createFileRoute("/_authenticated/app/audit")({
   head: () => ({ meta: [{ title: "Audit Log — PropAI" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    action: typeof search.action === "string" ? search.action : undefined,
+    from: typeof search.from === "string" ? search.from : undefined,
+    to: typeof search.to === "string" ? search.to : undefined,
+  }),
   component: AuditPage,
   errorComponent: ({ error }) => <div className="p-6 text-red-400">{error.message}</div>,
 });
@@ -33,9 +38,10 @@ function AuditPage() {
   const permsFn = useServerFn(getMyAuditPermissions);
   const qc = useQueryClient();
 
-  const [filter, setFilter] = useState<string>("all");
-  const [from, setFrom] = useState<string>(""); // yyyy-mm-dd
-  const [to, setTo] = useState<string>("");
+  const search = Route.useSearch();
+  const [filter, setFilter] = useState<string>(search.action ?? "all");
+  const [from, setFrom] = useState<string>(search.from ?? ""); // yyyy-mm-dd
+  const [to, setTo] = useState<string>(search.to ?? "");
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 

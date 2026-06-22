@@ -9,6 +9,9 @@ import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
   head: () => ({ meta: [{ title: "Owners — PropAI" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    status: search.status === "pending" || search.status === "traced" ? search.status : undefined,
+  }),
   component: OwnersPage,
   errorComponent: ({ error }) => <div className="p-6 text-red-400">{error.message}</div>,
   notFoundComponent: () => <div className="p-6">Not found.</div>,
@@ -52,7 +55,16 @@ function OwnersPage() {
   const [bulkRunning, setBulkRunning] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  const ownerList = owners ?? [];
+  const { status: statusFilter } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const allOwners = owners ?? [];
+  const ownerList = useMemo(() => {
+    if (!statusFilter) return allOwners;
+    return allOwners.filter((o) => {
+      const s = (o.skip_trace_status ?? "pending") === "traced" ? "traced" : "pending";
+      return s === statusFilter;
+    });
+  }, [allOwners, statusFilter]);
   const allSelected = ownerList.length > 0 && ownerList.every((o) => selected.has(o.id));
   const someSelected = selected.size > 0 && !allSelected;
 
@@ -212,6 +224,18 @@ function OwnersPage() {
           <p className="text-[var(--w55)] text-sm mt-1">
             People and entities behind your saved properties. Run skip trace to surface phones, emails, and relatives.
           </p>
+          {statusFilter && (
+            <div className="mt-2 inline-flex items-center gap-2 text-xs rounded-full border border-cyan/40 bg-cyan/10 text-cyan px-2.5 py-1">
+              Showing {statusFilter} owners
+              <button
+                onClick={() => navigate({ search: { status: undefined } })}
+                className="hover:text-white"
+                aria-label="Clear filter"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
