@@ -452,6 +452,78 @@ function LeadDetailPage() {
             <Button variant="outline" onClick={handleExportPdf} className="gap-2">
               <FileText className="h-4 w-4" /> Download PDF
             </Button>
+            <Button variant="outline" onClick={() => setEmailOpen(true)} className="gap-2">
+              <Mail className="h-4 w-4" /> Email PDF
+            </Button>
+
+            <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Email lead PDF</DialogTitle>
+                  <DialogDescription>
+                    Pick the team members to send the generated PDF to. They'll get a private download link valid for 7 days.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div className="text-xs uppercase tracking-wider text-[var(--w55)]">
+                    Recipients
+                  </div>
+                  {recipientCandidates.length === 0 ? (
+                    <p className="text-sm text-[var(--w55)]">
+                      No teammates with an email address found.
+                    </p>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto space-y-2 rounded-md border border-border p-3">
+                      {recipientCandidates.map((m) => {
+                        const checked = selectedIds.includes(m.id);
+                        return (
+                          <label
+                            key={m.id}
+                            htmlFor={`mail-${m.id}`}
+                            className="flex items-start gap-3 cursor-pointer"
+                          >
+                            <Checkbox
+                              id={`mail-${m.id}`}
+                              checked={checked}
+                              onCheckedChange={() => toggleRecipient(m.id)}
+                            />
+                            <div className="text-sm leading-tight">
+                              <div>{memberLabel(m)}</div>
+                              <div className="text-xs text-[var(--w55)]">{m.email}</div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <Label htmlFor="email-note" className="text-xs uppercase tracking-wider text-[var(--w55)]">
+                      Optional note
+                    </Label>
+                    <Textarea
+                      id="email-note"
+                      rows={3}
+                      placeholder="Add a quick message for your teammates…"
+                      value={emailNote}
+                      onChange={(e) => setEmailNote(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setEmailOpen(false)} disabled={sending}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSendEmail}
+                    disabled={sending || selectedIds.length === 0}
+                    className="gap-2"
+                  >
+                    <Mail className="h-4 w-4" />
+                    {sending ? "Sending…" : `Send to ${selectedIds.length || ""}`.trim()}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
