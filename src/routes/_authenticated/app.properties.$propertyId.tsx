@@ -84,11 +84,21 @@ function PropertyDetailPage() {
             <span className="text-xs text-[var(--w55)]">Lead score {p.lead_score}/100</span>
           )}
         </div>
-        <h1 className="text-3xl font-bold">{p.address}</h1>
-        <p className="text-[var(--w55)]">
-          {[p.city, p.state, p.zip].filter(Boolean).join(", ")} · {p.county}
-        </p>
-      </header>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold">{p.address}</h1>
+            <p className="text-[var(--w55)]">
+              {[p.city, p.state, p.zip].filter(Boolean).join(", ")} · {p.county}
+            </p>
+          </div>
+          <SaveToWatchlistButton
+            propertyKey={propertyId}
+            address={p.address}
+            city={p.city ?? null}
+            state={p.state ?? null}
+            county={p.county ?? null}
+          />
+        </div>
 
       {/* Quick stats from our stored row */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
