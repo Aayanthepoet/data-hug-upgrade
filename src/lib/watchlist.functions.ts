@@ -169,3 +169,79 @@ export const deleteWatchlistItem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export type AlertTrendPoint = {
+  date: string; // YYYY-MM-DD
+  foreclosure: number;
+  lis_pendens: number;
+  deed_transfer: number;
+};
+
+export const getAlertTrend = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { days: number }) =>
+    z.object({ days: z.number().int().min(1).max(90) }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<AlertTrendPoint[]> => {
+    const { supabase, userId } = context;
+    const { data: items, error: iErr } = await supabase
+      .from("watchlist_items")
+      .select("property_key, alert_foreclosure, alert_lis_pendens, alert_deed_transfer")
+      .eq("user_id", userId);
+    if (iErr) throw new Error(iErr.message);
+
+    const prefs = new Map(
+      (items ?? []).map((i) => [
+        i.property_key,
+        {
+          foreclosure: i.alert_foreclosure,
+          lis_pendens: i.alert_lis_pendens,
+          deed_transfer: i.alert_deed_transfer,
+        },
+      ]),
+    );
+
+    // Build empty buckets for the last N days.
+    const buckets: AlertTrendPoint[] = [];
+    const byDate = new Map<string, AlertTrendPoint>();
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    for (let i = data.days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const p: AlertTrendPoint = { date: key, foreclosure: 0, lis_pendens: 0, deed_transfer: 0 };
+      buckets.push(p);
+      byDate.set(key, p);
+    }
+
+    if (prefs.size === 0) return buckets;
+
+    const start = new Date(today);
+    start.setUTCDate(start.getUTCDate() - (data.days - 1));
+
+    const { data: events, error: eErr } = await supabase
+      .from("distress_events")
+      .select("property_id, event_type, created_at")
+      .in("property_id", Array.from(prefs.keys()))
+      .gte("created_at", start.toISOString());
+    if (eErr) throw new Error(eErr.message);
+
+    const typeKey = (t: string): "foreclosure" | "lis_pendens" | "deed_transfer" => {
+      const v = (t || "").toLowerCase();
+      if (v.includes("foreclos")) return "foreclosure";
+      if (v.includes("lis")) return "lis_pendens";
+      return "deed_transfer";
+    };
+
+    for (const e of events ?? []) {
+      const pref = prefs.get(e.property_id as string);
+      if (!pref) continue;
+      const k = typeKey(e.event_type as string);
+      if (!pref[k]) continue;
+      const day = (e.created_at as string).slice(0, 10);
+      const bucket = byDate.get(day);
+      if (bucket) bucket[k] += 1;
+    }
+    return buckets;
+  });

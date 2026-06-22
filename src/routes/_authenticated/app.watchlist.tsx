@@ -5,11 +5,22 @@ import { useState } from "react";
 import {
   listWatchlist,
   getWatchlistStats,
+  getAlertTrend,
   updateWatchlistItem,
   deleteWatchlistItem,
   type WatchlistItem,
 } from "@/lib/watchlist.functions";
 import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight, Bell, BellRing, Bookmark } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/app/watchlist")({
   head: () => ({ meta: [{ title: "Watchlist — PropAI" }] }),
@@ -67,6 +78,9 @@ function WatchlistPage() {
           hint="Foreclosure · Lis pendens · Deed"
         />
       </section>
+
+      <AlertTrendChart />
+
 
 
       {isLoading && <div className="text-[var(--w55)] text-sm">Loading…</div>}
@@ -227,5 +241,93 @@ function StatCard({
       <div className="text-2xl font-bold mt-1">{value}</div>
       {hint && <div className="text-[10px] text-[var(--w55)] mt-0.5">{hint}</div>}
     </div>
+  );
+}
+
+const TYPE_COLORS = {
+  foreclosure: "#ef4444",
+  lis_pendens: "#f97316",
+  deed_transfer: "#06b6d4",
+} as const;
+
+function AlertTrendChart() {
+  const [range, setRange] = useState<7 | 30>(7);
+  const fetchTrend = useServerFn(getAlertTrend);
+  const { data, isLoading } = useQuery({
+    queryKey: ["alert-trend", range],
+    queryFn: () => fetchTrend({ data: { days: range } }),
+  });
+
+  const fmt = (d: string) => {
+    const dt = new Date(d + "T00:00:00Z");
+    return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
+
+  return (
+    <section className="border border-border rounded-lg p-4">
+      <header className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div>
+          <h2 className="font-medium">Alert trend</h2>
+          <p className="text-xs text-[var(--w55)]">New alerts per day, split by type</p>
+        </div>
+        <div className="inline-flex rounded-md border border-border overflow-hidden text-xs">
+          {[7, 30].map((d) => (
+            <button
+              key={d}
+              onClick={() => setRange(d as 7 | 30)}
+              className={`px-3 py-1.5 ${range === d ? "bg-white/10 text-white" : "text-[var(--w55)] hover:text-white"}`}
+            >
+              {d}d
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="h-64 w-full">
+        {isLoading || !data ? (
+          <div className="h-full flex items-center justify-center text-xs text-[var(--w55)]">
+            Loading trend…
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <defs>
+                {(Object.keys(TYPE_COLORS) as Array<keyof typeof TYPE_COLORS>).map((k) => (
+                  <linearGradient key={k} id={`g-${k}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={TYPE_COLORS[k]} stopOpacity={0.55} />
+                    <stop offset="100%" stopColor={TYPE_COLORS[k]} stopOpacity={0} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={fmt}
+                stroke="rgba(255,255,255,0.4)"
+                fontSize={11}
+                minTickGap={20}
+              />
+              <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{
+                  background: "rgba(6,10,18,0.95)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 6,
+                  fontSize: 12,
+                }}
+                labelFormatter={(l) => fmt(String(l))}
+              />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Area type="monotone" stackId="1" dataKey="foreclosure" name="Foreclosure"
+                stroke={TYPE_COLORS.foreclosure} fill="url(#g-foreclosure)" />
+              <Area type="monotone" stackId="1" dataKey="lis_pendens" name="Lis pendens"
+                stroke={TYPE_COLORS.lis_pendens} fill="url(#g-lis_pendens)" />
+              <Area type="monotone" stackId="1" dataKey="deed_transfer" name="Deed transfer"
+                stroke={TYPE_COLORS.deed_transfer} fill="url(#g-deed_transfer)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </section>
   );
 }
