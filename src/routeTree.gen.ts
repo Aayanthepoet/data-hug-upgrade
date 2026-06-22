@@ -34,6 +34,7 @@ import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
 import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
+import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
 import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticated/app.agent'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -41,6 +42,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
+import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -171,6 +173,12 @@ const AuthenticatedAppCampaignsRoute =
     path: '/campaigns',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAuctionsRoute =
+  AuthenticatedAppAuctionsRouteImport.update({
+    id: '/auctions',
+    path: '/auctions',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
   id: '/agent',
   path: '/agent',
@@ -212,6 +220,12 @@ const AuthenticatedAppLeadsLeadIdRoute =
     path: '/$leadId',
     getParentRoute: () => AuthenticatedAppLeadsRoute,
   } as any)
+const AuthenticatedAppAuctionsAuctionIdRoute =
+  AuthenticatedAppAuctionsAuctionIdRouteImport.update({
+    id: '/$auctionId',
+    path: '/$auctionId',
+    getParentRoute: () => AuthenticatedAppAuctionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -224,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRoute
+  '/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -239,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -256,6 +272,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRoute
+  '/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -271,6 +288,7 @@ export interface FileRoutesByTo {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -291,6 +309,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/app/agent': typeof AuthenticatedAppAgentRoute
+  '/_authenticated/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
   '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
@@ -306,6 +325,7 @@ export interface FileRoutesById {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -326,6 +346,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/app/agent'
+    | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/lead-lists'
@@ -341,6 +362,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app/'
+    | '/app/auctions/$auctionId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
@@ -358,6 +380,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/app/agent'
+    | '/app/auctions'
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/lead-lists'
@@ -373,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app'
+    | '/app/auctions/$auctionId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
@@ -392,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/email/unsubscribe'
     | '/_authenticated/app/agent'
+    | '/_authenticated/app/auctions'
     | '/_authenticated/app/campaigns'
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
@@ -407,6 +432,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
+    | '/_authenticated/app/auctions/$auctionId'
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
@@ -610,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCampaignsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/auctions': {
+      id: '/_authenticated/app/auctions'
+      path: '/auctions'
+      fullPath: '/app/auctions'
+      preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/agent': {
       id: '/_authenticated/app/agent'
       path: '/agent'
@@ -659,8 +692,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLeadsLeadIdRouteImport
       parentRoute: typeof AuthenticatedAppLeadsRoute
     }
+    '/_authenticated/app/auctions/$auctionId': {
+      id: '/_authenticated/app/auctions/$auctionId'
+      path: '/$auctionId'
+      fullPath: '/app/auctions/$auctionId'
+      preLoaderRoute: typeof AuthenticatedAppAuctionsAuctionIdRouteImport
+      parentRoute: typeof AuthenticatedAppAuctionsRoute
+    }
   }
 }
+
+interface AuthenticatedAppAuctionsRouteChildren {
+  AuthenticatedAppAuctionsAuctionIdRoute: typeof AuthenticatedAppAuctionsAuctionIdRoute
+}
+
+const AuthenticatedAppAuctionsRouteChildren: AuthenticatedAppAuctionsRouteChildren =
+  {
+    AuthenticatedAppAuctionsAuctionIdRoute:
+      AuthenticatedAppAuctionsAuctionIdRoute,
+  }
+
+const AuthenticatedAppAuctionsRouteWithChildren =
+  AuthenticatedAppAuctionsRoute._addFileChildren(
+    AuthenticatedAppAuctionsRouteChildren,
+  )
 
 interface AuthenticatedAppLeadsRouteChildren {
   AuthenticatedAppLeadsLeadIdRoute: typeof AuthenticatedAppLeadsLeadIdRoute
@@ -695,6 +750,7 @@ const AuthenticatedAppPropertiesRouteWithChildren =
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRoute
+  AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRouteWithChildren
   AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
@@ -710,6 +766,7 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgentRoute: AuthenticatedAppAgentRoute,
+  AuthenticatedAppAuctionsRoute: AuthenticatedAppAuctionsRouteWithChildren,
   AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,

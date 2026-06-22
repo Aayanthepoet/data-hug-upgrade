@@ -24,6 +24,7 @@ import {
   Eye,
   Bookmark,
   Flame,
+  Gavel,
 } from "lucide-react";
 
 const items = [
@@ -33,6 +34,7 @@ const items = [
   { title: "Lead Scoring", url: "/app/scoring", icon: Flame },
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
+  { title: "Auctions", url: "/app/auctions", icon: Gavel },
   { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },
   { title: "Owners", url: "/app/owners", icon: Users },
   { title: "Contacts (Resolver)", url: "/app/contacts", icon: PhoneCall },
