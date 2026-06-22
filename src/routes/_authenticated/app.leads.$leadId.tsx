@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Download } from "lucide-react";
+import { ArrowLeft, Trash2, Download, FileText } from "lucide-react";
 import { useTeamMembers, memberLabel } from "@/hooks/use-team-members";
+import { jsPDF } from "jspdf";
 
 export const Route = createFileRoute("/_authenticated/app/leads/$leadId")({
   head: () => ({ meta: [{ title: "Lead — PropAI" }] }),
