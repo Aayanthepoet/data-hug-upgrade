@@ -131,7 +131,6 @@ export const placeBid = createServerFn({ method: "POST" })
   });
 
 // ---------- auto-close helpers ----------
-type SupabaseClient = Parameters<typeof requireSupabaseAuth.client>[0] extends never ? never : never; // unused, keep loose typing below
 
 async function closeAuctionRow(supabase: any, auctionId: string) {
   // Find top bid (if any).

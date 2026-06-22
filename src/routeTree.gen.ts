@@ -39,6 +39,7 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
@@ -202,6 +203,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksCloseAuctionsRoute =
+  ApiPublicHooksCloseAuctionsRouteImport.update({
+    id: '/api/public/hooks/close-auctions',
+    path: '/api/public/hooks/close-auctions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
     id: '/search',
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -292,6 +300,7 @@ export interface FileRoutesByTo {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -329,6 +338,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/api/public/hooks/close-auctions'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/api/public/hooks/close-auctions'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -436,6 +448,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
+    | '/api/public/hooks/close-auctions'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -454,6 +467,7 @@ export interface RootRouteChildren {
   ApiEnginesVisionRoute: typeof ApiEnginesVisionRoute
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -671,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/close-auctions': {
+      id: '/api/public/hooks/close-auctions'
+      path: '/api/public/hooks/close-auctions'
+      fullPath: '/api/public/hooks/close-auctions'
+      preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
       path: '/search'
@@ -809,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiEnginesVisionRoute: ApiEnginesVisionRoute,
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
