@@ -23,12 +23,14 @@ import {
   Search,
   Eye,
   Bookmark,
+  Flame,
 } from "lucide-react";
 
 const items = [
   { title: "Overview", url: "/app", icon: LayoutDashboard, exact: true },
   { title: "PropAI Agent", url: "/app/agent", icon: Bot },
   { title: "Leads", url: "/app/leads", icon: Inbox },
+  { title: "Lead Scoring", url: "/app/scoring", icon: Flame },
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
   { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },
