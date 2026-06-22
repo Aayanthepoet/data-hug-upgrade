@@ -203,7 +203,7 @@ function LeadDetailPage() {
     downloadCsv(`lead-${lead!.id}.csv`, lines);
   }
 
-  function handleExportPdf() {
+  function buildPdfDoc() {
     const memberName = (id: string | null) =>
       id ? memberLabel(members.find((m) => m.id === id)) : "Unassigned";
 
@@ -220,7 +220,6 @@ function LeadDetailPage() {
       }
     };
 
-    // Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.text("Lead Summary", marginX, y);
@@ -233,7 +232,6 @@ function LeadDetailPage() {
     y += 24;
     doc.setTextColor(0);
 
-    // Name + meta
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(lead!.full_name || "Unnamed lead", marginX, y);
@@ -249,7 +247,6 @@ function LeadDetailPage() {
     y += 24;
     doc.setTextColor(0);
 
-    // Details section
     const drawSectionTitle = (title: string) => {
       ensureSpace(28);
       doc.setFont("helvetica", "bold");
@@ -323,7 +320,6 @@ function LeadDetailPage() {
       });
     }
 
-    // Footer page numbers
     const pages = doc.getNumberOfPages();
     for (let i = 1; i <= pages; i++) {
       doc.setPage(i);
@@ -334,8 +330,106 @@ function LeadDetailPage() {
       doc.text("PropAI — Lead Summary", marginX, pageHeight - 32);
     }
 
-    doc.save(`lead-${lead!.id}.pdf`);
+    return doc;
   }
+
+  function handleExportPdf() {
+    buildPdfDoc().save(`lead-${lead!.id}.pdf`);
+  }
+
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [emailNote, setEmailNote] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const recipientCandidates = members.filter((m) => !!m.email);
+
+  function toggleRecipient(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function handleSendEmail() {
+    if (selectedIds.length === 0) {
+      toast.error("Pick at least one recipient");
+      return;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("You must be signed in");
+      return;
+    }
+    setSending(true);
+    try {
+      // 1. Build PDF
+      const doc = buildPdfDoc();
+      const blob = doc.output("blob");
+
+      // 2. Upload to private storage
+      const path = `${lead!.id}/${Date.now()}-lead-summary.pdf`;
+      const { error: upErr } = await supabase
+        .storage.from("lead-exports")
+        .upload(path, blob, { contentType: "application/pdf", upsert: false });
+      if (upErr) throw upErr;
+
+      // 3. Signed URL valid for 7 days
+      const { data: signed, error: signErr } = await supabase
+        .storage.from("lead-exports")
+        .createSignedUrl(path, 60 * 60 * 24 * 7);
+      if (signErr || !signed) throw signErr ?? new Error("Failed to sign URL");
+
+      const sharedBy =
+        user?.user_metadata?.full_name ||
+        user?.email ||
+        "A teammate";
+      const leadName = lead!.full_name || lead!.email || "a lead";
+
+      // 4. Send to each selected recipient
+      const recipients = recipientCandidates.filter((m) => selectedIds.includes(m.id));
+      const results = await Promise.allSettled(
+        recipients.map((m) =>
+          fetch("/lovable/email/transactional/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              templateName: "lead-pdf-summary",
+              recipientEmail: m.email,
+              idempotencyKey: `lead-pdf-${lead!.id}-${path}-${m.id}`,
+              templateData: {
+                leadName,
+                sharedBy,
+                downloadUrl: signed.signedUrl,
+                note: emailNote.trim() || undefined,
+              },
+            }),
+          }).then(async (res) => {
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+          }),
+        ),
+      );
+
+      const failed = results.filter((r) => r.status === "rejected").length;
+      const ok = results.length - failed;
+      if (ok > 0) toast.success(`Emailed PDF to ${ok} recipient${ok === 1 ? "" : "s"}`);
+      if (failed > 0) toast.error(`${failed} email${failed === 1 ? "" : "s"} failed to send`);
+
+      if (failed === 0) {
+        setEmailOpen(false);
+        setSelectedIds([]);
+        setEmailNote("");
+      }
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to send email");
+    } finally {
+      setSending(false);
+    }
+  }
+
 
   return (
     <div className="space-y-8 max-w-3xl">
