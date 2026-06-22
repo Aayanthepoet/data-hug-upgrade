@@ -99,6 +99,8 @@ function PropertyDetailPage() {
             county={p.county ?? null}
           />
         </div>
+      </header>
+
 
       {/* Quick stats from our stored row */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
