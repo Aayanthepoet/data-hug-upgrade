@@ -11,6 +11,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { cachedJsonFetch } from "./cached-fetch.server";
 
 const inputSchema = z.object({ propertyId: z.string().uuid() });
 
@@ -82,9 +83,10 @@ const NYC_BASE = "https://data.cityofnewyork.us/resource";
 async function soql<T>(dataset: string, params: Record<string, string>): Promise<T[]> {
   const url = new URL(`${NYC_BASE}/${dataset}.json`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const r = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!r.ok) throw new Error(`NYC ${dataset} ${r.status}`);
-  return (await r.json()) as T[];
+  return cachedJsonFetch<T[]>(url.toString(), {
+    label: `nyc:${dataset}`,
+    ttlMs: 10 * 60_000,
+  });
 }
 
 async function fetchNYC(bbl: string): Promise<DetailGroup[]> {
@@ -262,11 +264,11 @@ function friendlyDocType(code: string | undefined): string {
 
 // ----------------- Philly -----------------
 async function carto<T>(sql: string): Promise<T[]> {
-  const r = await fetch(`https://phl.carto.com/api/v2/sql?q=${encodeURIComponent(sql)}`, {
-    headers: { Accept: "application/json" },
+  const url = `https://phl.carto.com/api/v2/sql?q=${encodeURIComponent(sql)}`;
+  const j = await cachedJsonFetch<{ rows?: T[] }>(url, {
+    label: "philly:carto",
+    ttlMs: 10 * 60_000,
   });
-  if (!r.ok) throw new Error(`Carto ${r.status}`);
-  const j = (await r.json()) as { rows?: T[] };
   return j.rows ?? [];
 }
 
