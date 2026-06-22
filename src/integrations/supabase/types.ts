@@ -724,10 +724,17 @@ export type Database = {
           contact_id: string | null
           created_at: string
           direction: string
+          error: string | null
           id: string
+          owner_id: string | null
+          provider: string | null
+          provider_message_id: string | null
+          replied_at: string | null
           response: string | null
           sent_at: string | null
           status: string
+          subject: string | null
+          to_value: string | null
           updated_at: string
           user_id: string
         }
@@ -738,10 +745,17 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           direction?: string
+          error?: string | null
           id?: string
+          owner_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          replied_at?: string | null
           response?: string | null
           sent_at?: string | null
           status?: string
+          subject?: string | null
+          to_value?: string | null
           updated_at?: string
           user_id: string
         }
@@ -752,10 +766,17 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           direction?: string
+          error?: string | null
           id?: string
+          owner_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          replied_at?: string | null
           response?: string | null
           sent_at?: string | null
           status?: string
+          subject?: string | null
+          to_value?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -772,6 +793,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_messages_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
             referencedColumns: ["id"]
           },
         ]
