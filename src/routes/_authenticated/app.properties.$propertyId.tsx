@@ -130,43 +130,7 @@ function PropertyDetailPage() {
           )}
 
           {g.timeline && g.timeline.length > 0 && (
-            <div className="p-4 border-t border-border">
-              <h3 className="text-xs uppercase tracking-wider text-[var(--w55)] mb-3">Timeline</h3>
-              <ol className="relative border-l border-border/60 ml-2 space-y-4">
-                {g.timeline.map((e, ei) => {
-                  const meta = KIND_META[e.kind];
-                  return (
-                    <li key={ei} className="pl-5 relative">
-                      <span
-                        className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full ring-2 ring-background"
-                        style={{ background: meta.color }}
-                      />
-                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <time className="text-xs font-mono text-[var(--w55)]">{e.date}</time>
-                        <span
-                          className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border"
-                          style={{ color: meta.color, borderColor: `${meta.color}55`, background: `${meta.color}15` }}
-                        >
-                          {meta.label}
-                        </span>
-                        <span className="text-sm font-medium">{e.title}</span>
-                        {e.amount != null && e.amount > 0 && (
-                          <span className="text-sm text-cyan">${e.amount.toLocaleString()}</span>
-                        )}
-                      </div>
-                      {(e.from || e.to) && (
-                        <p className="text-xs text-[var(--w55)] mt-0.5">
-                          {e.from ?? "—"} <span className="opacity-60">→</span> {e.to ?? "—"}
-                        </p>
-                      )}
-                      {e.docId && (
-                        <p className="text-[10px] font-mono text-[var(--w55)] mt-0.5">Doc {e.docId}</p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
+            <TimelineSection events={g.timeline} />
           )}
 
           {g.rows && g.rows.length > 0 && (
