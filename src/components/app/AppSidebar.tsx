@@ -25,6 +25,7 @@ import {
   Bookmark,
   Flame,
   Gavel,
+  Send,
 } from "lucide-react";
 
 const items = [
