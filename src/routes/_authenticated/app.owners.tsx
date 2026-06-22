@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { listOwners, listOwnerContacts, runSkipTrace } from "@/lib/skiptrace/skiptrace.functions";
-import { Search, ChevronDown, ChevronRight, Phone, Mail, Users, Loader2, CheckCircle2, AlertCircle, X } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Phone, Mail, Users, Loader2, CheckCircle2, AlertCircle, X, Download } from "lucide-react";
 import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 
 export const Route = createFileRoute("/_authenticated/app/owners")({
@@ -39,6 +39,7 @@ function OwnersPage() {
   const fetchOwners = useServerFn(listOwners);
   const qc = useQueryClient();
   const traceFn = useServerFn(runSkipTrace);
+  const fetchContacts = useServerFn(listOwnerContacts);
 
   const { data: owners, isLoading } = useQuery({
     queryKey: ["owners"],
@@ -48,6 +49,7 @@ function OwnersPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [progress, setProgress] = useState<Record<string, BulkProgress>>({});
   const [bulkRunning, setBulkRunning] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const ownerList = owners ?? [];
   const allSelected = ownerList.length > 0 && ownerList.every((o) => selected.has(o.id));
@@ -100,6 +102,72 @@ function OwnersPage() {
     setBulkRunning(false);
   }
 
+  async function exportContacts(ids: string[]) {
+    if (exporting || ids.length === 0) return;
+    setExporting(true);
+    try {
+      const ownerById = new Map(ownerList.map((o) => [o.id, o]));
+      const results = await Promise.all(
+        ids.map(async (id) => ({
+          id,
+          rows: await fetchContacts({ data: { owner_id: id } }),
+        })),
+      );
+
+      const csvRows: string[][] = [[
+        "owner_id", "owner_name", "entity_type",
+        "contact_type", "value", "confidence", "is_verified",
+        "skip_trace_status", "skip_trace_last_run_at", "notes",
+      ]];
+      let count = 0;
+      for (const { id, rows } of results) {
+        const o = ownerById.get(id);
+        if (!o) continue;
+        for (const c of rows) {
+          if (c.contact_type !== "phone" && c.contact_type !== "email") continue;
+          if (c.do_not_contact) continue;
+          csvRows.push([
+            o.id,
+            o.full_name,
+            o.entity_type ?? "",
+            c.contact_type,
+            c.value,
+            c.confidence != null ? String(c.confidence) : "",
+            c.is_verified ? "true" : "false",
+            o.skip_trace_status ?? "pending",
+            o.skip_trace_last_run_at ?? "",
+            c.notes ?? "",
+          ]);
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        alert("No verified phone/email contacts to export for the selected owners.");
+        return;
+      }
+
+      const csv = csvRows
+        .map((row) => row.map((v) => {
+          const s = String(v ?? "");
+          return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(","))
+        .join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `owner-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const bulkStats = useMemo(() => {
     const entries = Object.values(progress);
     return {
@@ -136,6 +204,15 @@ function OwnersPage() {
           >
             {bulkRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
             Skip trace selected ({selected.size})
+          </button>
+          <button
+            onClick={() => exportContacts(Array.from(selected))}
+            disabled={exporting || selected.size === 0}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-xs hover:bg-white/5 disabled:opacity-50"
+            title="Download verified phone & email contacts for the selected owners"
+          >
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5 text-cyan" />}
+            Export CSV ({selected.size})
           </button>
         </div>
       </header>
