@@ -23,6 +23,9 @@ When drafting outreach messages:
 - always offer 2-3 variations
 - never invent owner names, phone numbers, or details that aren't in the data
 
+TASK MODE:
+When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool to return a structured, actionable checklist. Group tasks into sections like "Contacts to call", "Outreach drafts", "Auction steps", "Research". Each task should be concrete, one action, and reference specific properties/owners by name when possible. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
+
 If the workspace is empty, say so plainly and suggest the user add properties first.`;
 
 export const Route = createFileRoute("/api/chat")({
@@ -102,6 +105,21 @@ export const Route = createFileRoute("/api/chat")({
               if (error) return { error: error.message };
               return { count: data?.length ?? 0, leads: data ?? [] };
             },
+          }),
+          create_task_plan: tool({
+            description: "Return a structured, actionable checklist for the user. Use when the user asks for a plan, next steps, or task mode. Group tasks into clear sections (e.g. 'Contacts to call', 'Outreach drafts', 'Auction steps', 'Research'). Each task is one concrete action.",
+            inputSchema: z.object({
+              title: z.string().describe("Short title for this plan, e.g. 'Today's outreach plan'"),
+              sections: z.array(z.object({
+                name: z.string().describe("Section heading, e.g. 'Contacts to call'"),
+                tasks: z.array(z.object({
+                  label: z.string().describe("One concrete action, imperative voice"),
+                  detail: z.string().optional().describe("Optional supporting context: phone number, draft snippet, auction date, etc."),
+                  priority: z.enum(["high", "medium", "low"]).optional(),
+                })).min(1),
+              })).min(1),
+            }),
+            execute: async (plan) => plan,
           }),
         };
 

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Sparkles, Trash2, FileDown } from "lucide-react";
+import { Bot, Sparkles, Trash2, FileDown, ListChecks } from "lucide-react";
 import { exportConversationToPdf } from "@/lib/export-pdf";
+import { TaskPlan, type TaskPlanData } from "@/components/app/TaskPlan";
 
 import {
   Conversation,
@@ -91,11 +92,12 @@ function AgentPage() {
   }, [messages]);
 
   const isLoading = status === "submitted" || status === "streaming";
+  const [taskMode, setTaskMode] = useState(false);
 
   async function handleSubmit(message: PromptInputMessage) {
     const text = message.text?.trim();
     if (!text || isLoading) return;
-    await sendMessage({ text });
+    await sendMessage({ text: taskMode ? `[TASK MODE] ${text}` : text });
   }
 
   function newConversation() {
@@ -198,6 +200,19 @@ function AgentPage() {
                           output?: unknown;
                           errorText?: string;
                         };
+                        if (
+                          tp.type === "tool-create_task_plan" &&
+                          tp.output &&
+                          typeof tp.output === "object"
+                        ) {
+                          return (
+                            <TaskPlan
+                              key={tp.toolCallId ?? i}
+                              planId={tp.toolCallId ?? `${m.id}:${i}`}
+                              plan={tp.output as TaskPlanData}
+                            />
+                          );
+                        }
                         const state =
                           (tp.state as
                             | "input-streaming"
@@ -237,10 +252,23 @@ function AgentPage() {
         <div className="border-t border-border p-3">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
-              placeholder="Ask about your leads, or draft outreach…"
+              placeholder={taskMode ? "Describe what you need a plan for…" : "Ask about your leads, or draft outreach…"}
               autoFocus
             />
-            <PromptInputFooter className="justify-end">
+            <PromptInputFooter className="justify-between">
+              <button
+                type="button"
+                onClick={() => setTaskMode((v) => !v)}
+                className={`inline-flex items-center gap-2 text-xs rounded-lg px-3 py-1.5 border transition ${
+                  taskMode
+                    ? "border-cyan bg-[var(--cyan-d)] text-cyan"
+                    : "border-border text-[var(--w55)] hover:text-foreground"
+                }`}
+                aria-pressed={taskMode}
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+                Task mode {taskMode ? "on" : "off"}
+              </button>
               <PromptInputSubmit
                 status={status}
                 onClick={isLoading ? () => stop() : undefined}
