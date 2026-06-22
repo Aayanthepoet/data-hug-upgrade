@@ -95,7 +95,7 @@ function PropertySearch() {
 
   const importMutation = useMutation({
     mutationFn: async () => {
-      const records = runMutation.data?.filter((r) => selected.has(r.sourceRecordId)) ?? [];
+      const records = runMutation.data?.records.filter((r) => selected.has(r.sourceRecordId)) ?? [];
       if (!records.length) throw new Error("Select at least one property");
       return importFn({ data: { records } });
     },
@@ -136,7 +136,9 @@ function PropertySearch() {
     setTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
   };
 
-  const results = runMutation.data ?? [];
+  const results = runMutation.data?.records ?? [];
+  const providerName = runMutation.data?.provider;
+  const usedFallback = runMutation.data?.usedFallback;
   const allSelected = results.length > 0 && results.every((r) => selected.has(r.sourceRecordId));
   const toggleAll = () => {
     if (allSelected) setSelected(new Set());
@@ -264,6 +266,16 @@ function PropertySearch() {
             <div className="text-sm">
               <span className="font-medium">{results.length}</span>
               <span className="text-[var(--w55)]"> properties found</span>
+              {providerName && providerName !== "mock" && !usedFallback && (
+                <span className="ml-3 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Live · {providerName.replace("_", " ")}
+                </span>
+              )}
+              {usedFallback && (
+                <span className="ml-3 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                  Sample data · live source returned 0
+                </span>
+              )}
               {selected.size > 0 && <span className="text-cyan ml-3">{selected.size} selected</span>}
             </div>
             <div className="flex items-center gap-2">
