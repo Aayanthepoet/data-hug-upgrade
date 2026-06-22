@@ -186,13 +186,18 @@ function AuditPage() {
             )}
             {canExport ? `Export CSV (${rows.length})` : "Export restricted"}
           </button>
+          {canExport && perms?.exportRowLimit && (
+            <p className="text-[10px] text-[var(--w55)]">
+              Max {perms.exportRowLimit.toLocaleString()} rows per export
+            </p>
+          )}
           {!canExport && perms && (
             <p className="text-[10px] text-[var(--w55)]">
               Admin role required to download
             </p>
           )}
           {exportError && (
-            <p className="text-[10px] text-red-400 max-w-[260px] text-right">{exportError}</p>
+            <p className="text-[10px] text-red-400 max-w-[320px] text-right">{exportError}</p>
           )}
         </div>
       </header>
