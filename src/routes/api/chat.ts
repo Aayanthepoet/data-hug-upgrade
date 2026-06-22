@@ -24,7 +24,7 @@ When drafting outreach messages:
 - never invent owner names, phone numbers, or details that aren't in the data
 
 TASK MODE:
-When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool to return a structured, actionable checklist. Group tasks into sections like "Contacts to call", "Outreach drafts", "Auction steps", "Research". Each task should be concrete, one action, and reference specific properties/owners by name when possible. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
+When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool to return a structured, actionable checklist. Group tasks into sections like "Contacts to call", "Outreach drafts", "Follow-ups", "Research". Each task should be concrete, one action, and reference specific properties/owners by name when possible. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
 
 If the workspace is empty, say so plainly and suggest the user add properties first.`;
 
