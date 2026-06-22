@@ -6,6 +6,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   Select,
@@ -15,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Download, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, Download, FileText, Mail } from "lucide-react";
 import { useTeamMembers, memberLabel } from "@/hooks/use-team-members";
 import { jsPDF } from "jspdf";
 
