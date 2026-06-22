@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Sparkles, Trash2, FileDown } from "lucide-react";
+import { Bot, Sparkles, Trash2, FileDown, ListChecks } from "lucide-react";
 import { exportConversationToPdf } from "@/lib/export-pdf";
+import { TaskPlan, type TaskPlanData } from "@/components/app/TaskPlan";
 
 import {
   Conversation,
