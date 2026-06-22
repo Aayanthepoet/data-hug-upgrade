@@ -17,7 +17,7 @@ import {
   PhoneCall,
   ListChecks,
   Megaphone,
-  Gavel,
+  
   Clapperboard,
   Bot,
   Inbox,
