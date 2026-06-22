@@ -102,6 +102,72 @@ function OwnersPage() {
     setBulkRunning(false);
   }
 
+  async function exportContacts(ids: string[]) {
+    if (exporting || ids.length === 0) return;
+    setExporting(true);
+    try {
+      const ownerById = new Map(ownerList.map((o) => [o.id, o]));
+      const results = await Promise.all(
+        ids.map(async (id) => ({
+          id,
+          rows: await fetchContacts({ data: { owner_id: id } }),
+        })),
+      );
+
+      const csvRows: string[][] = [[
+        "owner_id", "owner_name", "entity_type",
+        "contact_type", "value", "confidence", "is_verified",
+        "skip_trace_status", "skip_trace_last_run_at", "notes",
+      ]];
+      let count = 0;
+      for (const { id, rows } of results) {
+        const o = ownerById.get(id);
+        if (!o) continue;
+        for (const c of rows) {
+          if (c.contact_type !== "phone" && c.contact_type !== "email") continue;
+          if (c.do_not_contact) continue;
+          csvRows.push([
+            o.id,
+            o.full_name,
+            o.entity_type ?? "",
+            c.contact_type,
+            c.value,
+            c.confidence != null ? String(c.confidence) : "",
+            c.is_verified ? "true" : "false",
+            o.skip_trace_status ?? "pending",
+            o.skip_trace_last_run_at ?? "",
+            c.notes ?? "",
+          ]);
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        alert("No verified phone/email contacts to export for the selected owners.");
+        return;
+      }
+
+      const csv = csvRows
+        .map((row) => row.map((v) => {
+          const s = String(v ?? "");
+          return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(","))
+        .join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `owner-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const bulkStats = useMemo(() => {
     const entries = Object.values(progress);
     return {
