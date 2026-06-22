@@ -91,13 +91,16 @@ function PropertyDetailPage() {
               {[p.city, p.state, p.zip].filter(Boolean).join(", ")} · {p.county}
             </p>
           </div>
-          <SaveToWatchlistButton
-            propertyKey={propertyId}
-            address={p.address}
-            city={p.city ?? null}
-            state={p.state ?? null}
-            county={p.county ?? null}
-          />
+          <div className="flex items-center gap-2">
+            <ListForAuctionButton propertyId={propertyId} defaultTitle={p.address} />
+            <SaveToWatchlistButton
+              propertyKey={propertyId}
+              address={p.address}
+              city={p.city ?? null}
+              state={p.state ?? null}
+              county={p.county ?? null}
+            />
+          </div>
         </div>
       </header>
 
