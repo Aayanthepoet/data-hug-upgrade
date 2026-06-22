@@ -79,6 +79,9 @@ function WatchlistPage() {
         />
       </section>
 
+      <AlertTrendChart />
+
+
 
       {isLoading && <div className="text-[var(--w55)] text-sm">Loading…</div>}
       {error && <div className="text-red-400 text-sm">{(error as Error).message}</div>}
