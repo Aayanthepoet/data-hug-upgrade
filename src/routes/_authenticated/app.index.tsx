@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { DashboardAnalyticsWidget } from "@/components/app/DashboardAnalyticsWidget";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Overview — PropAI" }] }),
@@ -48,7 +49,11 @@ function Overview() {
         adding data — everything is private to your account.
       </p>
 
-      <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="mt-10">
+        <DashboardAnalyticsWidget />
+      </div>
+
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Link
           to="/app/agent"
           className="surface p-5 hover:border-cyan transition col-span-2 md:col-span-1"
