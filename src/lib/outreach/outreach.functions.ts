@@ -63,17 +63,15 @@ export const sendOutreach = createServerFn({ method: "POST" })
     }
 
     // 3. Patch the row with provider outcome.
-    const patch: Record<string, unknown> = {
-      status: result.status,
-      provider: result.provider,
-      provider_message_id: result.providerMessageId,
-      error: result.error ?? null,
-    };
-    if (result.status === "sent") patch.sent_at = new Date().toISOString();
-
     const { error: updErr } = await supabase
       .from("outreach_messages")
-      .update(patch)
+      .update({
+        status: result.status,
+        provider: result.provider,
+        provider_message_id: result.providerMessageId,
+        error: result.error ?? null,
+        sent_at: result.status === "sent" ? new Date().toISOString() : null,
+      })
       .eq("id", inserted.id);
     if (updErr) throw new Error(updErr.message);
 
