@@ -391,7 +391,7 @@ function TimelineSection({ events, address }: { events: TimelineEvent[]; address
                   )}
                   <button
                     type="button"
-                    onClick={() => copyShareLink(key)}
+                    onClick={() => copyShareLink(key, e)}
                     className="ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--w55)] hover:text-cyan"
                     title="Copy shareable link to this event"
                   >
