@@ -39,16 +39,17 @@ export function isNYC(filters: DistressSearchFilters): boolean {
   );
 }
 
+import { cachedJsonFetch } from "./cached-fetch.server";
+
 async function soqlGet<T>(dataset: string, params: Record<string, string>): Promise<T[]> {
   const url = new URL(`https://data.cityofnewyork.us/resource/${dataset}.json`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
+  return cachedJsonFetch<T[]>(url.toString(), {
+    label: `nyc:${dataset}`,
+    // Socrata datasets refresh daily at most; 10 min keeps lists snappy
+    // without serving stale data for long.
+    ttlMs: 10 * 60_000,
   });
-  if (!res.ok) {
-    throw new Error(`NYC Socrata ${dataset} ${res.status}: ${await res.text().catch(() => "")}`);
-  }
-  return (await res.json()) as T[];
 }
 
 // ----- HPD Pre-Foreclosure Notices -----
