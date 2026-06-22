@@ -18,9 +18,14 @@ export const Route = createFileRoute("/_authenticated/app/watchlist")({
 
 function WatchlistPage() {
   const fetchList = useServerFn(listWatchlist);
+  const fetchStats = useServerFn(getWatchlistStats);
   const { data, isLoading, error } = useQuery({
     queryKey: ["watchlist"],
     queryFn: () => fetchList(),
+  });
+  const { data: stats } = useQuery({
+    queryKey: ["watchlist-stats"],
+    queryFn: () => fetchStats(),
   });
 
   return (
@@ -34,6 +39,35 @@ function WatchlistPage() {
           Open any property and use <span className="text-white">“Save to watchlist”</span> to add it here.
         </p>
       </header>
+
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard
+          label="Properties watched"
+          value={stats?.watching ?? "—"}
+          icon={<Bookmark className="h-4 w-4 text-cyan" />}
+        />
+        <StatCard
+          label="New alerts today"
+          value={stats?.alertsToday ?? "—"}
+          icon={<BellRing className="h-4 w-4 text-amber-400" />}
+          accent={stats && stats.alertsToday > 0 ? "amber" : undefined}
+        />
+        <StatCard
+          label="Alerts this week"
+          value={stats?.alertsThisWeek ?? "—"}
+          icon={<Bell className="h-4 w-4 text-emerald-400" />}
+        />
+        <StatCard
+          label="By type (week)"
+          value={
+            stats
+              ? `${stats.alertsByType.foreclosure} · ${stats.alertsByType.lis_pendens} · ${stats.alertsByType.deed_transfer}`
+              : "—"
+          }
+          hint="Foreclosure · Lis pendens · Deed"
+        />
+      </section>
+
 
       {isLoading && <div className="text-[var(--w55)] text-sm">Loading…</div>}
       {error && <div className="text-red-400 text-sm">{(error as Error).message}</div>}
