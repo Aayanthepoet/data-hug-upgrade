@@ -245,3 +245,78 @@ export const getAlertTrend = createServerFn({ method: "GET" })
     }
     return buckets;
   });
+
+export type AlertDayProperty = {
+  property_key: string;
+  address: string;
+  city: string | null;
+  state: string | null;
+  events: { type: "foreclosure" | "lis_pendens" | "deed_transfer"; created_at: string; note: string | null; amount: number | null }[];
+};
+
+export const getAlertsForDay = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { date: string }) =>
+    z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<AlertDayProperty[]> => {
+    const { supabase, userId } = context;
+    const { data: items, error: iErr } = await supabase
+      .from("watchlist_items")
+      .select("property_key, address, city, state, alert_foreclosure, alert_lis_pendens, alert_deed_transfer")
+      .eq("user_id", userId);
+    if (iErr) throw new Error(iErr.message);
+    if (!items || items.length === 0) return [];
+
+    const start = new Date(data.date + "T00:00:00.000Z");
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+
+    const itemMap = new Map(items.map((i) => [i.property_key, i]));
+
+    const { data: events, error: eErr } = await supabase
+      .from("distress_events")
+      .select("property_id, event_type, created_at, note, amount")
+      .in("property_id", items.map((i) => i.property_key))
+      .gte("created_at", start.toISOString())
+      .lt("created_at", end.toISOString())
+      .order("created_at", { ascending: false });
+    if (eErr) throw new Error(eErr.message);
+
+    const typeKey = (t: string): "foreclosure" | "lis_pendens" | "deed_transfer" => {
+      const v = (t || "").toLowerCase();
+      if (v.includes("foreclos")) return "foreclosure";
+      if (v.includes("lis")) return "lis_pendens";
+      return "deed_transfer";
+    };
+
+    const grouped = new Map<string, AlertDayProperty>();
+    for (const e of events ?? []) {
+      const item = itemMap.get(e.property_id as string);
+      if (!item) continue;
+      const k = typeKey(e.event_type as string);
+      const enabled =
+        (k === "foreclosure" && item.alert_foreclosure) ||
+        (k === "lis_pendens" && item.alert_lis_pendens) ||
+        (k === "deed_transfer" && item.alert_deed_transfer);
+      if (!enabled) continue;
+      let row = grouped.get(item.property_key);
+      if (!row) {
+        row = {
+          property_key: item.property_key,
+          address: item.address,
+          city: item.city,
+          state: item.state,
+          events: [],
+        };
+        grouped.set(item.property_key, row);
+      }
+      row.events.push({
+        type: k,
+        created_at: e.created_at as string,
+        note: (e.note as string) ?? null,
+        amount: (e.amount as number) ?? null,
+      });
+    }
+    return Array.from(grouped.values());
+  });
