@@ -20,7 +20,7 @@ const engines = [
   { icon: "👤", name: "Contact Resolver", role: "Phone, email, social skip tracing", badge: "Skip Trace", color: "var(--violet)" },
   { icon: "👁️", name: "Vision Studio", role: "Property redesign, room detection, upscaling", badge: "Image AI", color: "var(--cyan)" },
   { icon: "🎙️", name: "Voice & Video", role: "AI voiceover, video assembly, brand overlay", badge: "Video AI", color: "var(--red)" },
-  { icon: "⚡", name: "Live Engine", role: "Real-time auction bidding, fraud detection", badge: "Real-time", color: "var(--green)" },
+  
   { icon: "🤖", name: "PropAI Agent", role: "Conversational AI assistant with full account context", badge: "AI Agent", color: "var(--violet)" },
 ];
 
