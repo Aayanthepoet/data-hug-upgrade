@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2 } from "lucide-react";
+import { useTeamMembers, memberLabel } from "@/hooks/use-team-members";
 
 export const Route = createFileRoute("/_authenticated/app/leads/$leadId")({
   head: () => ({ meta: [{ title: "Lead — PropAI" }] }),
@@ -31,6 +32,7 @@ type Lead = {
   message: string | null;
   source: string | null;
   status: string | null;
+  assigned_to: string | null;
   created_at: string;
 };
 
