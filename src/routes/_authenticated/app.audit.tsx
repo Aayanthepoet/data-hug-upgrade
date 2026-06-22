@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ScrollText, Download, Search, Send, FileText, Loader2 } from "lucide-react";
-import { listAuditEvents, logAuditEvent } from "@/lib/audit/audit.functions";
+import { ScrollText, Download, Search, Send, FileText, Loader2, Lock } from "lucide-react";
+import { listAuditEvents, logAuditEvent, exportAuditEvents, getMyAuditPermissions } from "@/lib/audit/audit.functions";
 
 export const Route = createFileRoute("/_authenticated/app/audit")({
   head: () => ({ meta: [{ title: "Audit Log — PropAI" }] }),
@@ -29,12 +29,23 @@ function toIsoEnd(d: string | null) {
 function AuditPage() {
   const listFn = useServerFn(listAuditEvents);
   const logFn = useServerFn(logAuditEvent);
+  const exportFn = useServerFn(exportAuditEvents);
+  const permsFn = useServerFn(getMyAuditPermissions);
   const qc = useQueryClient();
 
   const [filter, setFilter] = useState<string>("all");
   const [from, setFrom] = useState<string>(""); // yyyy-mm-dd
   const [to, setTo] = useState<string>("");
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const { data: perms } = useQuery({
+    queryKey: ["audit-permissions"],
+    queryFn: () => permsFn(),
+    staleTime: 60_000,
+  });
+  const canExport = perms?.canExport ?? false;
+  const allowedRoles = perms?.allowedRoles ?? ["admin"];
 
   const queryInput = useMemo(
     () => ({
@@ -54,15 +65,28 @@ function AuditPage() {
   const rows = data ?? [];
 
   async function exportCsv() {
-    if (exporting || rows.length === 0) return;
+    if (exporting) return;
+    if (!canExport) {
+      setExportError(`Access denied. Audit log export requires one of: ${allowedRoles.join(", ")}.`);
+      return;
+    }
     setExporting(true);
+    setExportError(null);
     try {
+      // Server re-checks the role and returns rows (or throws Forbidden).
+      const serverRows = await exportFn({ data: queryInput });
+
+      if (serverRows.length === 0) {
+        setExportError("No audit events match the current filters.");
+        return;
+      }
+
       const header = [
         "created_at", "action", "resource_type", "record_count",
         "resource_count", "filename", "owner_names", "user_id", "id",
       ];
       const csvRows: string[][] = [header];
-      for (const r of rows) {
+      for (const r of serverRows) {
         const md = (r.metadata ?? {}) as Record<string, unknown>;
         const filename = typeof md.filename === "string" ? md.filename : "";
         const ownerNames = Array.isArray(md.owner_names) ? (md.owner_names as string[]).join("; ") : "";
@@ -109,14 +133,10 @@ function AuditPage() {
             action: "export.csv",
             resource_type: "audit_logs",
             resource_ids: [],
-            record_count: rows.length,
+            record_count: serverRows.length,
             metadata: {
               filename,
-              filters: {
-                action: filter,
-                from: from || null,
-                to: to || null,
-              },
+              filters: { action: filter, from: from || null, to: to || null },
             },
           },
         });
@@ -124,6 +144,8 @@ function AuditPage() {
       } catch (e) {
         console.warn("audit log failed", e);
       }
+    } catch (e) {
+      setExportError((e as Error).message);
     } finally {
       setExporting(false);
     }
@@ -138,16 +160,52 @@ function AuditPage() {
             Every export, skip trace, and outreach send — who, what, when, and how many records.
           </p>
         </div>
-        <button
-          onClick={exportCsv}
-          disabled={exporting || rows.length === 0}
-          className="inline-flex items-center gap-1.5 rounded-md bg-cyan text-black px-3 py-2 text-xs font-medium hover:bg-cyan/90 disabled:opacity-50 disabled:bg-cyan/40"
-          title="Download the current filtered audit log as CSV"
-        >
-          {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-          Export CSV ({rows.length})
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={exportCsv}
+            disabled={exporting || rows.length === 0 || !canExport}
+            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium disabled:opacity-50 ${
+              canExport
+                ? "bg-cyan text-black hover:bg-cyan/90 disabled:bg-cyan/40"
+                : "border border-border text-[var(--w55)] cursor-not-allowed"
+            }`}
+            title={
+              canExport
+                ? "Download the current filtered audit log as CSV"
+                : `Access denied. Requires role: ${allowedRoles.join(", ")}`
+            }
+          >
+            {exporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : canExport ? (
+              <Download className="h-3.5 w-3.5" />
+            ) : (
+              <Lock className="h-3.5 w-3.5" />
+            )}
+            {canExport ? `Export CSV (${rows.length})` : "Export restricted"}
+          </button>
+          {!canExport && perms && (
+            <p className="text-[10px] text-[var(--w55)]">
+              Admin role required to download
+            </p>
+          )}
+          {exportError && (
+            <p className="text-[10px] text-red-400 max-w-[260px] text-right">{exportError}</p>
+          )}
+        </div>
       </header>
+
+      {!canExport && perms && (
+        <div className="flex items-start gap-3 rounded-md border border-amber-400/30 bg-amber-400/5 p-3 text-xs">
+          <Lock className="h-4 w-4 text-amber-300 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium text-amber-200">Audit log export is restricted</p>
+            <p className="text-amber-200/70 mt-0.5">
+              You can view audit events, but CSV download requires one of these roles: <span className="font-mono">{allowedRoles.join(", ")}</span>. Ask a workspace admin if you need access.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex gap-2 flex-wrap">

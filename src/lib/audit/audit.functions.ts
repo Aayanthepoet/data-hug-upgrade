@@ -59,3 +59,50 @@ export const listAuditEvents = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+// Roles allowed to download the raw audit log as CSV. Keep narrow on purpose
+// — exports can include another user's actions (admins see all rows) and
+// shouldn't be downloadable by every signed-in user.
+const EXPORT_ALLOWED_ROLES = ["admin"] as const;
+
+export const getMyAuditPermissions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    const roles = (data ?? []).map((r) => r.role as string);
+    const canExport = roles.some((r) => (EXPORT_ALLOWED_ROLES as readonly string[]).includes(r));
+    return { roles, canExport, allowedRoles: [...EXPORT_ALLOWED_ROLES] };
+  });
+
+export const exportAuditEvents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // Server-side role check — do NOT rely on the UI hiding the button.
+    const { data: isAdmin, error: roleErr } = await supabase
+      .rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isAdmin) {
+      throw new Error("Forbidden: audit log export requires the admin role.");
+    }
+
+    let q = supabase
+      .from("audit_logs")
+      .select("id, action, resource_type, resource_ids, record_count, metadata, created_at, user_id")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (data.action) q = q.eq("action", data.action);
+    if (data.resource_type) q = q.eq("resource_type", data.resource_type);
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
