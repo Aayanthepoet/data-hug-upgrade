@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Send, Mail, MessageSquare, MapPin, Reply, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { listOutreach, sendOutreach, recordReply, listReachableOwners } from "@/lib/outreach/outreach.functions";
+import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/app/outreach")({
   head: () => ({ meta: [{ title: "Outreach — PropAI" }] }),
