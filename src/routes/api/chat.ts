@@ -114,7 +114,7 @@ export const Route = createFileRoute("/api/chat")({
                 name: z.string().describe("Section heading, e.g. 'Contacts to call'"),
                 tasks: z.array(z.object({
                   label: z.string().describe("One concrete action, imperative voice"),
-                  detail: z.string().optional().describe("Optional supporting context: phone number, draft snippet, auction date, etc."),
+                  detail: z.string().optional().describe("Optional supporting context: phone number, draft snippet, due date, etc."),
                   priority: z.enum(["high", "medium", "low"]).optional(),
                 })).min(1),
               })).min(1),
