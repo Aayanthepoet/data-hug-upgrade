@@ -5,11 +5,22 @@ import { useState } from "react";
 import {
   listWatchlist,
   getWatchlistStats,
+  getAlertTrend,
   updateWatchlistItem,
   deleteWatchlistItem,
   type WatchlistItem,
 } from "@/lib/watchlist.functions";
 import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight, Bell, BellRing, Bookmark } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/app/watchlist")({
   head: () => ({ meta: [{ title: "Watchlist — PropAI" }] }),
