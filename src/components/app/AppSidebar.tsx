@@ -22,6 +22,7 @@ import {
   Bot,
   Inbox,
   Search,
+  Eye,
 } from "lucide-react";
 
 const items = [
@@ -31,11 +32,12 @@ const items = [
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
   { title: "Owners", url: "/app/owners", icon: Users },
-  { title: "Contacts", url: "/app/contacts", icon: PhoneCall },
+  { title: "Contacts (Resolver)", url: "/app/contacts", icon: PhoneCall },
   { title: "Lead Lists", url: "/app/lead-lists", icon: ListChecks },
-  { title: "Campaigns", url: "/app/campaigns", icon: Megaphone },
-  { title: "Auctions", url: "/app/auctions", icon: Gavel },
-  { title: "Videos", url: "/app/videos", icon: Clapperboard },
+  { title: "Campaigns (Language)", url: "/app/campaigns", icon: Megaphone },
+  { title: "Vision Studio", url: "/app/vision", icon: Eye },
+  { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
+  { title: "Auctions (Live)", url: "/app/auctions", icon: Gavel },
 ];
 
 export function AppSidebar() {
