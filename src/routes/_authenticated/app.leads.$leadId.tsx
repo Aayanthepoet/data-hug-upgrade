@@ -341,9 +341,14 @@ function LeadDetailPage() {
               {lead.source ? ` · via ${lead.source}` : ""}
             </p>
           </div>
-          <Button variant="outline" onClick={handleExportCsv} className="gap-2">
-            <Download className="h-4 w-4" /> Export CSV
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={handleExportCsv} className="gap-2">
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+            <Button variant="outline" onClick={handleExportPdf} className="gap-2">
+              <FileText className="h-4 w-4" /> Download PDF
+            </Button>
+          </div>
         </div>
       </div>
 
