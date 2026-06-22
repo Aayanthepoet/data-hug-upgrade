@@ -138,7 +138,7 @@ function OwnerRow({ owner }: OwnerRowProps) {
       </tr>
       {open && (
         <tr className="border-t border-border bg-[rgba(255,255,255,.02)]">
-          <td colSpan={6} className="p-4">
+          <td colSpan={7} className="p-4">
             {isLoading && <p className="text-[var(--w55)] text-xs">Loading contacts…</p>}
             {!isLoading && contacts && contacts.length === 0 && (
               <p className="text-[var(--w55)] text-xs">No contacts yet. Run skip trace to populate.</p>
