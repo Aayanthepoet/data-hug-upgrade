@@ -6,11 +6,13 @@ import {
   listWatchlist,
   getWatchlistStats,
   getAlertTrend,
+  getAlertsForDay,
   updateWatchlistItem,
   deleteWatchlistItem,
   type WatchlistItem,
 } from "@/lib/watchlist.functions";
-import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight, Bell, BellRing, Bookmark } from "lucide-react";
+import { Eye, Trash2, AlertTriangle, Gavel, FileSignature, ArrowRight, Bell, BellRing, Bookmark, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ResponsiveContainer,
   AreaChart,
