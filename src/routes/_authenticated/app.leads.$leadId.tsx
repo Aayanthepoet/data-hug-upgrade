@@ -73,6 +73,22 @@ function LeadDetailPage() {
     },
   });
 
+  const historyQuery = useQuery({
+    queryKey: ["lead-assignments", leadId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lead_assignments").select("*").eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        assigned_to: string | null;
+        assigned_by: string | null;
+        created_at: string;
+      }>;
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
       const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
@@ -96,6 +112,7 @@ function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", leadId] });
       qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["lead-assignments", leadId] });
       toast.success("Assignment updated");
     },
     onError: (e: any) => toast.error(e.message),
@@ -244,6 +261,39 @@ function LeadDetailPage() {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Assignment history</h2>
+        {historyQuery.isLoading ? (
+          <p className="text-sm text-[var(--w55)]">Loading history…</p>
+        ) : (historyQuery.data?.length ?? 0) === 0 ? (
+          <p className="text-sm text-[var(--w55)]">No assignment changes yet.</p>
+        ) : (
+          <ol className="border border-border rounded-md divide-y divide-border">
+            {historyQuery.data!.map((h) => {
+              const assignee = h.assigned_to ? members.find((m) => m.id === h.assigned_to) : null;
+              const by = h.assigned_by ? members.find((m) => m.id === h.assigned_by) : null;
+              return (
+                <li key={h.id} className="px-4 py-3 text-sm flex flex-wrap items-baseline justify-between gap-2">
+                  <div>
+                    Assigned to{" "}
+                    <span className="font-medium">
+                      {h.assigned_to ? memberLabel(assignee) : "Unassigned"}
+                    </span>
+                    {" "}by{" "}
+                    <span className="font-medium">
+                      {h.assigned_by ? memberLabel(by) : "system"}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[var(--w55)] whitespace-nowrap">
+                    {new Date(h.created_at).toLocaleString()}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         )}
       </section>
     </div>
