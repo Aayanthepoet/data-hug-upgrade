@@ -66,9 +66,17 @@ export const runSkipTrace = createServerFn({ method: "POST" })
       if (iErr) throw new Error(iErr.message);
     }
 
+    // Stamp skip-trace status on the owner so the UI can show pending/traced/no-hit.
+    const status = phoneEmailRows.length > 0 ? "traced" : "no_hit";
+    await supabase
+      .from("owners")
+      .update({ skip_trace_status: status, skip_trace_last_run_at: new Date().toISOString() } as never)
+      .eq("id", data.owner_id);
+
     return {
       provider: result.provider,
       inserted: rows.length,
+      status,
       contacts: result.contacts,
     };
   });
