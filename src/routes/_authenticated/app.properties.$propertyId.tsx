@@ -5,7 +5,9 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.functions";
-import { ExternalLink, ArrowLeft, Search, X, Link2, Check } from "lucide-react";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
