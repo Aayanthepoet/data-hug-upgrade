@@ -201,6 +201,51 @@ export const getAlertTrend = createServerFn({ method: "GET" })
       ]),
     );
 
+    const typeKey = (t: string): "foreclosure" | "lis_pendens" | "deed_transfer" => {
+      const v = (t || "").toLowerCase();
+      if (v.includes("foreclos")) return "foreclosure";
+      if (v.includes("lis")) return "lis_pendens";
+      return "deed_transfer";
+    };
+
+    // If 1 day range is requested, return hourly buckets for the last 24 hours.
+    if (data.days === 1) {
+      const now = new Date();
+      const buckets: AlertTrendPoint[] = [];
+      const byHour = new Map<string, AlertTrendPoint>();
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(now);
+        d.setUTCHours(d.getUTCHours() - i, 0, 0, 0);
+        const key = d.toISOString();
+        const p: AlertTrendPoint = { date: key, foreclosure: 0, lis_pendens: 0, deed_transfer: 0 };
+        buckets.push(p);
+        byHour.set(key.slice(0, 13), p);
+      }
+
+      if (prefs.size === 0) return buckets;
+
+      const start = new Date(now);
+      start.setUTCHours(start.getUTCHours() - 23, 0, 0, 0);
+
+      const { data: events, error: eErr } = await supabase
+        .from("distress_events")
+        .select("property_id, event_type, created_at")
+        .in("property_id", Array.from(prefs.keys()))
+        .gte("created_at", start.toISOString());
+      if (eErr) throw new Error(eErr.message);
+
+      for (const e of events ?? []) {
+        const pref = prefs.get(e.property_id as string);
+        if (!pref) continue;
+        const k = typeKey(e.event_type as string);
+        if (!pref[k]) continue;
+        const hourKey = (e.created_at as string).slice(0, 13);
+        const bucket = byHour.get(hourKey);
+        if (bucket) bucket[k] += 1;
+      }
+      return buckets;
+    }
+
     // Build empty buckets for the last N days.
     const buckets: AlertTrendPoint[] = [];
     const byDate = new Map<string, AlertTrendPoint>();
@@ -226,13 +271,6 @@ export const getAlertTrend = createServerFn({ method: "GET" })
       .in("property_id", Array.from(prefs.keys()))
       .gte("created_at", start.toISOString());
     if (eErr) throw new Error(eErr.message);
-
-    const typeKey = (t: string): "foreclosure" | "lis_pendens" | "deed_transfer" => {
-      const v = (t || "").toLowerCase();
-      if (v.includes("foreclos")) return "foreclosure";
-      if (v.includes("lis")) return "lis_pendens";
-      return "deed_transfer";
-    };
 
     for (const e of events ?? []) {
       const pref = prefs.get(e.property_id as string);

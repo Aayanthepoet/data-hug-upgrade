@@ -253,7 +253,7 @@ const TYPE_COLORS = {
 } as const;
 
 function AlertTrendChart() {
-  const [range, setRange] = useState<7 | 30>(7);
+  const [range, setRange] = useState<1 | 7 | 30>(7);
   const [day, setDay] = useState<string | null>(null);
   const fetchTrend = useServerFn(getAlertTrend);
   const { data, isLoading } = useQuery({
@@ -262,6 +262,10 @@ function AlertTrendChart() {
   });
 
   const fmt = (d: string) => {
+    if (d.includes("T")) {
+      const dt = new Date(d);
+      return dt.toLocaleTimeString(undefined, { hour: "numeric" });
+    }
     const dt = new Date(d + "T00:00:00Z");
     return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   };
@@ -271,16 +275,22 @@ function AlertTrendChart() {
       <header className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <div>
           <h2 className="font-medium">Alert trend</h2>
-          <p className="text-xs text-[var(--w55)]">New alerts per day, split by type</p>
+          <p className="text-xs text-[var(--w55)]">
+            {range === 1 ? "New alerts per hour today" : "New alerts per day, split by type"}
+          </p>
         </div>
         <div className="inline-flex rounded-md border border-border overflow-hidden text-xs">
-          {[7, 30].map((d) => (
+          {[
+            { value: 1, label: "Today" },
+            { value: 7, label: "Last 7 days" },
+            { value: 30, label: "Last 30 days" },
+          ].map((opt) => (
             <button
-              key={d}
-              onClick={() => setRange(d as 7 | 30)}
-              className={`px-3 py-1.5 ${range === d ? "bg-white/10 text-white" : "text-[var(--w55)] hover:text-white"}`}
+              key={opt.value}
+              onClick={() => setRange(opt.value as 1 | 7 | 30)}
+              className={`px-3 py-1.5 ${range === opt.value ? "bg-white/10 text-white" : "text-[var(--w55)] hover:text-white"}`}
             >
-              {d}d
+              {opt.label}
             </button>
           ))}
         </div>
@@ -297,7 +307,12 @@ function AlertTrendChart() {
               data={data}
               margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
               onClick={(e: { activeLabel?: string } | null) => {
-                if (e?.activeLabel) setDay(e.activeLabel);
+                if (e?.activeLabel) {
+                  const clickedDate = e.activeLabel.includes("T")
+                    ? e.activeLabel.slice(0, 10)
+                    : e.activeLabel;
+                  setDay(clickedDate);
+                }
               }}
               style={{ cursor: "pointer" }}
             >
@@ -325,7 +340,13 @@ function AlertTrendChart() {
                   borderRadius: 6,
                   fontSize: 12,
                 }}
-                labelFormatter={(l) => fmt(String(l))}
+                labelFormatter={(l) => {
+                  if (String(l).includes("T")) {
+                    const dt = new Date(String(l));
+                    return dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) + " (" + dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ")";
+                  }
+                  return fmt(String(l));
+                }}
               />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Area type="monotone" stackId="1" dataKey="foreclosure" name="Foreclosure"
@@ -338,7 +359,7 @@ function AlertTrendChart() {
           </ResponsiveContainer>
         )}
       </div>
-      <p className="text-[10px] text-[var(--w55)] mt-2">Tip: click a day to see which properties triggered alerts.</p>
+      <p className="text-[10px] text-[var(--w55)] mt-2">Tip: click a point on the chart to see which properties triggered alerts.</p>
       <DayDrilldown date={day} onClose={() => setDay(null)} />
     </section>
   );
