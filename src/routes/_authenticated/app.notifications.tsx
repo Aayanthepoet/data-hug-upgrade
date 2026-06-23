@@ -8,7 +8,11 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
   sendTestSms,
+  wireSmsTriggers,
 } from "@/lib/notifications.functions";
+import { useAuth } from "@/hooks/use-auth";
+import { useTeamMembers } from "@/hooks/use-team-members";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
