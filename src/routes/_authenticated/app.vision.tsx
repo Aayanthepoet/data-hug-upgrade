@@ -790,7 +790,7 @@ function VisionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove source photo?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove this source photo? This will permanently delete the file and remove it as your "before" image.
+              Are you sure you want to remove this source photo? You'll have a few seconds to undo before the file is permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
