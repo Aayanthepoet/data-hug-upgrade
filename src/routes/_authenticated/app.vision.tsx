@@ -260,7 +260,7 @@ function VisionPage() {
     onSourceFile(file);
   }
 
-
+  const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
   );
   const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
