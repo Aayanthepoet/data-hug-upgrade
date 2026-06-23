@@ -278,7 +278,7 @@ function VisionPage() {
               <div key={r.id} className="surface p-3 space-y-2">
                 {r.status === "ready" && r.signed_url ? (
                   <BeforeAfterSlider
-                    before={r.source_image_url}
+                    before={r.source_signed_url}
                     after={r.signed_url}
                     filename={`render-${r.id}.png`}
                   />
