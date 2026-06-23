@@ -251,6 +251,25 @@ function NotificationSettingsPage() {
                 Will be saved as <span className="font-mono text-[var(--w70)]">{normalizedPhone}</span>
               </p>
             )}
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!phoneValid || sendTest.isPending}
+                onClick={() => sendTest.mutate(normalizedPhone)}
+              >
+                {sendTest.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                ) : (
+                  <Smartphone className="h-3.5 w-3.5 mr-2" />
+                )}
+                Send test SMS
+              </Button>
+              <p className="text-xs text-[var(--w55)] mt-1.5">
+                Sends a one-time message to verify delivery. Standard carrier rates apply.
+              </p>
+            </div>
           </div>
         )}
       </section>
