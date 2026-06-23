@@ -688,15 +688,17 @@ function VisionPage() {
       <div className="space-y-3">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-medium">Render history</h2>
-          <span className="text-xs text-[var(--w55)]">{renders.length} total</span>
+          <span className="text-xs text-[var(--w55)]">
+            {renders.filter((r) => !hiddenRenderIds.has(r.id)).length} total
+          </span>
         </div>
-        {renders.length === 0 ? (
+        {renders.filter((r) => !hiddenRenderIds.has(r.id)).length === 0 ? (
           <div className="surface p-8 text-center text-sm text-[var(--w55)]">
             No renders yet. Generate one above.
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {renders.map((r) => (
+            {renders.filter((r) => !hiddenRenderIds.has(r.id)).map((r) => (
               <div key={r.id} className="surface p-3 space-y-2">
                 {r.status === "ready" && r.signed_url ? (
                   <BeforeAfterSlider
