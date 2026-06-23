@@ -1,13 +1,14 @@
 import { createFileRoute, Outlet, useNavigate, useParams, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { Bot, Plus, Trash2, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bot, Plus, Trash2, MessageSquare, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   listChatThreads,
   createChatThread,
   deleteChatThread,
+  updateChatThreadTitle,
 } from "@/lib/chat-threads.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
