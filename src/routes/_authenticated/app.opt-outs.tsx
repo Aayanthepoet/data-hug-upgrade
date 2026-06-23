@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ShieldAlert, Search, Plus, RotateCcw, Trash2, Ban, FileDown, FileText } from "lucide-react";
+import { ShieldAlert, Search, Plus, RotateCcw, Trash2, Ban, FileDown, FileText, Send } from "lucide-react";
 import { exportOptOutsCsv, exportOptOutsPdf } from "@/lib/export-opt-outs";
+import { sendTestComplianceDigest } from "@/lib/compliance/digest.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -157,6 +159,16 @@ function OptOutsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => sendTestDigest.mutate()}
+            disabled={sendTestDigest.isPending}
+            title="Send the weekly compliance digest to your own email right now"
+          >
+            <Send className="h-4 w-4" />
+            {sendTestDigest.isPending ? "Sending…" : "Send test digest"}
+          </Button>
           <Button
             variant="outline"
             className="gap-2"
