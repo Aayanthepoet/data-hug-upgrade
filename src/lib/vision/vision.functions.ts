@@ -300,6 +300,34 @@ export const uploadSourcePhoto = createServerFn({ method: "POST" })
     return { id: photoRow.id as string, path, signed_url: signed?.signedUrl ?? null };
   });
 
+// Delete a previously uploaded source photo: removes the storage object and
+// its `vision_source_photos` row. Ownership is double-enforced (RLS + check).
+export const deleteSourcePhoto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: row, error: getErr } = await supabase
+      .from("vision_source_photos")
+      .select("storage_path, user_id")
+      .eq("id", data.id)
+      .single();
+    if (getErr) throw new Error(getErr.message);
+    if (row.user_id !== userId) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (row.storage_path) {
+      await supabaseAdmin.storage.from(BUCKET).remove([row.storage_path]);
+    }
+    const { error: delErr } = await supabase
+      .from("vision_source_photos")
+      .delete()
+      .eq("id", data.id);
+    if (delErr) throw new Error(delErr.message);
+    return { ok: true };
+  });
+
 export const deleteRender = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))

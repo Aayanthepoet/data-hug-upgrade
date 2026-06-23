@@ -21,6 +21,7 @@ import {
   listPropertiesForRender,
   getVisionCapabilities,
   uploadSourcePhoto,
+  deleteSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
@@ -42,12 +43,15 @@ function VisionPage() {
   const propsFn = useServerFn(listPropertiesForRender);
   const capsFn = useServerFn(getVisionCapabilities);
   const uploadFn = useServerFn(uploadSourcePhoto);
+  const deleteSourceFn = useServerFn(deleteSourcePhoto);
 
   // Source photo (the "before"): uploaded to the private vision-renders
   // bucket; we keep the storage path for the render row and a signed URL
   // for the local preview while composing.
   const [sourcePath, setSourcePath] = useState<string | null>(null);
+  const [sourcePhotoId, setSourcePhotoId] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [removingSource, setRemovingSource] = useState(false);
   const [uploading, setUploading] = useState(false);
   // The server fn is a single request, so we can't observe true upload
   // bytes-sent. Instead we drive a two-phase bar: real progress during
@@ -184,6 +188,7 @@ function VisionPage() {
       setUploadProgress(100);
       setUploadPhase("done");
       setSourcePath(res.path);
+      setSourcePhotoId(res.id);
       setSourcePreview(res.signed_url);
       setUploadError(null);
       setFailedFile(null);
@@ -207,6 +212,53 @@ function VisionPage() {
     }
   }
 
+  /**
+   * Remove the current source photo: deletes the storage object + DB row when
+   * one was saved server-side, then clears local preview state.
+   */
+  async function removeSourcePhoto() {
+    const id = sourcePhotoId;
+    setRemovingSource(true);
+    try {
+      if (id) {
+        await deleteSourceFn({ data: { id } });
+      }
+      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(sourcePreview);
+      }
+      setSourcePath(null);
+      setSourcePhotoId(null);
+      setSourcePreview(null);
+      if (id) toast.success("Source photo removed");
+    } catch (e) {
+      toast.error("Couldn't remove photo", {
+        description: e instanceof Error ? e.message : "Delete failed",
+      });
+    } finally {
+      setRemovingSource(false);
+    }
+  }
+
+  /**
+   * Replace the current source photo: deletes the existing one (best-effort)
+   * and then runs the standard upload flow (which may open the cropper).
+   */
+  async function replaceSourcePhoto(file: File) {
+    const id = sourcePhotoId;
+    if (id) {
+      try {
+        await deleteSourceFn({ data: { id } });
+      } catch (e) {
+        // Don't block the replace — surface the issue but keep going.
+        toast.error("Couldn't delete the previous photo", {
+          description: e instanceof Error ? e.message : "Delete failed",
+        });
+      }
+      setSourcePhotoId(null);
+      setSourcePath(null);
+    }
+    onSourceFile(file);
+  }
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
@@ -253,6 +305,7 @@ function VisionPage() {
         URL.revokeObjectURL(sourcePreview);
       }
       setSourcePath(null);
+      setSourcePhotoId(null);
       setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
@@ -327,27 +380,49 @@ function VisionPage() {
           <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
           <div className="flex flex-wrap items-center gap-3">
             {sourcePreview && !uploadError ? (
-              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10 shrink-0">
-                <img src={sourcePreview} alt="source" className={`h-full w-full object-cover transition-opacity duration-200 ${uploading ? "opacity-40" : ""}`} />
-                {uploading ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <Loader2 className="h-5 w-5 text-white animate-spin" />
+              <div className="flex items-center gap-3">
+                <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10 shrink-0">
+                  <img src={sourcePreview} alt="source" className={`h-full w-full object-cover transition-opacity duration-200 ${uploading || removingSource ? "opacity-40" : ""}`} />
+                  {uploading || removingSource ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <Loader2 className="h-5 w-5 text-white animate-spin" />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void removeSourcePhoto()}
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
+                      aria-label="Remove source photo"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+                {!uploading && !removingSource && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="cursor-pointer inline-flex items-center gap-1 px-2 py-1 rounded border border-white/15 text-[11px] text-[var(--w55)] hover:bg-white/5 transition-colors">
+                      <RefreshCw className="h-3 w-3" />
+                      Replace
+                      <input
+                        type="file"
+                        accept={ACCEPT_ATTR}
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void replaceSourcePhoto(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => void removeSourcePhoto()}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-500/20 text-[11px] text-red-300 hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Remove
+                    </button>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (sourcePreview && sourcePreview.startsWith("blob:")) {
-                        URL.revokeObjectURL(sourcePreview);
-                      }
-                      setSourcePath(null);
-                      setSourcePreview(null);
-                    }}
-                    className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
-                    aria-label="Remove source photo"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
                 )}
               </div>
             ) : uploadError && failedFile ? (
