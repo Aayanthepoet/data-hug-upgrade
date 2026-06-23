@@ -900,6 +900,90 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          channel_in_app: boolean
+          channel_sms: boolean
+          created_at: string
+          on_auction_activity: boolean
+          on_lead_reply: boolean
+          on_new_lead: boolean
+          quiet_enabled: boolean
+          quiet_end_local: string
+          quiet_start_local: string
+          sms_phone: string | null
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_in_app?: boolean
+          channel_sms?: boolean
+          created_at?: string
+          on_auction_activity?: boolean
+          on_lead_reply?: boolean
+          on_new_lead?: boolean
+          quiet_enabled?: boolean
+          quiet_end_local?: string
+          quiet_start_local?: string
+          sms_phone?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_in_app?: boolean
+          channel_sms?: boolean
+          created_at?: string
+          on_auction_activity?: boolean
+          on_lead_reply?: boolean
+          on_new_lead?: boolean
+          quiet_enabled?: boolean
+          quiet_end_local?: string
+          quiet_start_local?: string
+          sms_phone?: string | null
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          metadata: Json
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          metadata?: Json
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          metadata?: Json
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       outreach_messages: {
         Row: {
           body: string | null
@@ -1468,6 +1552,17 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      dispatch_notification: {
+        Args: {
+          _body: string
+          _link: string
+          _metadata: Json
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -1476,6 +1571,12 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      is_in_quiet_hours: {
+        Args: {
+          _pref: Database["public"]["Tables"]["notification_preferences"]["Row"]
         }
         Returns: boolean
       }
