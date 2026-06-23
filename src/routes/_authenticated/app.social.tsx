@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -10,7 +10,8 @@ import {
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
-import { connectMetaSimulated, disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { MetaAccountPicker } from "@/components/social/MetaAccountPicker";
 import { Button } from "@/components/ui/button";
 
 const PLATFORMS = [
@@ -33,8 +34,9 @@ function SocialHubPage() {
   const listAccts = useServerFn(listMySocialAccounts);
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
-  const connectMeta = useServerFn(connectMetaSimulated);
   const disconnect = useServerFn(disconnectSocialAccount);
+
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const postsQ = useQuery({ queryKey: ["my-social-posts"], queryFn: () => list() });
   const accountsQ = useQuery({ queryKey: ["my-social-accounts"], queryFn: () => listAccts() });
@@ -53,11 +55,11 @@ function SocialHubPage() {
       );
       window.history.replaceState({}, "", "/app/social");
     } else if (ok === "meta") {
-      toast.success("Facebook + Instagram connected.");
+      // Real OAuth returned — open the picker to choose which Pages/IG to use.
       window.history.replaceState({}, "", "/app/social");
-      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+      setPickerOpen(true);
     }
-  }, [qc]);
+  }, []);
 
   const actMut = useMutation({
     mutationFn: (vars: { post_id: string; action: "publish" | "unpublish" | "delete" }) =>
@@ -69,14 +71,6 @@ function SocialHubPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const connectMetaMut = useMutation({
-    mutationFn: () => connectMeta(),
-    onSuccess: () => {
-      toast.success("Simulated Facebook + Instagram accounts connected.");
-      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const disconnectMut = useMutation({
     mutationFn: (account_id: string) => disconnect({ data: { account_id } }),
