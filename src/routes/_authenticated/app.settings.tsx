@@ -48,7 +48,15 @@ function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clean up object URLs when replaced/unmounted
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     if (profile) {
@@ -68,7 +76,13 @@ function SettingsPage() {
       const { data, error } = await supabase.storage
         .from("avatars")
         .createSignedUrl(profile.avatar_url, 3600);
-      if (!cancelled && !error) setAvatarUrl(data?.signedUrl ?? null);
+      if (!cancelled && !error) {
+        setAvatarUrl(data?.signedUrl ?? null);
+        setPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+      }
     }
     load();
     return () => {
@@ -88,7 +102,21 @@ function SettingsPage() {
         throw new Error(`Image is ${mb}MB — max 5MB`);
       }
 
-      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      // Compress/resize unless GIF (preserve animation)
+      let upload: Blob = file;
+      let ext = "jpg";
+      let contentType = "image/jpeg";
+      if (file.type === "image/gif") {
+        upload = file;
+        ext = "gif";
+        contentType = "image/gif";
+      } else {
+        const compressed = await compressImage(file, 512, 0.9);
+        upload = compressed;
+        ext = "jpg";
+        contentType = "image/jpeg";
+      }
+
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
       // Get a signed upload URL so we can drive the PUT via XHR for progress
@@ -103,7 +131,7 @@ function SettingsPage() {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", signed.signedUrl, true);
         xhr.setRequestHeader("x-upsert", "false");
-        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.setRequestHeader("Content-Type", contentType);
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             setUploadProgress(Math.round((e.loaded / e.total) * 100));
@@ -115,7 +143,7 @@ function SettingsPage() {
         };
         xhr.onerror = () => reject(new Error("Network error during upload"));
         xhr.onabort = () => reject(new Error("Upload was cancelled"));
-        xhr.send(file);
+        xhr.send(upload);
       });
 
       setUploadPhase("saving");
@@ -134,9 +162,14 @@ function SettingsPage() {
     onSuccess: () => {
       toast.success("Avatar updated", { description: "Your new profile picture is live." });
       qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+      // Preview is cleared once the new signed URL loads (see signed-URL effect)
     },
     onError: (e: Error) => {
       toast.error("Avatar upload failed", { description: e.message });
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     },
     onSettled: () => {
       setUploadProgress(null);
@@ -209,8 +242,8 @@ function SettingsPage() {
         <div className="grid gap-4">
           <div className="flex items-center gap-4">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              {previewUrl || avatarUrl ? (
+                <img src={previewUrl ?? avatarUrl!} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
                 <UserIcon className="h-8 w-8 text-[var(--w45)]" />
               )}
@@ -223,7 +256,11 @@ function SettingsPage() {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) uploadAvatar.mutate(file);
+                  if (file) {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(URL.createObjectURL(file));
+                    uploadAvatar.mutate(file);
+                  }
                   e.target.value = "";
                 }}
               />
@@ -352,4 +389,41 @@ function Row({
       <span className="font-mono text-xs truncate">{value}</span>
     </div>
   );
+}
+
+/**
+ * Resize an image to fit within maxSize x maxSize (preserving aspect ratio)
+ * and re-encode as JPEG. Skips upscaling.
+ */
+async function compressImage(file: File, maxSize: number, quality: number): Promise<Blob> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result as string);
+    fr.onerror = () => reject(new Error("Could not read image"));
+    fr.readAsDataURL(file);
+  });
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("Could not decode image"));
+    el.src = dataUrl;
+  });
+
+  const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas not supported");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", quality),
+  );
+  if (!blob) throw new Error("Could not encode image");
+  return blob;
 }
