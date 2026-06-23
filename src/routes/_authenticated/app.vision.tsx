@@ -99,6 +99,12 @@ function VisionPage() {
       return;
     }
 
+    if (sourcePreview && sourcePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(sourcePreview);
+    }
+    const localPreviewUrl = URL.createObjectURL(file);
+    setSourcePreview(localPreviewUrl);
+
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
@@ -202,6 +208,9 @@ function VisionPage() {
       }),
     onSuccess: () => {
       toast.success("Redesign rendered");
+      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(sourcePreview);
+      }
       setSourcePath(null);
       setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
@@ -275,23 +284,37 @@ function VisionPage() {
         >
           <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
           <div className="flex flex-wrap items-center gap-3">
-            {sourcePreview ? (
-              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10">
-                <img src={sourcePreview} alt="source" className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSourcePath(null);
-                    setSourcePreview(null);
-                  }}
-                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center"
-                  aria-label="Remove source photo"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+            {sourcePreview && !uploadError ? (
+              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10 shrink-0">
+                <img src={sourcePreview} alt="source" className={`h-full w-full object-cover transition-opacity duration-200 ${uploading ? "opacity-40" : ""}`} />
+                {uploading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                    <Loader2 className="h-5 w-5 text-white animate-spin" />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+                        URL.revokeObjectURL(sourcePreview);
+                      }
+                      setSourcePath(null);
+                      setSourcePreview(null);
+                    }}
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
+                    aria-label="Remove source photo"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             ) : uploadError && failedFile ? (
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded border border-red-500/30 bg-red-500/5 text-xs text-red-200 w-full max-w-xl">
+                {sourcePreview && (
+                  <div className="relative h-14 w-20 rounded overflow-hidden border border-red-500/20 shrink-0">
+                    <img src={sourcePreview} alt="failed upload preview" className="h-full w-full object-cover opacity-70" />
+                  </div>
+                )}
                 <div className="flex items-start gap-2 flex-1 min-w-0">
                   <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                   <div className="space-y-0.5 min-w-0">
@@ -317,8 +340,12 @@ function VisionPage() {
                     size="sm"
                     className="h-8 text-[var(--w55)] hover:text-white flex items-center gap-1"
                     onClick={() => {
+                      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+                        URL.revokeObjectURL(sourcePreview);
+                      }
                       setUploadError(null);
                       setFailedFile(null);
+                      setSourcePreview(null);
                     }}
                   >
                     <X className="h-3 w-3" />
