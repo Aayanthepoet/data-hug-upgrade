@@ -182,7 +182,7 @@ export const listMySocialAccounts = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("social_accounts")
-      .select("id, platform, display_name, avatar_url, status, connected_at")
+      .select("id, platform, display_name, avatar_url, status, connected_at, external_account_id")
       .eq("user_id", userId)
       .order("connected_at", { ascending: false });
     if (error) throw new Error(error.message);
