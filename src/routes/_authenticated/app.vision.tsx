@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
+import { SourcePhotoCropper } from "@/components/app/SourcePhotoCropper";
 import {
   generateRedesign,
   listRenders,
