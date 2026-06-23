@@ -58,14 +58,18 @@ export const getPublicPost = createServerFn({ method: "GET" })
       .maybeSingle();
     if (!post) return null;
 
-    let property: Record<string, unknown> | null = null;
+    let property: {
+      id: string; address: string | null; city: string | null; state: string | null;
+      zip: string | null; beds: number | null; baths: number | null; sqft: number | null;
+      price: number | null; photos: string[] | null;
+    } | null = null;
     if (post.property_id) {
       const { data: p } = await sb
         .from("properties")
         .select("id, address, city, state, zip, beds, baths, sqft, price, photos")
         .eq("id", post.property_id)
         .maybeSingle();
-      property = p ?? null;
+      property = (p as typeof property) ?? null;
     }
 
     return { agent, post, property };
