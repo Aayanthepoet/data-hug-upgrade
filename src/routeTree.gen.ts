@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
@@ -98,6 +99,11 @@ const IndexRoute = IndexRouteImport.update({
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -318,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRouteWithChildren
   '/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/agent': typeof AuthenticatedAppAgentRouteWithChildren
   '/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
@@ -413,6 +421,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/_authenticated/app/agent': typeof AuthenticatedAppAgentRouteWithChildren
   '/_authenticated/app/auctions': typeof AuthenticatedAppAuctionsRouteWithChildren
@@ -462,6 +471,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/dashboard'
     | '/api/chat'
+    | '/api/transcribe'
     | '/email/unsubscribe'
     | '/app/agent'
     | '/app/auctions'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/dashboard'
     | '/api/chat'
+    | '/api/transcribe'
     | '/email/unsubscribe'
     | '/app/agent'
     | '/app/auctions'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/dashboard'
     | '/api/chat'
+    | '/api/transcribe'
     | '/email/unsubscribe'
     | '/_authenticated/app/agent'
     | '/_authenticated/app/auctions'
@@ -603,6 +615,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiEnginesTtsRoute: typeof ApiEnginesTtsRoute
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
@@ -680,6 +693,13 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -1083,6 +1103,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiEnginesTtsRoute: ApiEnginesTtsRoute,
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
