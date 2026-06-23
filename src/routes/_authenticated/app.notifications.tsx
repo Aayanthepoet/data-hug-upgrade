@@ -384,6 +384,33 @@ function NotificationSettingsPage() {
         )}
       </section>
 
+      {/* Admin: wire DB → SMS pipeline */}
+      <section className="surface p-5 space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)]">
+          Admin · SMS trigger pipeline
+        </h2>
+        <p className="text-xs text-[var(--w55)]">
+          One-time setup: stores the public hook URL and shared secret in the
+          database vault so events (new lead, reply, auction activity) can
+          dispatch SMS through Twilio. Re-run after rotating the hook secret
+          or moving environments. Admins only.
+        </p>
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={wireMut.isPending}
+            onClick={() => wireMut.mutate()}
+          >
+            {wireMut.isPending && <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />}
+            Wire SMS trigger pipeline
+          </Button>
+        </div>
+      </section>
+
+
+
       <div className="flex items-center justify-end gap-3">
         {phoneBlockingSave && (
           <span className="text-xs text-red-500">
