@@ -61,6 +61,7 @@ function VisionPage() {
   // HEIC can't be decoded in <img> in most browsers, so we skip the crop step
   // for those formats and upload directly. Everything else opens the cropper.
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
@@ -130,6 +131,7 @@ function VisionPage() {
     const localPreviewUrl = URL.createObjectURL(file);
     setSourcePreview(localPreviewUrl);
 
+    setUploadingFile(file);
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
@@ -187,6 +189,7 @@ function VisionPage() {
       setTimeout(() => {
         setUploadProgress(0);
         setUploadPhase("idle");
+        setUploadingFile(null);
       }, 600);
     }
   }
@@ -355,7 +358,7 @@ function VisionPage() {
                     variant="outline"
                     size="sm"
                     className="h-8 border-red-500/30 hover:bg-red-500/10 text-red-200 hover:text-red-100 flex items-center gap-1"
-                    onClick={() => onSourceFile(failedFile)}
+                    onClick={() => void uploadFile(failedFile)}
                   >
                     <RefreshCw className="h-3 w-3" />
                     Retry
@@ -409,15 +412,35 @@ function VisionPage() {
             )}
           </div>
           {uploading || uploadPhase === "done" ? (
-            <div className="mt-2 space-y-1" aria-live="polite">
-              <Progress value={uploadProgress} className="h-1.5" />
-              <div className="flex justify-between text-[10px] text-[var(--w55)]">
-                <span>
-                  {uploadPhase === "encoding" && "Preparing image…"}
-                  {uploadPhase === "sending" && "Uploading to library…"}
-                  {uploadPhase === "done" && "Upload complete"}
-                </span>
-                <span>{uploadProgress}%</span>
+            <div
+              className={`mt-3 p-3 rounded-lg border flex items-center gap-3 transition-colors ${
+                uploadPhase === "done"
+                  ? "border-green-500/30 bg-green-500/5"
+                  : "border-primary/30 bg-primary/5"
+              }`}
+              aria-live="polite"
+              role="status"
+            >
+              <Loader2
+                className={`h-4 w-4 shrink-0 ${
+                  uploadPhase === "done" ? "text-green-400" : "text-primary animate-spin"
+                }`}
+              />
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className={uploadPhase === "done" ? "text-green-300" : "text-primary/90"}>
+                    {uploadPhase === "encoding" && "Preparing image…"}
+                    {uploadPhase === "sending" && "Uploading to library…"}
+                    {uploadPhase === "done" && "Upload complete"}
+                  </span>
+                  <span className="text-[var(--w55)] tabular-nums">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-1.5" />
+                {uploadingFile && (
+                  <p className="text-[10px] text-[var(--w55)] truncate">
+                    {uploadingFile.name} · {formatMB(uploadingFile.size)}
+                  </p>
+                )}
               </div>
             </div>
           ) : null}
