@@ -767,81 +767,25 @@ function VisionPage() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {renders.filter((r) => !hiddenRenderIds.has(r.id)).map((r) => (
-              <div key={r.id} className="surface p-3 space-y-2">
-                {r.status === "ready" && r.signed_url ? (
-                  <BeforeAfterSlider
-                    before={r.source_signed_url}
-                    after={r.signed_url}
-                    filename={`render-${r.id}.png`}
-                  />
-                ) : (
-                  <div className="aspect-video bg-black/20 rounded overflow-hidden flex items-center justify-center">
-                    <span className="text-xs text-[var(--w55)]">
-                      {r.status === "failed" ? "Failed" : "Rendering…"}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <StatusBadge status={r.status} />
-                  {r.style && <Badge variant="outline" className="text-xs">{r.style}</Badge>}
-                  {r.properties && (
-                    <Badge variant="outline" className="text-xs">
-                      <Link2 className="h-3 w-3 mr-1" />
-                      {r.properties.address}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-[var(--w55)] line-clamp-2">{r.prompt}</p>
-                {r.status === "failed" && r.error && (
-                  <p className="text-xs text-red-400 line-clamp-2">{r.error}</p>
-                )}
-                <div className="flex items-center justify-between pt-1">
-                  <Select
-                    value={r.property_id ?? "none"}
-                    onValueChange={(v) =>
-                      link.mutate({ id: r.id, property_id: v === "none" ? null : v })
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs flex-1 mr-2">
-                      <SelectValue placeholder="Link to…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Unlinked</SelectItem>
-                      {properties.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.address}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() =>
-                      regenerate.mutate({
-                        prompt: r.prompt ?? "",
-                        style: r.style,
-                        source_image_url: r.source_image_url,
-                        property_id: r.property_id,
-                      })
-                    }
-                    disabled={regenerate.isPending || !r.prompt}
-                    title="Regenerate with the same prompt and style"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${regenerate.isPending ? "animate-spin" : ""}`} />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setRenderIdToDelete(r.id)}
-                    disabled={remove.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-
-                </div>
-              </div>
+              <RenderCard
+                key={r.id}
+                r={r}
+                properties={properties}
+                onLink={(property_id) => link.mutate({ id: r.id, property_id })}
+                onDelete={() => setRenderIdToDelete(r.id)}
+                deleteDisabled={remove.isPending}
+                onRegenerate={(edited) =>
+                  regenerate.mutate({
+                    prompt: edited.prompt,
+                    style: edited.style,
+                    source_image_url: r.source_image_url,
+                    property_id: r.property_id,
+                  })
+                }
+                regenerating={regenerate.isPending}
+              />
             ))}
+
           </div>
         )}
       </div>
