@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,21 +76,51 @@ function SettingsPage() {
     };
   }, [profile?.avatar_url]);
 
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadPhase, setUploadPhase] = useState<"uploading" | "saving" | null>(null);
+
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
       if (!user?.id) throw new Error("Not signed in");
-      if (!file.type.startsWith("image/")) throw new Error("File must be an image");
-      if (file.size > 5 * 1024 * 1024) throw new Error("Image must be under 5MB");
+      if (!file.type.startsWith("image/")) throw new Error("Only image files are allowed (PNG, JPG, WebP, GIF)");
+      if (file.size > 5 * 1024 * 1024) {
+        const mb = (file.size / 1024 / 1024).toFixed(1);
+        throw new Error(`Image is ${mb}MB — max 5MB`);
+      }
 
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
-      const { error: upErr } = await supabase.storage
+      // Get a signed upload URL so we can drive the PUT via XHR for progress
+      setUploadPhase("uploading");
+      setUploadProgress(0);
+      const { data: signed, error: signErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { cacheControl: "3600", upsert: false });
-      if (upErr) throw upErr;
+        .createSignedUploadUrl(path);
+      if (signErr || !signed) throw new Error(signErr?.message || "Could not start upload");
 
-      // Delete previous avatar if any
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", signed.signedUrl, true);
+        xhr.setRequestHeader("x-upsert", "false");
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed (${xhr.status}): ${xhr.responseText || xhr.statusText}`));
+        };
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.onabort = () => reject(new Error("Upload was cancelled"));
+        xhr.send(file);
+      });
+
+      setUploadPhase("saving");
+      setUploadProgress(100);
+
       if (profile?.avatar_url) {
         await supabase.storage.from("avatars").remove([profile.avatar_url]);
       }
@@ -98,13 +129,19 @@ function SettingsPage() {
         .from("profiles")
         .update({ avatar_url: path })
         .eq("id", user.id);
-      if (dbErr) throw dbErr;
+      if (dbErr) throw new Error(`Couldn't save profile: ${dbErr.message}`);
     },
     onSuccess: () => {
-      toast.success("Avatar updated");
+      toast.success("Avatar updated", { description: "Your new profile picture is live." });
       qc.invalidateQueries({ queryKey: ["profile", user?.id] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      toast.error("Avatar upload failed", { description: e.message });
+    },
+    onSettled: () => {
+      setUploadProgress(null);
+      setUploadPhase(null);
+    },
   });
 
   const save = useMutation({
@@ -202,6 +239,20 @@ function SettingsPage() {
                 )}
               </Button>
               <p className="text-xs text-[var(--w45)] mt-1.5">PNG or JPG, up to 5MB</p>
+              {uploadAvatar.isPending && (
+                <div className="mt-3 space-y-1.5">
+                  <Progress value={uploadPhase === "saving" ? 100 : uploadProgress ?? 0} className="h-1.5" />
+                  <div className="flex justify-between text-xs text-[var(--w55)]">
+                    <span>
+                      {uploadPhase === "saving"
+                        ? "Saving to profile…"
+                        : uploadProgress != null
+                          ? `Uploading… ${uploadProgress}%`
+                          : "Preparing…"}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
