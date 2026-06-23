@@ -97,6 +97,14 @@ function PropertyDetailPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              to="/app/vision"
+              search={{ property: propertyId }}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5"
+              title="Generate AI redesign for this property"
+            >
+              <Link2 className="h-3.5 w-3.5 text-cyan" /> Redesign in Vision Studio
+            </Link>
             <ListForAuctionButton propertyId={propertyId} defaultTitle={p.address} />
             <SaveToWatchlistButton
               propertyKey={propertyId}

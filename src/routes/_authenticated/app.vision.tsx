@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,7 +19,12 @@ import {
   getVisionCapabilities,
 } from "@/lib/vision/vision.functions";
 
+const visionSearchSchema = z.object({
+  property: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_authenticated/app/vision")({
+  validateSearch: zodValidator(visionSearchSchema),
   head: () => ({ meta: [{ title: "Vision Studio — PropAI" }] }),
   component: VisionPage,
 });
@@ -36,7 +43,13 @@ function VisionPage() {
   );
   const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
   const [resolution, setResolution] = useState<"hd" | "2k" | "4k">("hd");
-  const [propertyId, setPropertyId] = useState<string>("none");
+  // Auto-link: when navigated from a property page (?property=<uuid>) we
+  // prefill the selector so the next render is attached without extra clicks.
+  const { property: prefillProperty } = Route.useSearch();
+  const [propertyId, setPropertyId] = useState<string>(prefillProperty ?? "none");
+  useEffect(() => {
+    if (prefillProperty) setPropertyId(prefillProperty);
+  }, [prefillProperty]);
 
   const { data: renders = [] } = useQuery({
     queryKey: ["vision-renders"],
