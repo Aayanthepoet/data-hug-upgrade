@@ -157,6 +157,45 @@ export const Route = createFileRoute("/api/chat")({
               return { count: data?.length ?? 0, leads: data ?? [] };
             },
           }),
+          get_lead: tool({
+            description: "Get full details for one inbound lead including its notes, email send history, and assignment history. Use when the user asks about a specific lead by name or ID.",
+            inputSchema: z.object({ lead_id: z.string().uuid() }),
+            execute: async ({ lead_id }) => {
+              const { data: lead, error } = await supabase
+                .from("leads")
+                .select("id, full_name, email, company, phone, message, source, status, assigned_to, created_at")
+                .eq("id", lead_id)
+                .maybeSingle();
+              if (error) return { error: error.message };
+              if (!lead) return { error: "Lead not found" };
+              const [notesRes, emailsRes, assignmentsRes] = await Promise.all([
+                supabase
+                  .from("lead_notes")
+                  .select("id, body, author_id, created_at")
+                  .eq("lead_id", lead_id)
+                  .order("created_at", { ascending: false })
+                  .limit(50),
+                supabase
+                  .from("lead_emails")
+                  .select("id, recipient_email, recipient_id, sent_by, status, error_message, created_at")
+                  .eq("lead_id", lead_id)
+                  .order("created_at", { ascending: false })
+                  .limit(50),
+                supabase
+                  .from("lead_assignments")
+                  .select("id, assigned_to, assigned_by, created_at")
+                  .eq("lead_id", lead_id)
+                  .order("created_at", { ascending: false })
+                  .limit(20),
+              ]);
+              return {
+                lead,
+                notes: notesRes.data ?? [],
+                emails: emailsRes.data ?? [],
+                assignments: assignmentsRes.data ?? [],
+              };
+            },
+          }),
           list_contracts: tool({
             description: "List the user's contracts (newest first). Optionally filter by status: draft, sent, viewed, signed, failed.",
             inputSchema: z.object({
