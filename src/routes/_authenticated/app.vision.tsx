@@ -14,6 +14,7 @@ import {
   deleteRender,
   linkRenderToProperty,
   listPropertiesForRender,
+  getVisionCapabilities,
 } from "@/lib/vision/vision.functions";
 
 export const Route = createFileRoute("/_authenticated/app/vision")({
@@ -28,6 +29,7 @@ function VisionPage() {
   const deleteFn = useServerFn(deleteRender);
   const linkFn = useServerFn(linkRenderToProperty);
   const propsFn = useServerFn(listPropertiesForRender);
+  const capsFn = useServerFn(getVisionCapabilities);
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
@@ -44,6 +46,12 @@ function VisionPage() {
     queryKey: ["vision-properties"],
     queryFn: () => propsFn(),
   });
+  const { data: caps } = useQuery({
+    queryKey: ["vision-capabilities"],
+    queryFn: () => capsFn(),
+  });
+  const supported = caps?.supportedResolutions ?? ["hd", "2k", "4k"];
+  const resolutionSupported = supported.includes(resolution);
 
   const generate = useMutation({
     mutationFn: () =>
@@ -119,11 +127,23 @@ function VisionPage() {
             <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="hd">HD · 1024 × 1024</SelectItem>
-                <SelectItem value="2k">2K · 2048 × 2048</SelectItem>
-                <SelectItem value="4k">4K · 4096 × 4096</SelectItem>
+                <SelectItem value="hd" disabled={!supported.includes("hd")}>
+                  HD · 1024 × 1024{!supported.includes("hd") && " — unavailable"}
+                </SelectItem>
+                <SelectItem value="2k" disabled={!supported.includes("2k")}>
+                  2K · 2048 × 2048{!supported.includes("2k") && " — unavailable"}
+                </SelectItem>
+                <SelectItem value="4k" disabled={!supported.includes("4k")}>
+                  4K · 4096 × 4096{!supported.includes("4k") && " — unavailable"}
+                </SelectItem>
               </SelectContent>
             </Select>
+            {!resolutionSupported && (
+              <p className="text-xs text-red-400 mt-1">
+                {resolution.toUpperCase()} isn't available on the current renderer
+                {caps?.provider ? ` (${caps.provider})` : ""}. Pick a supported tier.
+              </p>
+            )}
           </div>
           <div>
             <label className="text-xs text-[var(--w55)]">Link to property (optional)</label>
@@ -139,7 +159,7 @@ function VisionPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending}>
+          <Button onClick={() => generate.mutate()} disabled={generate.isPending || !resolutionSupported}>
             {generate.isPending ? "Rendering…" : "Generate redesign"}
           </Button>
         </div>

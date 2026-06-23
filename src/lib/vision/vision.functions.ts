@@ -34,7 +34,26 @@ export const generateRedesign = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    // 1. Queue a row up-front so a crash still leaves an audit record.
+    // 1. Pick provider — real if API key present, otherwise mock — and
+    //    validate the requested resolution BEFORE we queue a render row,
+    //    so unsupported tiers (e.g. 4K on gpt-image-2) surface a clean
+    //    error to the UI instead of a half-written audit row.
+    const key = process.env.LOVABLE_API_KEY;
+    const { mockVisionProvider } = await import("./mock-provider.server");
+    const { createLovableVisionProvider } = await import("./lovable-provider.server");
+    const { RESOLUTION_LABELS } = await import("./provider");
+    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
+
+    if (!provider.supportedResolutions.includes(data.resolution)) {
+      const supportedLabel = provider.supportedResolutions
+        .map((r) => RESOLUTION_LABELS[r])
+        .join(", ");
+      throw new Error(
+        `${RESOLUTION_LABELS[data.resolution]} is not available on the current renderer (${provider.name}). Supported: ${supportedLabel}.`,
+      );
+    }
+
+    // 2. Queue a row up-front so a crash still leaves an audit record.
     const { data: row, error: insErr } = await supabase
       .from("media_assets")
       .insert({
@@ -53,12 +72,6 @@ export const generateRedesign = createServerFn({ method: "POST" })
     if (insErr) throw new Error(insErr.message);
 
     const renderId = row.id as string;
-
-    // 2. Pick provider — real if API key present, otherwise mock.
-    const key = process.env.LOVABLE_API_KEY;
-    const { mockVisionProvider } = await import("./mock-provider.server");
-    const { createLovableVisionProvider } = await import("./lovable-provider.server");
-    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
 
     await supabase
       .from("media_assets")
@@ -232,4 +245,19 @@ export const listPropertiesForRender = createServerFn({ method: "GET" })
       .limit(100);
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+// Exposes the active provider's name + supported resolution tiers so the
+// UI can disable unsupported options and explain why.
+export const getVisionCapabilities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const key = process.env.LOVABLE_API_KEY;
+    const { mockVisionProvider } = await import("./mock-provider.server");
+    const { createLovableVisionProvider } = await import("./lovable-provider.server");
+    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
+    return {
+      provider: provider.name,
+      supportedResolutions: [...provider.supportedResolutions],
+    };
   });

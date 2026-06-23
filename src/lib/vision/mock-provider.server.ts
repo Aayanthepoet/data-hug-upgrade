@@ -9,6 +9,7 @@ const TINY_PNG_B64 =
 
 export const mockVisionProvider: VisionProvider = {
   name: "mock-vision",
+  supportedResolutions: ["hd", "2k", "4k"],
   async render() {
     return { provider: "mock-vision", imageBase64: TINY_PNG_B64 };
   },
