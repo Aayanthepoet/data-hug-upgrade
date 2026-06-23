@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2 } from "lucide-react";
+import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2, Building2 } from "lucide-react";
 import {
   listMyPosts,
   listMySocialAccounts,
