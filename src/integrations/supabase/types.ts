@@ -248,6 +248,56 @@ export type Database = {
           },
         ]
       }
+      compliance_digest_reads: {
+        Row: {
+          digest_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          digest_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          digest_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_digest_reads_digest_id_fkey"
+            columns: ["digest_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_digests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_digests: {
+        Row: {
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          stats: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          stats?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          stats?: Json
+        }
+        Relationships: []
+      }
       comps: {
         Row: {
           address: string
