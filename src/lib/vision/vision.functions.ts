@@ -246,3 +246,18 @@ export const listPropertiesForRender = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+// Exposes the active provider's name + supported resolution tiers so the
+// UI can disable unsupported options and explain why.
+export const getVisionCapabilities = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const key = process.env.LOVABLE_API_KEY;
+    const { mockVisionProvider } = await import("./mock-provider.server");
+    const { createLovableVisionProvider } = await import("./lovable-provider.server");
+    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
+    return {
+      provider: provider.name,
+      supportedResolutions: [...provider.supportedResolutions],
+    };
+  });
