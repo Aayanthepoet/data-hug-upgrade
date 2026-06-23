@@ -28,6 +28,23 @@ export const listContractsForProperty = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+export const getContract = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ contract_id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("contracts")
+      .select("*")
+      .eq("id", data.contract_id)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Contract not found.");
+    return row;
+  });
+
+
 export const getContractPdfUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ contract_id: z.string().uuid() }).parse(i))
