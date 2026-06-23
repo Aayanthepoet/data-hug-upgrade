@@ -270,7 +270,7 @@ export const listMyProperties = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("properties")
-      .select("id, address, city, state, zip, beds, baths, sqft, price, photos")
+      .select("id, address, city, state, zip, beds, baths, sqft, list_price, estimated_value")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(200);
