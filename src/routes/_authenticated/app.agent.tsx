@@ -51,6 +51,42 @@ function AgentLayout() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const updateTitleFn = useServerFn(updateChatThreadTitle);
+
+  const updateTitle = useMutation({
+    mutationFn: ({ threadId, title }: { threadId: string; title: string }) =>
+      updateTitleFn({ data: { threadId, title } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["chat-threads"] });
+      setEditingId(null);
+      toast.success("Chat renamed");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleStartEdit = (e: React.MouseEvent, id: string, title: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingId(id);
+    setEditingTitle(title);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    if (!editingTitle.trim()) {
+      toast.error("Title cannot be empty");
+      return;
+    }
+    updateTitle.mutate({ threadId: id, title: editingTitle.trim() });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
   // Auto-redirect to most recent thread when landing on bare /app/agent
   useEffect(() => {
     if (activeId) return;
