@@ -46,6 +46,23 @@ function OptOutsPage() {
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
 
+  const sendTestDigestFn = useServerFn(sendTestComplianceDigest);
+  const sendTestDigest = useMutation({
+    mutationFn: () =>
+      sendTestDigestFn({
+        data: {
+          dashboardUrl:
+            typeof window !== "undefined" ? `${window.location.origin}/app/opt-outs` : undefined,
+        },
+      }),
+    onSuccess: (r) => {
+      if (r.queued > 0) toast.success(`Test digest queued to ${r.recipientEmail}`);
+      else if (r.suppressed > 0) toast.error(`${r.recipientEmail} is on the suppression list`);
+      else toast.error("Digest could not be sent");
+    },
+    onError: (e) => toast.error((e as Error).message || "Failed to send test digest"),
+  });
+
   // Verify admin
   const { data: isAdmin, isLoading: roleLoading } = useQuery({
     queryKey: ["is-admin", user?.id],
