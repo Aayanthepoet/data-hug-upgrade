@@ -409,15 +409,35 @@ function VisionPage() {
             )}
           </div>
           {uploading || uploadPhase === "done" ? (
-            <div className="mt-2 space-y-1" aria-live="polite">
-              <Progress value={uploadProgress} className="h-1.5" />
-              <div className="flex justify-between text-[10px] text-[var(--w55)]">
-                <span>
-                  {uploadPhase === "encoding" && "Preparing image…"}
-                  {uploadPhase === "sending" && "Uploading to library…"}
-                  {uploadPhase === "done" && "Upload complete"}
-                </span>
-                <span>{uploadProgress}%</span>
+            <div
+              className={`mt-3 p-3 rounded-lg border flex items-center gap-3 transition-colors ${
+                uploadPhase === "done"
+                  ? "border-green-500/30 bg-green-500/5"
+                  : "border-primary/30 bg-primary/5"
+              }`}
+              aria-live="polite"
+              role="status"
+            >
+              <Loader2
+                className={`h-4 w-4 shrink-0 ${
+                  uploadPhase === "done" ? "text-green-400" : "text-primary animate-spin"
+                }`}
+              />
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className={uploadPhase === "done" ? "text-green-300" : "text-primary/90"}>
+                    {uploadPhase === "encoding" && "Preparing image…"}
+                    {uploadPhase === "sending" && "Uploading to library…"}
+                    {uploadPhase === "done" && "Upload complete"}
+                  </span>
+                  <span className="text-[var(--w55)] tabular-nums">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-1.5" />
+                {uploadingFile && (
+                  <p className="text-[10px] text-[var(--w55)] truncate">
+                    {uploadingFile.name} · {formatMB(uploadingFile.size)}
+                  </p>
+                )}
               </div>
             </div>
           ) : null}
