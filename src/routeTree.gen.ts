@@ -56,6 +56,7 @@ import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
+import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
@@ -316,6 +317,12 @@ const AuthenticatedAppVisionLibraryRoute =
     path: '/library',
     getParentRoute: () => AuthenticatedAppVisionRoute,
   } as any)
+const AuthenticatedAppSocialComposeRoute =
+  AuthenticatedAppSocialComposeRouteImport.update({
+    id: '/social/compose',
+    path: '/social/compose',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
     id: '/search',
@@ -407,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -462,6 +470,7 @@ export interface FileRoutesByTo {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -520,6 +529,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -690,6 +702,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
+    | '/_authenticated/app/social/compose'
     | '/_authenticated/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -1064,6 +1077,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppVisionLibraryRouteImport
       parentRoute: typeof AuthenticatedAppVisionRoute
     }
+    '/_authenticated/app/social/compose': {
+      id: '/_authenticated/app/social/compose'
+      path: '/social/compose'
+      fullPath: '/app/social/compose'
+      preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
       path: '/search'
@@ -1232,6 +1252,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRouteWithChildren
   AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
+  AuthenticatedAppSocialComposeRoute: typeof AuthenticatedAppSocialComposeRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -1257,6 +1278,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
     AuthenticatedAppAdminContractsRouteWithChildren,
   AuthenticatedAppContractsContractIdRoute:
     AuthenticatedAppContractsContractIdRoute,
+  AuthenticatedAppSocialComposeRoute: AuthenticatedAppSocialComposeRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
@@ -1317,13 +1339,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
