@@ -813,7 +813,7 @@ function VisionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete render history?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this render? This action cannot be undone and will permanently remove this item from your library history.
+              Are you sure you want to delete this render? You'll have a few seconds to undo before it's permanently removed from your library history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -822,7 +822,7 @@ function VisionPage() {
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 if (renderIdToDelete) {
-                  remove.mutate(renderIdToDelete);
+                  softDeleteRender(renderIdToDelete);
                   setRenderIdToDelete(null);
                 }
               }}
