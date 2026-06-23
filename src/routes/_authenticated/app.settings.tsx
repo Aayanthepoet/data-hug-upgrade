@@ -125,7 +125,7 @@ function SettingsPage() {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", signed.signedUrl, true);
         xhr.setRequestHeader("x-upsert", "false");
-        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.setRequestHeader("Content-Type", contentType);
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             setUploadProgress(Math.round((e.loaded / e.total) * 100));
@@ -137,7 +137,7 @@ function SettingsPage() {
         };
         xhr.onerror = () => reject(new Error("Network error during upload"));
         xhr.onabort = () => reject(new Error("Upload was cancelled"));
-        xhr.send(file);
+        xhr.send(upload);
       });
 
       setUploadPhase("saving");
