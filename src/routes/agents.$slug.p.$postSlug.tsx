@@ -69,11 +69,18 @@ export const Route = createFileRoute("/agents/$slug/p/$postSlug")({
   component: PostPage,
 });
 
+type PropertyView = {
+  id: string; address: string | null; city: string | null; state: string | null;
+  zip: string | null; beds: number | null; baths: number | null; sqft: number | null;
+  price: number | null; photos: string[] | null;
+} | null;
+
 function PostPage() {
   const params = Route.useParams();
   const { data } = useSuspenseQuery(postQuery(params.slug, params.postSlug));
   if (!data) return null;
-  const { agent, post, property } = data as PostData;
+  const { agent, post } = data as PostData;
+  const property = (data as PostData).property as PropertyView;
   const fullName = agent.full_name || `Agent ${agent.public_slug}`;
   const bodyHtml = marked.parse(post.body_md || "", { async: false }) as string;
 

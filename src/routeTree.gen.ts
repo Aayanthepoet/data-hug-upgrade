@@ -54,6 +54,7 @@ import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
+import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
@@ -304,6 +305,11 @@ const ApiPublicHooksCloseAuctionsRoute =
     path: '/api/public/hooks/close-auctions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AgentsSlugPPostSlugRoute = AgentsSlugPPostSlugRouteImport.update({
+  id: '/p/$postSlug',
+  path: '/p/$postSlug',
+  getParentRoute: () => AgentsSlugRoute,
+} as any)
 const AuthenticatedAppVisionLibraryRoute =
   AuthenticatedAppVisionLibraryRouteImport.update({
     id: '/library',
@@ -369,7 +375,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/agents/$slug': typeof AgentsSlugRoute
+  '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
+  '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -423,7 +430,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/agents/$slug': typeof AgentsSlugRoute
+  '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -456,6 +463,7 @@ export interface FileRoutesByTo {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
+  '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -480,7 +488,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/agents/$slug': typeof AgentsSlugRoute
+  '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -513,6 +521,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
+  '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/app/vision/library'
+    | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/app/vision/library'
+    | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/_authenticated/app/vision/library'
+    | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -702,7 +714,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
-  AgentsSlugRoute: typeof AgentsSlugRoute
+  AgentsSlugRoute: typeof AgentsSlugRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1038,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agents/$slug/p/$postSlug': {
+      id: '/agents/$slug/p/$postSlug'
+      path: '/p/$postSlug'
+      fullPath: '/agents/$slug/p/$postSlug'
+      preLoaderRoute: typeof AgentsSlugPPostSlugRouteImport
+      parentRoute: typeof AgentsSlugRoute
+    }
     '/_authenticated/app/vision/library': {
       id: '/_authenticated/app/vision/library'
       path: '/library'
@@ -1256,6 +1275,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AgentsSlugRouteChildren {
+  AgentsSlugPPostSlugRoute: typeof AgentsSlugPPostSlugRoute
+}
+
+const AgentsSlugRouteChildren: AgentsSlugRouteChildren = {
+  AgentsSlugPPostSlugRoute: AgentsSlugPPostSlugRoute,
+}
+
+const AgentsSlugRouteWithChildren = AgentsSlugRoute._addFileChildren(
+  AgentsSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1265,7 +1296,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
-  AgentsSlugRoute: AgentsSlugRoute,
+  AgentsSlugRoute: AgentsSlugRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
