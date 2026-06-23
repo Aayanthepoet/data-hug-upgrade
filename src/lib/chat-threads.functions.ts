@@ -1,11 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import type { Json } from "@/integrations/supabase/types";
 
 export type StoredMessage = {
   id: string;
   role: "user" | "assistant" | "system";
-  parts: unknown[];
+  parts: Json;
 };
 
 export const listChatThreads = createServerFn({ method: "GET" })
