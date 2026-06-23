@@ -35,6 +35,7 @@ import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
 import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
 import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
@@ -48,6 +49,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
+import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
@@ -190,6 +192,12 @@ const AuthenticatedAppOptOutsRoute = AuthenticatedAppOptOutsRouteImport.update({
   path: '/opt-outs',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -264,6 +272,11 @@ const ApiPublicHooksOutreachReplyRoute =
     path: '/api/public/hooks/outreach-reply',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksNotifySmsRoute = ApiPublicHooksNotifySmsRouteImport.update({
+  id: '/api/public/hooks/notify-sms',
+  path: '/api/public/hooks/notify-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksComplianceDigestRoute =
   ApiPublicHooksComplianceDigestRouteImport.update({
     id: '/api/public/hooks/compliance-digest',
@@ -333,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -354,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -380,6 +395,7 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -401,6 +417,7 @@ export interface FileRoutesByTo {
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -430,6 +447,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -451,6 +469,7 @@ export interface FileRoutesById {
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -480,6 +499,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/notifications'
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
@@ -501,6 +521,7 @@ export interface FileRouteTypes {
     | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -527,6 +548,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/notifications'
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
@@ -548,6 +570,7 @@ export interface FileRouteTypes {
     | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -576,6 +599,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
+    | '/_authenticated/app/notifications'
     | '/_authenticated/app/opt-outs'
     | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
@@ -597,6 +621,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -622,6 +647,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
   ApiPublicHooksComplianceDigestRoute: typeof ApiPublicHooksComplianceDigestRoute
+  ApiPublicHooksNotifySmsRoute: typeof ApiPublicHooksNotifySmsRoute
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
@@ -814,6 +840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOptOutsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/notifications': {
+      id: '/_authenticated/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/leads': {
       id: '/_authenticated/app/leads'
       path: '/leads'
@@ -903,6 +936,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/outreach-reply'
       fullPath: '/api/public/hooks/outreach-reply'
       preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notify-sms': {
+      id: '/api/public/hooks/notify-sms'
+      path: '/api/public/hooks/notify-sms'
+      fullPath: '/api/public/hooks/notify-sms'
+      preLoaderRoute: typeof ApiPublicHooksNotifySmsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/compliance-digest': {
@@ -1045,6 +1085,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
+  AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOptOutsRoute: typeof AuthenticatedAppOptOutsRoute
   AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
@@ -1065,6 +1106,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
+  AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOptOutsRoute: AuthenticatedAppOptOutsRoute,
   AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
@@ -1110,6 +1152,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
   ApiPublicHooksComplianceDigestRoute: ApiPublicHooksComplianceDigestRoute,
+  ApiPublicHooksNotifySmsRoute: ApiPublicHooksNotifySmsRoute,
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
