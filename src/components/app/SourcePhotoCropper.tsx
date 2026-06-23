@@ -133,7 +133,7 @@ export function SourcePhotoCropper({ file, onCancel, onUseOriginal, onConfirmCro
     try {
       const cropped = await buildCroppedFile();
       if (cropped) {
-        onConfirmCrop(cropped);
+        onConfirmCrop(cropped, { aspect, maxEdge });
       } else if (file) {
         // If we couldn't build a crop (no selection drawn), upload original.
         onUseOriginal(file);
