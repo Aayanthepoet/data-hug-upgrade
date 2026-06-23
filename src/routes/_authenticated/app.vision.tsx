@@ -355,7 +355,7 @@ function VisionPage() {
                     variant="outline"
                     size="sm"
                     className="h-8 border-red-500/30 hover:bg-red-500/10 text-red-200 hover:text-red-100 flex items-center gap-1"
-                    onClick={() => onSourceFile(failedFile)}
+                    onClick={() => void uploadFile(failedFile)}
                   >
                     <RefreshCw className="h-3 w-3" />
                     Retry
