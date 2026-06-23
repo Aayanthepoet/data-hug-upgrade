@@ -99,6 +99,12 @@ function VisionPage() {
       return;
     }
 
+    if (sourcePreview && sourcePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(sourcePreview);
+    }
+    const localPreviewUrl = URL.createObjectURL(file);
+    setSourcePreview(localPreviewUrl);
+
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
