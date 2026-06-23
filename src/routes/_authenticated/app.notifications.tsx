@@ -94,7 +94,9 @@ function NotificationSettingsPage() {
       return updateFn({
         data: {
           ...prefs,
-          sms_phone: prefs.sms_phone?.trim() || null,
+          sms_phone: prefs.channel_sms
+            ? (prefs.sms_phone ? prefs.sms_phone.replace(/[\s\-().]+/g, "").trim() || null : null)
+            : (prefs.sms_phone?.trim() || null),
           quiet_start_local: prefs.quiet_start_local + ":00",
           quiet_end_local: prefs.quiet_end_local + ":00",
         },
