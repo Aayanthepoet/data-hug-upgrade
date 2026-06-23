@@ -49,7 +49,7 @@ const ComplianceDigest = ({
     <Html lang="en" dir="ltr">
       <Head />
       <Preview>
-        {optOutsThisWeek} new opt-outs · {blockedSends} blocked sends · {fmt(periodStart)}–{fmt(periodEnd)}
+        {`${optOutsThisWeek} new opt-outs · ${blockedSends} blocked sends · ${fmt(periodStart)}–${fmt(periodEnd)}`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
