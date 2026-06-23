@@ -11,6 +11,16 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
 import { SourcePhotoCropper } from "@/components/app/SourcePhotoCropper";
 import {
@@ -52,6 +62,8 @@ function VisionPage() {
   const [sourcePhotoId, setSourcePhotoId] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [removingSource, setRemovingSource] = useState(false);
+  const [isDeleteSourceDialogOpen, setIsDeleteSourceDialogOpen] = useState(false);
+  const [renderIdToDelete, setRenderIdToDelete] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   // The server fn is a single request, so we can't observe true upload
   // bytes-sent. Instead we drive a two-phase bar: real progress during
@@ -390,7 +402,7 @@ function VisionPage() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => void removeSourcePhoto()}
+                      onClick={() => setIsDeleteSourceDialogOpen(true)}
                       className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
                       aria-label="Remove source photo"
                     >
@@ -416,7 +428,7 @@ function VisionPage() {
                     </label>
                     <button
                       type="button"
-                      onClick={() => void removeSourcePhoto()}
+                      onClick={() => setIsDeleteSourceDialogOpen(true)}
                       className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-500/20 text-[11px] text-red-300 hover:bg-red-500/10 transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -658,7 +670,7 @@ function VisionPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => remove.mutate(r.id)}
+                    onClick={() => setRenderIdToDelete(r.id)}
                     disabled={remove.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -693,6 +705,54 @@ function VisionPage() {
           });
         }}
       />
+
+      <AlertDialog open={isDeleteSourceDialogOpen} onOpenChange={setIsDeleteSourceDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove source photo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this source photo? This will permanently delete the file and remove it as your "before" image.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                setIsDeleteSourceDialogOpen(false);
+                void removeSourcePhoto();
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={renderIdToDelete !== null} onOpenChange={(open) => !open && setRenderIdToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete render history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this render? This action cannot be undone and will permanently remove this item from your library history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                if (renderIdToDelete) {
+                  remove.mutate(renderIdToDelete);
+                  setRenderIdToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
