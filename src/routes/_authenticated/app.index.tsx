@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardAnalyticsWidget } from "@/components/app/DashboardAnalyticsWidget";
 import { OptOutTrendsWidget } from "@/components/app/OptOutTrendsWidget";
+import { ComplianceDigestWidget } from "@/components/app/ComplianceDigestWidget";
 
 
 export const Route = createFileRoute("/_authenticated/app/")({
@@ -53,6 +54,10 @@ function Overview() {
 
       <div className="mt-10">
         <DashboardAnalyticsWidget />
+      </div>
+
+      <div className="mt-6">
+        <ComplianceDigestWidget />
       </div>
 
       <div className="mt-6">
