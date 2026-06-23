@@ -191,3 +191,15 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
+
+function StatusBadge({ connected }: { connected: boolean }) {
+  return connected ? (
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/30">
+      ● Connected
+    </span>
+  ) : (
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--w55)] border border-border">
+      Not connected
+    </span>
+  );
+}
