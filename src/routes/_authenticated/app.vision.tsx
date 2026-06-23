@@ -189,6 +189,7 @@ function VisionPage() {
       setTimeout(() => {
         setUploadProgress(0);
         setUploadPhase("idle");
+        setUploadingFile(null);
       }, 600);
     }
   }
