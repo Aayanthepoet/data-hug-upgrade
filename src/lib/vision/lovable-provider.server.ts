@@ -7,6 +7,9 @@ import { RESOLUTION_SIZES, type VisionProvider, type VisionRenderInput, type Vis
 export function createLovableVisionProvider(apiKey: string): VisionProvider {
   return {
     name: "lovable-ai/gpt-image-2",
+    // Upstream (openai/gpt-image-2) only renders up to ~1024². 2K/4K are
+    // surfaced in the picker but rejected here with a clear error.
+    supportedResolutions: ["hd"] as const,
     async render(input: VisionRenderInput): Promise<VisionRenderResult> {
       const STYLE_DESCRIPTORS: Record<string, string> = {
         "modern": "clean lines, neutral palette, minimal decor, matte finishes",
