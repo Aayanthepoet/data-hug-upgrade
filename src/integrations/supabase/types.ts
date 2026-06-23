@@ -484,6 +484,74 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          buyer_email: string | null
+          buyer_name: string
+          closing_date: string
+          created_at: string
+          error_message: string | null
+          id: string
+          pdf_storage_path: string | null
+          property_id: string
+          purchase_price: number
+          seller_email: string | null
+          seller_name: string
+          signed_at: string | null
+          signed_pdf_url: string | null
+          signwell_document_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buyer_email?: string | null
+          buyer_name: string
+          closing_date: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pdf_storage_path?: string | null
+          property_id: string
+          purchase_price: number
+          seller_email?: string | null
+          seller_name: string
+          signed_at?: string | null
+          signed_pdf_url?: string | null
+          signwell_document_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buyer_email?: string | null
+          buyer_name?: string
+          closing_date?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          pdf_storage_path?: string | null
+          property_id?: string
+          purchase_price?: number
+          seller_email?: string | null
+          seller_name?: string
+          signed_at?: string | null
+          signed_pdf_url?: string | null
+          signwell_document_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       distress_events: {
         Row: {
           amount: number | null
