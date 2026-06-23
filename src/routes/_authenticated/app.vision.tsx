@@ -61,6 +61,7 @@ function VisionPage() {
   // HEIC can't be decoded in <img> in most browsers, so we skip the crop step
   // for those formats and upload directly. Everything else opens the cropper.
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
