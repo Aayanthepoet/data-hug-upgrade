@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Bell, MessageSquare, UserPlus, Gavel, Smartphone, Loader2 } from "lucide-react";
+import { Bell, MessageSquare, UserPlus, Gavel, Smartphone, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import {
   getNotificationPreferences,
   updateNotificationPreferences,
@@ -94,7 +94,9 @@ function NotificationSettingsPage() {
       return updateFn({
         data: {
           ...prefs,
-          sms_phone: prefs.sms_phone?.trim() || null,
+          sms_phone: prefs.channel_sms
+            ? (prefs.sms_phone ? prefs.sms_phone.replace(/[\s\-().]+/g, "").trim() || null : null)
+            : (prefs.sms_phone?.trim() || null),
           quiet_start_local: prefs.quiet_start_local + ":00",
           quiet_end_local: prefs.quiet_end_local + ":00",
         },
@@ -117,6 +119,25 @@ function NotificationSettingsPage() {
 
   const update = <K extends keyof Prefs>(key: K, value: Prefs[K]) =>
     setPrefs((p) => (p ? { ...p, [key]: value } : p));
+
+  // E.164: leading '+', country code 1-3 digits (no leading 0), then up to 14
+  // more digits. Total digits 8-15. Accept user input that may include spaces,
+  // dashes, parens — we strip them before validating and before saving.
+  const normalizePhone = (raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return "";
+    // Keep leading + if present, strip everything non-digit after.
+    const hasPlus = trimmed.startsWith("+");
+    const digits = trimmed.replace(/\D+/g, "");
+    return hasPlus ? `+${digits}` : digits;
+  };
+  const E164_RE = /^\+[1-9]\d{7,14}$/;
+  const rawPhone = prefs.sms_phone ?? "";
+  const normalizedPhone = normalizePhone(rawPhone);
+  const phoneTouched = rawPhone.length > 0;
+  const phoneValid = E164_RE.test(normalizedPhone);
+  const phoneError = prefs.channel_sms && phoneTouched && !phoneValid;
+  const phoneBlockingSave = prefs.channel_sms && !phoneValid;
 
   const browserTz =
     typeof Intl !== "undefined"
@@ -171,17 +192,57 @@ function NotificationSettingsPage() {
         {prefs.channel_sms && (
           <div className="pl-7 space-y-2">
             <Label htmlFor="sms_phone" className="text-xs">
-              SMS number (E.164 format, e.g. +14155551234)
+              Mobile number
             </Label>
-            <Input
-              id="sms_phone"
-              type="tel"
-              inputMode="tel"
-              placeholder="+14155551234"
-              value={prefs.sms_phone ?? ""}
-              onChange={(e) => update("sms_phone", e.target.value)}
-              className="max-w-xs"
-            />
+            <div className="relative max-w-xs">
+              <Input
+                id="sms_phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="+1 415 555 1234"
+                value={prefs.sms_phone ?? ""}
+                onChange={(e) => update("sms_phone", e.target.value)}
+                onBlur={() =>
+                  update("sms_phone", normalizePhone(prefs.sms_phone ?? ""))
+                }
+                aria-invalid={phoneError || undefined}
+                aria-describedby="sms_phone_help"
+                className={
+                  "pr-9 " +
+                  (phoneError
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : phoneValid && phoneTouched
+                      ? "border-emerald-500/60"
+                      : "")
+                }
+              />
+              {phoneTouched && (
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  {phoneValid ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-label="Valid number" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-red-500" aria-label="Invalid number" />
+                  )}
+                </span>
+              )}
+            </div>
+            <p
+              id="sms_phone_help"
+              className={
+                "text-xs " +
+                (phoneError ? "text-red-500" : "text-[var(--w55)]")
+              }
+            >
+              {phoneError
+                ? "Enter your number in E.164 format: a leading + followed by country code and number. Example: +14155551234"
+                : "Use E.164 format: + then country code, then number. Spaces and dashes are OK — we'll normalize on save. Example: +1 415 555 1234 → +14155551234."}
+            </p>
+            {phoneTouched && phoneValid && normalizedPhone !== (prefs.sms_phone ?? "") && (
+              <p className="text-xs text-[var(--w55)]">
+                Will be saved as <span className="font-mono text-[var(--w70)]">{normalizedPhone}</span>
+              </p>
+            )}
           </div>
         )}
       </section>
@@ -284,10 +345,15 @@ function NotificationSettingsPage() {
         )}
       </section>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex items-center justify-end gap-3">
+        {phoneBlockingSave && (
+          <span className="text-xs text-red-500">
+            Enter a valid E.164 phone number to save SMS alerts.
+          </span>
+        )}
         <Button
           onClick={() => save.mutate()}
-          disabled={save.isPending}
+          disabled={save.isPending || phoneBlockingSave}
         >
           {save.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save preferences
