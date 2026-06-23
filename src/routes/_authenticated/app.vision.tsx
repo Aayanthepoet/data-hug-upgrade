@@ -21,6 +21,7 @@ import {
   listPropertiesForRender,
   getVisionCapabilities,
   uploadSourcePhoto,
+  deleteSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
@@ -42,12 +43,15 @@ function VisionPage() {
   const propsFn = useServerFn(listPropertiesForRender);
   const capsFn = useServerFn(getVisionCapabilities);
   const uploadFn = useServerFn(uploadSourcePhoto);
+  const deleteSourceFn = useServerFn(deleteSourcePhoto);
 
   // Source photo (the "before"): uploaded to the private vision-renders
   // bucket; we keep the storage path for the render row and a signed URL
   // for the local preview while composing.
   const [sourcePath, setSourcePath] = useState<string | null>(null);
+  const [sourcePhotoId, setSourcePhotoId] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [removingSource, setRemovingSource] = useState(false);
   const [uploading, setUploading] = useState(false);
   // The server fn is a single request, so we can't observe true upload
   // bytes-sent. Instead we drive a two-phase bar: real progress during
