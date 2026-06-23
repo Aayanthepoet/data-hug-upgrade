@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trash2, Link2 } from "lucide-react";
+import { Trash2, Link2, Upload, X } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
 import {
   generateRedesign,
@@ -18,6 +18,7 @@ import {
   linkRenderToProperty,
   listPropertiesForRender,
   getVisionCapabilities,
+  uploadSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
