@@ -10,21 +10,32 @@ const SYSTEM_PROMPT = `You are PropAI Agent, an assistant for a real-estate inve
 You have read access to the user's private workspace via tools:
 - list_properties: browse the user's saved properties (with lead scores and distress flags)
 - get_property: full details for one property including its owner(s) and contact info
-- list_recent_leads: inbound contact-form leads from the public site
+- list_recent_leads: inbound contact-form leads from the public site (admin-only)
+- search_leads: search inbound leads by name/email/company or filter by status
+- list_contracts: list the user's contracts, optionally filtered by status (draft/sent/viewed/signed/failed)
+- get_contract: full details for one contract including buyer/seller/property/signing status
+- workspace_summary: top-line counts (properties, leads, contracts by status) for the user's workspace
 
-Use tools proactively when the user asks about their data. When summarizing leads:
+Use tools proactively when the user asks about their data — don't guess. Call workspace_summary first when the user asks something open-ended ("what's going on", "give me an overview").
+
+When summarizing leads or properties:
 - group by distress signal (preforeclosure / vacant / absentee) and equity
 - highlight the highest-scoring opportunities
 - be concise; use markdown bullet lists
 
-When drafting outreach messages:
-- adapt tone to the channel (SMS = short and casual, email = warm and professional, letter = personal)
-- weave in concrete facts you found via tools (address, owner name, equity, distress signal)
-- always offer 2-3 variations
+When discussing contracts:
+- always include status, buyer/seller, purchase price, and signed date if available
+- flag any contract in 'failed' status as needing attention
+- never invent IDs, prices, or counterparties
+
+When drafting outreach:
+- adapt tone to the channel (SMS = short, email = warm, letter = personal)
+- weave in concrete facts pulled via tools
+- offer 2-3 variations
 - never invent owner names, phone numbers, or details that aren't in the data
 
 TASK MODE:
-When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool to return a structured, actionable checklist. Group tasks into sections like "Contacts to call", "Outreach drafts", "Follow-ups", "Research". Each task should be concrete, one action, and reference specific properties/owners by name when possible. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
+When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool. Group into sections like "Contacts to call", "Outreach drafts", "Follow-ups", "Contracts to chase", "Research". Each task is one concrete action. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
 
 If the workspace is empty, say so plainly and suggest the user add properties first.`;
 
@@ -120,6 +131,97 @@ export const Route = createFileRoute("/api/chat")({
                 .order("created_at", { ascending: false }).limit(limit);
               if (error) return { error: error.message };
               return { count: data?.length ?? 0, leads: data ?? [] };
+            },
+          }),
+          search_leads: tool({
+            description: "Search inbound leads from the public contact form by name/email/company text or filter by status. Admin-only.",
+            inputSchema: z.object({
+              query: z.string().optional().describe("Free-text match against full_name, email, company"),
+              status: z.string().optional().describe("Filter by status (e.g. new, contacted, qualified, archived)"),
+              limit: z.number().min(1).max(50).default(20),
+            }),
+            execute: async ({ query, status, limit }) => {
+              let q = supabase
+                .from("leads")
+                .select("id, full_name, email, company, phone, message, status, source, created_at")
+                .order("created_at", { ascending: false })
+                .limit(limit);
+              if (status) q = q.eq("status", status);
+              if (query && query.trim()) {
+                const term = `%${query.trim()}%`;
+                q = q.or(`full_name.ilike.${term},email.ilike.${term},company.ilike.${term}`);
+              }
+              const { data, error } = await q;
+              if (error) return { error: error.message };
+              return { count: data?.length ?? 0, leads: data ?? [] };
+            },
+          }),
+          list_contracts: tool({
+            description: "List the user's contracts (newest first). Optionally filter by status: draft, sent, viewed, signed, failed.",
+            inputSchema: z.object({
+              status: z.string().optional().describe("Filter by status"),
+              limit: z.number().min(1).max(50).default(25),
+            }),
+            execute: async ({ status, limit }) => {
+              let q = supabase
+                .from("contracts")
+                .select("id, buyer_name, seller_name, purchase_price, closing_date, status, signed_at, property_id, error_message, created_at")
+                .order("created_at", { ascending: false })
+                .limit(limit);
+              if (status) q = q.eq("status", status);
+              const { data, error } = await q;
+              if (error) return { error: error.message };
+              return { count: data?.length ?? 0, contracts: data ?? [] };
+            },
+          }),
+          get_contract: tool({
+            description: "Get full details for one contract including buyer/seller info, signing status, and linked property.",
+            inputSchema: z.object({ contract_id: z.string().uuid() }),
+            execute: async ({ contract_id }) => {
+              const { data: contract, error } = await supabase
+                .from("contracts")
+                .select("id, buyer_name, buyer_email, seller_name, seller_email, purchase_price, closing_date, status, signed_at, signwell_document_id, error_message, property_id, created_at, updated_at")
+                .eq("id", contract_id)
+                .maybeSingle();
+              if (error) return { error: error.message };
+              if (!contract) return { error: "Contract not found" };
+              let property = null;
+              if (contract.property_id) {
+                const { data: p } = await supabase
+                  .from("properties")
+                  .select("id, address, city, state, zip, estimated_value")
+                  .eq("id", contract.property_id)
+                  .maybeSingle();
+                property = p;
+              }
+              return { contract, property };
+            },
+          }),
+          workspace_summary: tool({
+            description: "High-level counts for the user's workspace: total properties, distressed properties, contracts grouped by status, and recent lead count.",
+            inputSchema: z.object({}),
+            execute: async () => {
+              const [propsRes, distressRes, contractsRes, leadsRes] = await Promise.all([
+                supabase.from("properties").select("id", { count: "exact", head: true }),
+                supabase
+                  .from("properties")
+                  .select("id", { count: "exact", head: true })
+                  .or("is_preforeclosure.eq.true,is_vacant.eq.true,is_absentee.eq.true"),
+                supabase.from("contracts").select("status"),
+                supabase.from("leads").select("id", { count: "exact", head: true }),
+              ]);
+              const contractsByStatus: Record<string, number> = {};
+              for (const row of contractsRes.data ?? []) {
+                const s = (row as { status: string | null }).status ?? "unknown";
+                contractsByStatus[s] = (contractsByStatus[s] ?? 0) + 1;
+              }
+              return {
+                properties_total: propsRes.count ?? 0,
+                properties_distressed: distressRes.count ?? 0,
+                contracts_total: (contractsRes.data ?? []).length,
+                contracts_by_status: contractsByStatus,
+                leads_total: leadsRes.count ?? 0,
+              };
             },
           }),
           create_task_plan: tool({
