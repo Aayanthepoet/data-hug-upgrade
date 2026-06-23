@@ -145,7 +145,14 @@ export const getContractAdmin = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!contract) throw new Error("Contract not found");
 
-    let property: Record<string, unknown> | null = null;
+    let property: {
+      id: string;
+      address: string | null;
+      city: string | null;
+      state: string | null;
+      zip: string | null;
+      estimated_value: number | null;
+    } | null = null;
     if (contract.property_id) {
       const { data: p } = await supabaseAdmin
         .from("properties")
