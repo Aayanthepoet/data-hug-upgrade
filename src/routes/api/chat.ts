@@ -12,6 +12,7 @@ You have read access to the user's private workspace via tools:
 - get_property: full details for one property including its owner(s) and contact info
 - list_recent_leads: inbound contact-form leads from the public site (admin-only)
 - search_leads: search inbound leads by name/email/company or filter by status
+- get_lead: full details for one inbound lead including notes, email history, and assignments
 - list_contracts: list the user's contracts, optionally filtered by status (draft/sent/viewed/signed/failed)
 - get_contract: full details for one contract including buyer/seller/property/signing status
 - workspace_summary: top-line counts (properties, leads, contracts by status) for the user's workspace
