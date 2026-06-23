@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage } from "ai";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT = `You are PropAI Agent, an assistant for a real-estate investor inside the PropAI app.
@@ -50,8 +50,24 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
 
-        const body = (await request.json()) as { messages?: unknown };
+        const body = (await request.json()) as { messages?: unknown; threadId?: unknown };
         if (!Array.isArray(body.messages)) return new Response("Messages required", { status: 400 });
+        const threadId = typeof body.threadId === "string" ? body.threadId : "";
+        if (!threadId) return new Response("threadId required", { status: 400 });
+
+        // Verify the thread belongs to this user
+        const { data: thread, error: threadErr } = await supabase
+          .from("chat_threads")
+          .select("id, title")
+          .eq("id", threadId)
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+        if (threadErr || !thread) return new Response("Thread not found", { status: 404 });
+
+        const userId = userData.user.id;
+        const incoming = body.messages as UIMessage[];
+        const lastUserMsg = [...incoming].reverse().find((m) => m.role === "user");
+
 
         const gateway = createLovableAiGatewayProvider(lovableKey);
         const model = gateway("google/gemini-3-flash-preview");
@@ -123,18 +139,60 @@ export const Route = createFileRoute("/api/chat")({
           }),
         };
 
+        // Persist the latest user message (only the last one — earlier ones are already saved)
+        if (lastUserMsg) {
+          await supabase.from("chat_messages").insert({
+            thread_id: threadId,
+            user_id: userId,
+            message_id: lastUserMsg.id,
+            role: "user",
+            parts: lastUserMsg.parts as unknown as Json,
+          });
+
+          // Auto-title the thread from the first user message if still default
+          if (thread.title === "New chat") {
+            const firstText = lastUserMsg.parts.find(
+              (p): p is { type: "text"; text: string } => p.type === "text",
+            )?.text;
+            if (firstText) {
+              const title = firstText.replace(/^\[TASK MODE\]\s*/i, "").slice(0, 60);
+              await supabase.from("chat_threads").update({ title }).eq("id", threadId);
+            }
+          }
+        }
+
         const result = streamText({
           model,
           system: SYSTEM_PROMPT,
-          messages: await convertToModelMessages(body.messages as UIMessage[]),
+          messages: await convertToModelMessages(incoming),
           tools,
           stopWhen: stepCountIs(50),
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: body.messages as UIMessage[],
+          originalMessages: incoming,
+          onFinish: async ({ messages: finished }) => {
+            // Persist any new assistant messages produced this turn
+            const startIndex = incoming.length;
+            const newOnes = finished.slice(startIndex);
+            if (newOnes.length === 0) return;
+            const rows = newOnes.map((m) => ({
+              thread_id: threadId,
+              user_id: userId,
+              message_id: m.id,
+              role: m.role,
+              parts: m.parts as unknown as Json,
+            }));
+            const { error } = await supabase.from("chat_messages").insert(rows);
+            if (error) console.error("[chat] failed to persist assistant messages", error);
+            await supabase
+              .from("chat_threads")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", threadId);
+          },
         });
       },
     },
   },
 });
+
