@@ -13,9 +13,7 @@ const agentQuery = (slug: string) =>
 
 export const Route = createFileRoute("/agents/$slug")({
   loader: async ({ params, context }) => {
-    const data = await context.queryClient.ensureQueryData(
-      agentQuery(params.slug, getPublicAgent),
-    );
+    const data = await context.queryClient.ensureQueryData(agentQuery(params.slug));
     if (!data) throw notFound();
     return data;
   },
