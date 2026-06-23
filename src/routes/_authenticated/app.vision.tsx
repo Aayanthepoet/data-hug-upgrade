@@ -39,6 +39,46 @@ function VisionPage() {
   const linkFn = useServerFn(linkRenderToProperty);
   const propsFn = useServerFn(listPropertiesForRender);
   const capsFn = useServerFn(getVisionCapabilities);
+  const uploadFn = useServerFn(uploadSourcePhoto);
+
+  // Source photo (the "before"): uploaded to the private vision-renders
+  // bucket; we keep the storage path for the render row and a signed URL
+  // for the local preview while composing.
+  const [sourcePath, setSourcePath] = useState<string | null>(null);
+  const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onSourceFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      toast.error("Image too large (max 12MB)");
+      return;
+    }
+    setUploading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      // Chunked btoa avoids "Maximum call stack" on large images.
+      let bin = "";
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 0x8000)));
+      }
+      const base64 = btoa(bin);
+      const res = await uploadFn({
+        data: { filename: file.name, contentType: file.type, base64 },
+      });
+      setSourcePath(res.path);
+      setSourcePreview(res.signed_url);
+      toast.success("Source photo uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
