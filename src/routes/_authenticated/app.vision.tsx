@@ -188,6 +188,7 @@ function VisionPage() {
       setUploadProgress(100);
       setUploadPhase("done");
       setSourcePath(res.path);
+      setSourcePhotoId(res.id);
       setSourcePreview(res.signed_url);
       setUploadError(null);
       setFailedFile(null);
