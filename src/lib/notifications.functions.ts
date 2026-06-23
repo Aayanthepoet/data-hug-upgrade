@@ -177,11 +177,11 @@ export const wireSmsTriggers = createServerFn({ method: "POST" })
     const secret = process.env.NOTIFY_HOOK_SECRET;
     if (!secret) throw new Error("NOTIFY_HOOK_SECRET is not configured.");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.rpc("seed_notify_vault", {
+    const { error } = await supabase.rpc("seed_notify_vault", {
       _url: url,
       _secret: secret,
     });
     if (error) throw new Error(error.message);
     return { ok: true, url };
   });
+
