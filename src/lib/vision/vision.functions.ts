@@ -8,10 +8,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const STYLES = ["modern", "scandinavian", "industrial", "farmhouse", "mid-century", "coastal"] as const;
+const RESOLUTIONS = ["hd", "2k", "4k"] as const;
 
 const GenerateInput = z.object({
   prompt: z.string().min(4).max(2000),
   style: z.enum(STYLES).default("modern"),
+  resolution: z.enum(RESOLUTIONS).default("hd"),
   property_id: z.string().uuid().nullable().optional(),
   owner_id: z.string().uuid().nullable().optional(),
   source_image_url: z.string().url().nullable().optional(),
