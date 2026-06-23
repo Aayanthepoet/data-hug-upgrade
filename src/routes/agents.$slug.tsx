@@ -78,7 +78,7 @@ function AgentPage() {
     email: agent.public_email || undefined,
     worksFor: agent.public_brokerage ? { "@type": "Organization", name: agent.public_brokerage } : undefined,
     areaServed: agent.public_service_areas?.length
-      ? agent.public_service_areas.map((a) => ({ "@type": "Place", name: a }))
+      ? agent.public_service_areas.map((a: string) => ({ "@type": "Place", name: a }))
       : undefined,
   };
 
@@ -132,7 +132,7 @@ function AgentPage() {
             </div>
             {agent.public_service_areas?.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
-                {agent.public_service_areas.map((a) => (
+                {agent.public_service_areas.map((a: string) => (
                   <span key={a} className="text-xs px-2 py-1 rounded bg-[var(--surface-2)] border border-border">
                     {a}
                   </span>
