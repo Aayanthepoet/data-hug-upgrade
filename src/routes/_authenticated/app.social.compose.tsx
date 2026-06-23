@@ -70,10 +70,21 @@ function ComposePage() {
   const saveMut = useMutation({
     mutationFn: (publish: boolean) => {
       if (!draft) throw new Error("Generate a draft first.");
-      const prop = propertiesQ.data?.find((p) => p.id === propertyId);
-      const hero = prop?.photos?.[0] ?? null;
       return save({
         data: {
+          property_id: propertyId || null,
+          landing_slug: draft.landing_slug,
+          headline: draft.headline,
+          subheadline: draft.subheadline,
+          body_md: draft.body_md,
+          hero_image_url: null,
+          cta_url: null,
+          tags: draft.tags,
+          publish,
+          variants: draft.variants,
+        },
+      });
+    },
           property_id: propertyId || null,
           landing_slug: draft.landing_slug,
           headline: draft.headline,
