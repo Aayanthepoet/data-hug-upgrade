@@ -63,10 +63,9 @@ export const Route = createFileRoute("/agents/$slug")({
 
 function AgentPage() {
   const params = Route.useParams();
-  const fn = useServerFn(getPublicAgent);
-  const { data } = useSuspenseQuery(agentQuery(params.slug, fn));
+  const { data } = useSuspenseQuery(agentQuery(params.slug));
   if (!data) return null;
-  const { agent, posts } = data;
+  const { agent, posts } = data as AgentData;
   const fullName = agent.full_name || `Agent ${agent.public_slug}`;
 
   const jsonLd = {
