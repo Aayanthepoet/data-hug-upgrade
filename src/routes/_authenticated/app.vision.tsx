@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
+import { SourcePhotoCropper } from "@/components/app/SourcePhotoCropper";
 import {
   generateRedesign,
   listRenders,
@@ -57,6 +58,9 @@ function VisionPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [failedFile, setFailedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // HEIC can't be decoded in <img> in most browsers, so we skip the crop step
+  // for those formats and upload directly. Everything else opens the cropper.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
@@ -72,9 +76,7 @@ function VisionPage() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  async function onSourceFile(file: File) {
-    // 1. Type — accept by MIME, fall back to extension for HEIC on Safari
-    //    (some browsers report an empty MIME for .heic).
+  function validateFile(file: File): { ok: true } | { ok: false } {
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
     const looksLikeAllowed =
       (file.type && ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) ||
@@ -83,21 +85,44 @@ function VisionPage() {
       toast.error("Unsupported file type", {
         description: `Please upload a ${ALLOWED_LABEL} image. Got "${file.type || ext || "unknown"}".`,
       });
-      return;
+      return { ok: false };
     }
-    // 2. Size — too small (likely empty/corrupted) or too large.
     if (file.size < MIN_BYTES) {
       toast.error("File looks empty", {
         description: "The selected image is under 1 KB. Try another file.",
       });
-      return;
+      return { ok: false };
     }
     if (file.size > MAX_BYTES) {
       toast.error("Image too large", {
         description: `Max ${formatMB(MAX_BYTES)} — your file is ${formatMB(file.size)}.`,
       });
+      return { ok: false };
+    }
+    return { ok: true };
+  }
+
+  /**
+   * Entry point for picked/dropped files. Validates, then opens the optional
+   * crop dialog. HEIC/HEIF can't render in a browser <img>, so we skip the
+   * cropper and upload directly. Retry from the error banner also lands here.
+   */
+  function onSourceFile(file: File) {
+    if (!validateFile(file).ok) return;
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const isHeic =
+      file.type === "image/heic" || file.type === "image/heif" || ext === "heic" || ext === "heif";
+    if (isHeic) {
+      void uploadFile(file);
       return;
     }
+    setPendingFile(file);
+  }
+
+  async function uploadFile(file: File) {
+    // Re-validate (cropped file size may differ from the original).
+    if (!validateFile(file).ok) return;
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
 
     if (sourcePreview && sourcePreview.startsWith("blob:")) {
       URL.revokeObjectURL(sourcePreview);
@@ -238,6 +263,7 @@ function VisionPage() {
   });
 
   return (
+    <>
     <div className="space-y-6">
       <div>
         <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
@@ -533,6 +559,19 @@ function VisionPage() {
         )}
       </div>
     </div>
+      <SourcePhotoCropper
+        file={pendingFile}
+        onCancel={() => setPendingFile(null)}
+        onUseOriginal={(f) => {
+          setPendingFile(null);
+          void uploadFile(f);
+        }}
+        onConfirmCrop={(f) => {
+          setPendingFile(null);
+          void uploadFile(f);
+        }}
+      />
+    </>
   );
 }
 
