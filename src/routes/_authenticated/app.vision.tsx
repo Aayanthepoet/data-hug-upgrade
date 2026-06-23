@@ -131,6 +131,7 @@ function VisionPage() {
     const localPreviewUrl = URL.createObjectURL(file);
     setSourcePreview(localPreviewUrl);
 
+    setUploadingFile(file);
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
