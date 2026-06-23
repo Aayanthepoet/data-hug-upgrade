@@ -212,6 +212,14 @@ const UploadInput = z.object({
   contentType: z.string().min(3).max(80),
   // Base64-encoded bytes, no data: prefix. Client converts the File first.
   base64: z.string().min(4),
+  // Optional crop/resize metadata. When the user chose to crop in the
+  // dialog, the client sends what they picked so we can save an audit trail
+  // alongside the storage path.
+  originalFilename: z.string().min(1).max(200).nullable().optional(),
+  originalByteSize: z.number().int().nonnegative().nullable().optional(),
+  wasCropped: z.boolean().optional(),
+  cropAspect: z.string().max(20).nullable().optional(),
+  cropMaxEdge: z.number().int().min(64).max(8192).nullable().optional(),
 });
 
 export const uploadSourcePhoto = createServerFn({ method: "POST" })
@@ -260,10 +268,36 @@ export const uploadSourcePhoto = createServerFn({ method: "POST" })
       .from(BUCKET)
       .upload(path, bytes, { contentType: data.contentType, upsert: false });
     if (error) throw new Error(`Storage upload failed: ${error.message}`);
+
+    // Record the upload alongside its metadata (filename, size, crop
+    // settings) so we have an audit trail per user / per render. We use the
+    // RLS-scoped `supabase` client so the row's `user_id` is enforced.
+    const { data: photoRow, error: metaErr } = await context.supabase
+      .from("vision_source_photos")
+      .insert({
+        user_id: userId,
+        storage_path: path,
+        filename: data.filename,
+        content_type: data.contentType,
+        byte_size: decodedBytes,
+        original_filename: data.originalFilename ?? null,
+        original_byte_size: data.originalByteSize ?? null,
+        was_cropped: data.wasCropped ?? false,
+        crop_aspect: data.cropAspect ?? null,
+        crop_max_edge: data.cropMaxEdge ?? null,
+      })
+      .select("id")
+      .single();
+    if (metaErr) {
+      // Roll back the storage object so we don't leave an orphan blob.
+      await supabaseAdmin.storage.from(BUCKET).remove([path]);
+      throw new Error(`Failed to save photo metadata: ${metaErr.message}`);
+    }
+
     const { data: signed } = await supabaseAdmin.storage
       .from(BUCKET)
       .createSignedUrl(path, 60 * 60);
-    return { path, signed_url: signed?.signedUrl ?? null };
+    return { id: photoRow.id as string, path, signed_url: signed?.signedUrl ?? null };
   });
 
 export const deleteRender = createServerFn({ method: "POST" })

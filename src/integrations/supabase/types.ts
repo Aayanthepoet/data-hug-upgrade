@@ -1296,6 +1296,54 @@ export type Database = {
           },
         ]
       }
+      vision_source_photos: {
+        Row: {
+          byte_size: number
+          content_type: string
+          created_at: string
+          crop_aspect: string | null
+          crop_max_edge: number | null
+          filename: string
+          id: string
+          original_byte_size: number | null
+          original_filename: string | null
+          storage_path: string
+          updated_at: string
+          user_id: string
+          was_cropped: boolean
+        }
+        Insert: {
+          byte_size: number
+          content_type: string
+          created_at?: string
+          crop_aspect?: string | null
+          crop_max_edge?: number | null
+          filename: string
+          id?: string
+          original_byte_size?: number | null
+          original_filename?: string | null
+          storage_path: string
+          updated_at?: string
+          user_id: string
+          was_cropped?: boolean
+        }
+        Update: {
+          byte_size?: number
+          content_type?: string
+          created_at?: string
+          crop_aspect?: string | null
+          crop_max_edge?: number | null
+          filename?: string
+          id?: string
+          original_byte_size?: number | null
+          original_filename?: string | null
+          storage_path?: string
+          updated_at?: string
+          user_id?: string
+          was_cropped?: boolean
+        }
+        Relationships: []
+      }
       watchlist_items: {
         Row: {
           address: string
