@@ -212,6 +212,14 @@ const UploadInput = z.object({
   contentType: z.string().min(3).max(80),
   // Base64-encoded bytes, no data: prefix. Client converts the File first.
   base64: z.string().min(4),
+  // Optional crop/resize metadata. When the user chose to crop in the
+  // dialog, the client sends what they picked so we can save an audit trail
+  // alongside the storage path.
+  originalFilename: z.string().min(1).max(200).nullable().optional(),
+  originalByteSize: z.number().int().nonnegative().nullable().optional(),
+  wasCropped: z.boolean().optional(),
+  cropAspect: z.string().max(20).nullable().optional(),
+  cropMaxEdge: z.number().int().min(64).max(8192).nullable().optional(),
 });
 
 export const uploadSourcePhoto = createServerFn({ method: "POST" })
