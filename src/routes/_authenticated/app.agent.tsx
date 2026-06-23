@@ -246,8 +246,18 @@ function AgentLayout() {
                 loop
                 playsInline
                 preload="metadata"
-              />
+                aria-label="PropAI Agent intro: a short motion-graphics video showing how the AI copilot organizes conversations into threads, plans tasks step by step, and securely remembers your chats across devices."
+              >
+                <track
+                  kind="captions"
+                  src="/propai-intro.en.vtt"
+                  srcLang="en"
+                  label="English"
+                  default
+                />
+              </video>
             </div>
+
           </div>
 
         )}
