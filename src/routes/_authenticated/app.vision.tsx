@@ -33,6 +33,7 @@ function VisionPage() {
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
   );
   const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
+  const [resolution, setResolution] = useState<"hd" | "2k" | "4k">("hd");
   const [propertyId, setPropertyId] = useState<string>("none");
 
   const { data: renders = [] } = useQuery({
