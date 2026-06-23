@@ -817,11 +817,28 @@ function VisionPage() {
                   <Button
                     size="icon"
                     variant="ghost"
+                    onClick={() =>
+                      regenerate.mutate({
+                        prompt: r.prompt ?? "",
+                        style: r.style,
+                        source_image_url: r.source_image_url,
+                        property_id: r.property_id,
+                      })
+                    }
+                    disabled={regenerate.isPending || !r.prompt}
+                    title="Regenerate with the same prompt and style"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${regenerate.isPending ? "animate-spin" : ""}`} />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
                     onClick={() => setRenderIdToDelete(r.id)}
                     disabled={remove.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
+
                 </div>
               </div>
             ))}
