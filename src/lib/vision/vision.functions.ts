@@ -219,22 +219,47 @@ export const uploadSourcePhoto = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UploadInput.parse(d))
   .handler(async ({ data, context }) => {
     const { userId } = context;
-    if (!data.contentType.startsWith("image/")) {
-      throw new Error("Only image uploads are allowed");
+
+    // Allowlist mirrors the client validator. The server is the trust
+    // boundary — a custom client could skip the client checks entirely.
+    const ALLOWED_TYPES = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ]);
+    const ALLOWED_EXTS = new Set(["jpg", "jpeg", "png", "webp", "heic", "heif"]);
+    const MAX_BYTES = 12 * 1024 * 1024;
+
+    const ext = (data.filename.split(".").pop() ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!ALLOWED_TYPES.has(data.contentType) && !ALLOWED_EXTS.has(ext)) {
+      throw new Error(
+        `Unsupported file type "${data.contentType || ext || "unknown"}". Allowed: JPG, PNG, WebP, HEIC.`,
+      );
     }
-    // ~12MB cap after base64 inflation (~16MB encoded).
-    if (data.base64.length > 16 * 1024 * 1024) {
-      throw new Error("Image too large (max ~12MB)");
+
+    // base64 inflates by ~4/3; estimate decoded byte length to enforce the
+    // real on-disk cap (12 MB) rather than the encoded length.
+    const padding = data.base64.endsWith("==") ? 2 : data.base64.endsWith("=") ? 1 : 0;
+    const decodedBytes = Math.floor((data.base64.length * 3) / 4) - padding;
+    if (decodedBytes <= 0) {
+      throw new Error("Upload was empty.");
     }
-    const ext = (data.filename.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+    if (decodedBytes > MAX_BYTES) {
+      const mb = (decodedBytes / (1024 * 1024)).toFixed(1);
+      throw new Error(`Image too large: ${mb} MB. Max 12 MB.`);
+    }
+
+    const safeExt = ALLOWED_EXTS.has(ext) ? ext : "png";
     const id = crypto.randomUUID();
-    const path = `${userId}/sources/${id}.${ext}`;
+    const path = `${userId}/sources/${id}.${safeExt}`;
     const bytes = base64ToBytes(data.base64);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.storage
       .from(BUCKET)
       .upload(path, bytes, { contentType: data.contentType, upsert: false });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(`Storage upload failed: ${error.message}`);
     const { data: signed } = await supabaseAdmin.storage
       .from(BUCKET)
       .createSignedUrl(path, 60 * 60);
