@@ -1280,6 +1280,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_phone_suppressed: { Args: { _phone: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1289,6 +1290,7 @@ export type Database = {
         }
         Returns: number
       }
+      normalize_phone: { Args: { _phone: string }; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
