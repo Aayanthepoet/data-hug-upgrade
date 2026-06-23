@@ -225,30 +225,63 @@ function VisionPage() {
   }
 
   /**
-   * Remove the current source photo: deletes the storage object + DB row when
-   * one was saved server-side, then clears local preview state.
+   * Remove the current source photo with an undo window. We hide the photo
+   * from the UI immediately and snapshot the state; the actual server delete
+   * is deferred ~6s so the toast's "Undo" button can restore it. If the user
+   * undoes, we cancel the pending server call and put the snapshot back.
    */
-  async function removeSourcePhoto() {
-    const id = sourcePhotoId;
-    setRemovingSource(true);
-    try {
-      if (id) {
-        await deleteSourceFn({ data: { id } });
+  function removeSourcePhoto() {
+    const snapshot = {
+      id: sourcePhotoId,
+      path: sourcePath,
+      preview: sourcePreview,
+    };
+
+    // Locally hide the photo right away so the UI reflects the intent.
+    setSourcePath(null);
+    setSourcePhotoId(null);
+    setSourcePreview(null);
+
+    // If there was never a server-side row, nothing to defer or undo.
+    if (!snapshot.id) {
+      if (snapshot.preview && snapshot.preview.startsWith("blob:")) {
+        URL.revokeObjectURL(snapshot.preview);
       }
-      if (sourcePreview && sourcePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(sourcePreview);
-      }
-      setSourcePath(null);
-      setSourcePhotoId(null);
-      setSourcePreview(null);
-      if (id) toast.success("Source photo removed");
-    } catch (e) {
-      toast.error("Couldn't remove photo", {
-        description: e instanceof Error ? e.message : "Delete failed",
-      });
-    } finally {
-      setRemovingSource(false);
+      return;
     }
+
+    let undone = false;
+    const UNDO_MS = 6000;
+    const timer = setTimeout(async () => {
+      if (undone) return;
+      setRemovingSource(true);
+      try {
+        await deleteSourceFn({ data: { id: snapshot.id! } });
+      } catch (e) {
+        // The undo window already closed, so restoring the UI now would be
+        // misleading. Surface the error and keep the photo hidden.
+        toast.error("Couldn't remove photo", {
+          description: e instanceof Error ? e.message : "Delete failed",
+        });
+      } finally {
+        setRemovingSource(false);
+      }
+    }, UNDO_MS);
+
+    toast.success("Source photo removed", {
+      duration: UNDO_MS,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          clearTimeout(timer);
+          setSourcePath(snapshot.path);
+          setSourcePhotoId(snapshot.id);
+          setSourcePreview(snapshot.preview);
+          toast.success("Restore complete");
+        },
+      },
+    });
   }
 
   /**
@@ -324,14 +357,58 @@ function VisionPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Render failed"),
   });
 
+  // Soft-hidden renders during the undo window. We optimistically filter
+  // these from the list and only call the server delete after the timeout
+  // fires without an undo click.
+  const [hiddenRenderIds, setHiddenRenderIds] = useState<Set<string>>(new Set());
+
   const remove = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: () => {
-      toast.success("Deleted");
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Delete failed"),
   });
+
+  function softDeleteRender(id: string) {
+    setHiddenRenderIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+
+    let undone = false;
+    const UNDO_MS = 6000;
+    const timer = setTimeout(() => {
+      if (undone) return;
+      remove.mutate(id, {
+        onSettled: () => {
+          setHiddenRenderIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        },
+      });
+    }, UNDO_MS);
+
+    toast.success("Render deleted", {
+      duration: UNDO_MS,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          clearTimeout(timer);
+          setHiddenRenderIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          toast.success("Restore complete");
+        },
+      },
+    });
+  }
 
   const link = useMutation({
     mutationFn: ({ id, property_id }: { id: string; property_id: string | null }) =>
@@ -611,15 +688,17 @@ function VisionPage() {
       <div className="space-y-3">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-medium">Render history</h2>
-          <span className="text-xs text-[var(--w55)]">{renders.length} total</span>
+          <span className="text-xs text-[var(--w55)]">
+            {renders.filter((r) => !hiddenRenderIds.has(r.id)).length} total
+          </span>
         </div>
-        {renders.length === 0 ? (
+        {renders.filter((r) => !hiddenRenderIds.has(r.id)).length === 0 ? (
           <div className="surface p-8 text-center text-sm text-[var(--w55)]">
             No renders yet. Generate one above.
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {renders.map((r) => (
+            {renders.filter((r) => !hiddenRenderIds.has(r.id)).map((r) => (
               <div key={r.id} className="surface p-3 space-y-2">
                 {r.status === "ready" && r.signed_url ? (
                   <BeforeAfterSlider
@@ -711,7 +790,7 @@ function VisionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove source photo?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove this source photo? This will permanently delete the file and remove it as your "before" image.
+              Are you sure you want to remove this source photo? You'll have a few seconds to undo before the file is permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -720,7 +799,7 @@ function VisionPage() {
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 setIsDeleteSourceDialogOpen(false);
-                void removeSourcePhoto();
+                removeSourcePhoto();
               }}
             >
               Remove
@@ -734,7 +813,7 @@ function VisionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete render history?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this render? This action cannot be undone and will permanently remove this item from your library history.
+              Are you sure you want to delete this render? You'll have a few seconds to undo before it's permanently removed from your library history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -743,7 +822,7 @@ function VisionPage() {
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 if (renderIdToDelete) {
-                  remove.mutate(renderIdToDelete);
+                  softDeleteRender(renderIdToDelete);
                   setRenderIdToDelete(null);
                 }
               }}
