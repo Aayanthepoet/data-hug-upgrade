@@ -7,6 +7,7 @@ import { Bell, MessageSquare, UserPlus, Gavel, Smartphone, Loader2, CheckCircle2
 import {
   getNotificationPreferences,
   updateNotificationPreferences,
+  sendTestSms,
 } from "@/lib/notifications.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
