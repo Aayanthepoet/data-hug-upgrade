@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,7 +19,12 @@ import {
   getVisionCapabilities,
 } from "@/lib/vision/vision.functions";
 
+const visionSearchSchema = z.object({
+  property: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_authenticated/app/vision")({
+  validateSearch: zodValidator(visionSearchSchema),
   head: () => ({ meta: [{ title: "Vision Studio — PropAI" }] }),
   component: VisionPage,
 });
