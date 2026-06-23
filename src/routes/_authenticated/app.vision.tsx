@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Trash2, Link2, Upload, X } from "lucide-react";
+import { Trash2, Link2, Upload, X, Loader2 } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
 import {
   generateRedesign,
@@ -47,6 +48,13 @@ function VisionPage() {
   const [sourcePath, setSourcePath] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // The server fn is a single request, so we can't observe true upload
+  // bytes-sent. Instead we drive a two-phase bar: real progress during
+  // base64 encoding (we own the loop), then a creeping estimate during the
+  // network round-trip that snaps to 100 on success.
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "encoding" | "sending" | "done">("idle");
+
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
@@ -90,15 +98,31 @@ function VisionPage() {
     }
 
     setUploading(true);
+    setUploadPhase("encoding");
+    setUploadProgress(0);
+    let creepTimer: ReturnType<typeof setInterval> | null = null;
     try {
       const buf = await file.arrayBuffer();
-      // Chunked btoa avoids "Maximum call stack" on large images.
+      // Chunked btoa avoids "Maximum call stack" on large images. We also
+      // yield to the event loop every chunk so the progress bar paints.
       let bin = "";
       const bytes = new Uint8Array(buf);
-      for (let i = 0; i < bytes.length; i += 0x8000) {
+      const total = bytes.length;
+      for (let i = 0; i < total; i += 0x8000) {
         bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 0x8000)));
+        // Encoding owns 0 → 60% of the bar.
+        setUploadProgress(Math.min(60, Math.round(((i + 0x8000) / total) * 60)));
+        await new Promise((r) => setTimeout(r, 0));
       }
       const base64 = btoa(bin);
+
+      // Network phase: creep from 60 → 90 while the RPC is in flight.
+      setUploadPhase("sending");
+      setUploadProgress(60);
+      creepTimer = setInterval(() => {
+        setUploadProgress((p) => (p < 90 ? p + 2 : p));
+      }, 150);
+
       const res = await uploadFn({
         data: {
           filename: file.name,
@@ -106,16 +130,28 @@ function VisionPage() {
           base64,
         },
       });
+      if (creepTimer) clearInterval(creepTimer);
+      setUploadProgress(100);
+      setUploadPhase("done");
       setSourcePath(res.path);
       setSourcePreview(res.signed_url);
       toast.success("Source photo uploaded", { description: file.name });
     } catch (e) {
+      if (creepTimer) clearInterval(creepTimer);
       const msg = e instanceof Error ? e.message : "Upload failed";
       toast.error("Couldn't upload that photo", { description: msg });
+      setUploadProgress(0);
+      setUploadPhase("idle");
     } finally {
       setUploading(false);
+      // Let the "done" 100% frame paint briefly, then reset.
+      setTimeout(() => {
+        setUploadProgress(0);
+        setUploadPhase("idle");
+      }, 600);
     }
   }
+
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
@@ -221,8 +257,10 @@ function VisionPage() {
                 </button>
               </div>
             ) : (
-              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5">
-                <Upload className="h-3 w-3" />
+              <label
+                className={`cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5 ${uploading ? "opacity-60 pointer-events-none" : ""}`}
+              >
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                 {uploading ? "Uploading…" : "Upload room photo"}
                 <input
                   type="file"
@@ -241,7 +279,21 @@ function VisionPage() {
               {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
             </p>
           </div>
+          {uploading || uploadPhase === "done" ? (
+            <div className="mt-2 space-y-1" aria-live="polite">
+              <Progress value={uploadProgress} className="h-1.5" />
+              <div className="flex justify-between text-[10px] text-[var(--w55)]">
+                <span>
+                  {uploadPhase === "encoding" && "Preparing image…"}
+                  {uploadPhase === "sending" && "Uploading to library…"}
+                  {uploadPhase === "done" && "Upload complete"}
+                </span>
+                <span>{uploadProgress}%</span>
+              </div>
+            </div>
+          ) : null}
         </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
             <label className="text-xs text-[var(--w55)]">Style</label>
@@ -294,8 +346,12 @@ function VisionPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending || !resolutionSupported}>
-            {generate.isPending ? "Rendering…" : "Generate redesign"}
+          <Button
+            onClick={() => generate.mutate()}
+            disabled={generate.isPending || !resolutionSupported || uploading}
+            title={uploading ? "Wait for the source photo to finish uploading" : undefined}
+          >
+            {generate.isPending ? "Rendering…" : uploading ? "Waiting for upload…" : "Generate redesign"}
           </Button>
         </div>
       </div>
