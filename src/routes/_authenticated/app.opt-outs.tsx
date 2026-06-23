@@ -349,6 +349,38 @@ function OptOutsPage() {
       </div>
 
       <AddOptOutDialog open={addOpen} onClose={() => setAddOpen(false)} />
+
+      <Dialog open={testDigestOpen} onOpenChange={setTestDigestOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send test compliance digest</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-[var(--w55)]">
+              This will render the current weekly digest and email it only to your verified admin address:
+            </p>
+            <div className="surface p-3 font-mono text-sm break-all">
+              {myEmail ?? "—"}
+            </div>
+            <p className="text-xs text-[var(--w45)]">
+              The subject is prefixed with <span className="font-mono">[TEST]</span>. This does not affect
+              the scheduled Monday digest or the dashboard snapshot.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTestDigestOpen(false)} disabled={sendTestDigest.isPending}>
+              Cancel
+            </Button>
+            <Button
+              className="btn-primary"
+              onClick={() => sendTestDigest.mutate()}
+              disabled={!myEmail || sendTestDigest.isPending}
+            >
+              {sendTestDigest.isPending ? "Sending…" : `Send to ${myEmail ?? ""}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
