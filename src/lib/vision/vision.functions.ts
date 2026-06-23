@@ -185,10 +185,60 @@ export const listRenders = createServerFn({ method: "GET" })
             .createSignedUrl(r.storage_path, 60 * 60);
           signedUrl = signed?.signedUrl ?? null;
         }
-        return { ...r, signed_url: signedUrl };
+        // Source photo: stored as a bucket path; sign for the slider.
+        // Pre-existing URL strings (http/https) pass through unchanged.
+        let sourceSignedUrl: string | null = null;
+        if (r.source_image_url) {
+          if (/^https?:\/\//i.test(r.source_image_url)) {
+            sourceSignedUrl = r.source_image_url;
+          } else {
+            const { data: signed } = await supabaseAdmin.storage
+              .from(BUCKET)
+              .createSignedUrl(r.source_image_url, 60 * 60);
+            sourceSignedUrl = signed?.signedUrl ?? null;
+          }
+        }
+        return { ...r, signed_url: signedUrl, source_signed_url: sourceSignedUrl };
       }),
     );
     return out;
+  });
+
+// Upload a "before" source photo to the private vision-renders bucket under
+// the caller's prefix. Returns the storage path the client should pass back
+// as `source_image_url` when generating a redesign.
+const UploadInput = z.object({
+  filename: z.string().min(1).max(120),
+  contentType: z.string().min(3).max(80),
+  // Base64-encoded bytes, no data: prefix. Client converts the File first.
+  base64: z.string().min(4),
+});
+
+export const uploadSourcePhoto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UploadInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    if (!data.contentType.startsWith("image/")) {
+      throw new Error("Only image uploads are allowed");
+    }
+    // ~12MB cap after base64 inflation (~16MB encoded).
+    if (data.base64.length > 16 * 1024 * 1024) {
+      throw new Error("Image too large (max ~12MB)");
+    }
+    const ext = (data.filename.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+    const id = crypto.randomUUID();
+    const path = `${userId}/sources/${id}.${ext}`;
+    const bytes = base64ToBytes(data.base64);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(path, bytes, { contentType: data.contentType, upsert: false });
+    if (error) throw new Error(error.message);
+    const { data: signed } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .createSignedUrl(path, 60 * 60);
+    return { path, signed_url: signed?.signedUrl ?? null };
   });
 
 export const deleteRender = createServerFn({ method: "POST" })
