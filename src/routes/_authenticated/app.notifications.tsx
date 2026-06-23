@@ -192,17 +192,57 @@ function NotificationSettingsPage() {
         {prefs.channel_sms && (
           <div className="pl-7 space-y-2">
             <Label htmlFor="sms_phone" className="text-xs">
-              SMS number (E.164 format, e.g. +14155551234)
+              Mobile number
             </Label>
-            <Input
-              id="sms_phone"
-              type="tel"
-              inputMode="tel"
-              placeholder="+14155551234"
-              value={prefs.sms_phone ?? ""}
-              onChange={(e) => update("sms_phone", e.target.value)}
-              className="max-w-xs"
-            />
+            <div className="relative max-w-xs">
+              <Input
+                id="sms_phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="+1 415 555 1234"
+                value={prefs.sms_phone ?? ""}
+                onChange={(e) => update("sms_phone", e.target.value)}
+                onBlur={() =>
+                  update("sms_phone", normalizePhone(prefs.sms_phone ?? ""))
+                }
+                aria-invalid={phoneError || undefined}
+                aria-describedby="sms_phone_help"
+                className={
+                  "pr-9 " +
+                  (phoneError
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : phoneValid && phoneTouched
+                      ? "border-emerald-500/60"
+                      : "")
+                }
+              />
+              {phoneTouched && (
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                  {phoneValid ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-label="Valid number" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-red-500" aria-label="Invalid number" />
+                  )}
+                </span>
+              )}
+            </div>
+            <p
+              id="sms_phone_help"
+              className={
+                "text-xs " +
+                (phoneError ? "text-red-500" : "text-[var(--w55)]")
+              }
+            >
+              {phoneError
+                ? "Enter your number in E.164 format: a leading + followed by country code and number. Example: +14155551234"
+                : "Use E.164 format: + then country code, then number. Spaces and dashes are OK — we'll normalize on save. Example: +1 415 555 1234 → +14155551234."}
+            </p>
+            {phoneTouched && phoneValid && normalizedPhone !== (prefs.sms_phone ?? "") && (
+              <p className="text-xs text-[var(--w55)]">
+                Will be saved as <span className="font-mono text-[var(--w70)]">{normalizedPhone}</span>
+              </p>
+            )}
           </div>
         )}
       </section>
