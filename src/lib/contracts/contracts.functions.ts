@@ -243,10 +243,11 @@ export const createContract = createServerFn({ method: "POST" })
         .catch(() => ({}));
 
       if (!resp.ok || !json.id) {
-        const msg =
-          (json.errors && JSON.stringify(json.errors).slice(0, 200)) ||
+        const msg: string =
+          (json.errors ? JSON.stringify(json.errors).slice(0, 200) : "") ||
           json.message ||
           `SignWell HTTP ${resp.status}`;
+
         await supabase
           .from("contracts")
           .update({ status: "error", error_message: msg })
