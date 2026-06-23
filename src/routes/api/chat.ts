@@ -139,18 +139,60 @@ export const Route = createFileRoute("/api/chat")({
           }),
         };
 
+        // Persist the latest user message (only the last one — earlier ones are already saved)
+        if (lastUserMsg) {
+          await supabase.from("chat_messages").insert({
+            thread_id: threadId,
+            user_id: userId,
+            message_id: lastUserMsg.id,
+            role: "user",
+            parts: lastUserMsg.parts as unknown as Json,
+          });
+
+          // Auto-title the thread from the first user message if still default
+          if (thread.title === "New chat") {
+            const firstText = lastUserMsg.parts.find(
+              (p): p is { type: "text"; text: string } => p.type === "text",
+            )?.text;
+            if (firstText) {
+              const title = firstText.replace(/^\[TASK MODE\]\s*/i, "").slice(0, 60);
+              await supabase.from("chat_threads").update({ title }).eq("id", threadId);
+            }
+          }
+        }
+
         const result = streamText({
           model,
           system: SYSTEM_PROMPT,
-          messages: await convertToModelMessages(body.messages as UIMessage[]),
+          messages: await convertToModelMessages(incoming),
           tools,
           stopWhen: stepCountIs(50),
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: body.messages as UIMessage[],
+          originalMessages: incoming,
+          onFinish: async ({ messages: finished }) => {
+            // Persist any new assistant messages produced this turn
+            const startIndex = incoming.length;
+            const newOnes = finished.slice(startIndex);
+            if (newOnes.length === 0) return;
+            const rows = newOnes.map((m) => ({
+              thread_id: threadId,
+              user_id: userId,
+              message_id: m.id,
+              role: m.role,
+              parts: m.parts as unknown as Json,
+            }));
+            const { error } = await supabase.from("chat_messages").insert(rows);
+            if (error) console.error("[chat] failed to persist assistant messages", error);
+            await supabase
+              .from("chat_threads")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", threadId);
+          },
         });
       },
     },
   },
 });
+
