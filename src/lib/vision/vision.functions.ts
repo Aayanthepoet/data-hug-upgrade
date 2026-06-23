@@ -71,6 +71,7 @@ export const generateRedesign = createServerFn({ method: "POST" })
       const out = await provider.render({
         prompt: data.prompt,
         style: data.style,
+        resolution: data.resolution,
         sourceImageUrl: data.source_image_url ?? null,
       });
       imageBase64 = out.imageBase64;
