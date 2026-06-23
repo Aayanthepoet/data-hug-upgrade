@@ -32,7 +32,7 @@ function VisionPage() {
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
   );
-  const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century">("modern");
+  const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
   const [propertyId, setPropertyId] = useState<string>("none");
 
   const { data: renders = [] } = useQuery({
@@ -108,6 +108,7 @@ function VisionPage() {
                 <SelectItem value="industrial">Industrial</SelectItem>
                 <SelectItem value="farmhouse">Farmhouse</SelectItem>
                 <SelectItem value="mid-century">Mid-century</SelectItem>
+                <SelectItem value="coastal">Coastal</SelectItem>
               </SelectContent>
             </Select>
           </div>

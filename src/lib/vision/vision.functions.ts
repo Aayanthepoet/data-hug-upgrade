@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const STYLES = ["modern", "scandinavian", "industrial", "farmhouse", "mid-century"] as const;
+const STYLES = ["modern", "scandinavian", "industrial", "farmhouse", "mid-century", "coastal"] as const;
 
 const GenerateInput = z.object({
   prompt: z.string().min(4).max(2000),
