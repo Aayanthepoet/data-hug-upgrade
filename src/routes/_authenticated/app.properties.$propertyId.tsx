@@ -137,6 +137,20 @@ function PropertyDetailPage() {
 
       <VisionGallerySection propertyId={propertyId} />
 
+      <ContractsSection
+        propertyId={propertyId}
+        defaultSeller={[p.address, p.city, p.state].filter(Boolean).join(", ")}
+        defaultPrice={
+          p.estimated_value != null
+            ? Number(p.estimated_value)
+            : p.list_price != null
+              ? Number(p.list_price)
+              : null
+        }
+      />
+
+
+
 
 
       {data.groups.length === 0 && (
