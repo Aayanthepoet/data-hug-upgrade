@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Trash2, Link2, Upload, X, Loader2 } from "lucide-react";
+import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
 import {
   generateRedesign,
@@ -54,7 +54,8 @@ function VisionPage() {
   // network round-trip that snaps to 100 on success.
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadPhase, setUploadPhase] = useState<"idle" | "encoding" | "sending" | "done">("idle");
-
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [failedFile, setFailedFile] = useState<File | null>(null);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
@@ -100,6 +101,8 @@ function VisionPage() {
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
+    setUploadError(null);
+    setFailedFile(null);
     let creepTimer: ReturnType<typeof setInterval> | null = null;
     try {
       const buf = await file.arrayBuffer();
@@ -135,6 +138,8 @@ function VisionPage() {
       setUploadPhase("done");
       setSourcePath(res.path);
       setSourcePreview(res.signed_url);
+      setUploadError(null);
+      setFailedFile(null);
       toast.success("Source photo uploaded", { description: file.name });
     } catch (e) {
       if (creepTimer) clearInterval(creepTimer);
@@ -142,6 +147,8 @@ function VisionPage() {
       toast.error("Couldn't upload that photo", { description: msg });
       setUploadProgress(0);
       setUploadPhase("idle");
+      setUploadError(msg);
+      setFailedFile(file);
     } finally {
       setUploading(false);
       // Let the "done" 100% frame paint briefly, then reset.
@@ -240,7 +247,7 @@ function VisionPage() {
         </div>
         <div>
           <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
-          <div className="flex items-center gap-3 mt-1">
+          <div className="flex flex-wrap items-center gap-3 mt-1">
             {sourcePreview ? (
               <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10">
                 <img src={sourcePreview} alt="source" className="h-full w-full object-cover" />
@@ -255,6 +262,42 @@ function VisionPage() {
                 >
                   <X className="h-3 w-3" />
                 </button>
+              </div>
+            ) : uploadError && failedFile ? (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded border border-red-500/30 bg-red-500/5 text-xs text-red-200 w-full max-w-xl">
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="font-semibold text-red-300 truncate">Upload failed</p>
+                    <p className="text-[var(--w55)] truncate text-[11px]">{failedFile.name}</p>
+                    <p className="text-red-400/90 text-[11px] line-clamp-2">{uploadError}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 border-red-500/30 hover:bg-red-500/10 text-red-200 hover:text-red-100 flex items-center gap-1"
+                    onClick={() => onSourceFile(failedFile)}
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    Retry
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-[var(--w55)] hover:text-white flex items-center gap-1"
+                    onClick={() => {
+                      setUploadError(null);
+                      setFailedFile(null);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
             ) : (
               <label
@@ -275,9 +318,11 @@ function VisionPage() {
                 />
               </label>
             )}
-            <p className="text-xs text-[var(--w55)]">
-              {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
-            </p>
+            {!uploadError && !sourcePreview && (
+              <p className="text-xs text-[var(--w55)]">
+                {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
+              </p>
+            )}
           </div>
           {uploading || uploadPhase === "done" ? (
             <div className="mt-2 space-y-1" aria-live="polite">
