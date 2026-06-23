@@ -10,9 +10,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { ShieldOff, TrendingUp, TrendingDown } from "lucide-react";
+import { ShieldOff, TrendingUp, TrendingDown, FileDown, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { exportTrendsCsv, exportTrendsPdf } from "@/lib/export-opt-outs";
 
 type Row = { opted_out_at: string; keyword: string | null; restored_at: string | null };
 
