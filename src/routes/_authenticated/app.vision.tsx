@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw, Images } from "lucide-react";
+import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw, Images, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -767,81 +767,25 @@ function VisionPage() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {renders.filter((r) => !hiddenRenderIds.has(r.id)).map((r) => (
-              <div key={r.id} className="surface p-3 space-y-2">
-                {r.status === "ready" && r.signed_url ? (
-                  <BeforeAfterSlider
-                    before={r.source_signed_url}
-                    after={r.signed_url}
-                    filename={`render-${r.id}.png`}
-                  />
-                ) : (
-                  <div className="aspect-video bg-black/20 rounded overflow-hidden flex items-center justify-center">
-                    <span className="text-xs text-[var(--w55)]">
-                      {r.status === "failed" ? "Failed" : "Rendering…"}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <StatusBadge status={r.status} />
-                  {r.style && <Badge variant="outline" className="text-xs">{r.style}</Badge>}
-                  {r.properties && (
-                    <Badge variant="outline" className="text-xs">
-                      <Link2 className="h-3 w-3 mr-1" />
-                      {r.properties.address}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-[var(--w55)] line-clamp-2">{r.prompt}</p>
-                {r.status === "failed" && r.error && (
-                  <p className="text-xs text-red-400 line-clamp-2">{r.error}</p>
-                )}
-                <div className="flex items-center justify-between pt-1">
-                  <Select
-                    value={r.property_id ?? "none"}
-                    onValueChange={(v) =>
-                      link.mutate({ id: r.id, property_id: v === "none" ? null : v })
-                    }
-                  >
-                    <SelectTrigger className="h-8 text-xs flex-1 mr-2">
-                      <SelectValue placeholder="Link to…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Unlinked</SelectItem>
-                      {properties.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.address}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() =>
-                      regenerate.mutate({
-                        prompt: r.prompt ?? "",
-                        style: r.style,
-                        source_image_url: r.source_image_url,
-                        property_id: r.property_id,
-                      })
-                    }
-                    disabled={regenerate.isPending || !r.prompt}
-                    title="Regenerate with the same prompt and style"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${regenerate.isPending ? "animate-spin" : ""}`} />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setRenderIdToDelete(r.id)}
-                    disabled={remove.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-
-                </div>
-              </div>
+              <RenderCard
+                key={r.id}
+                r={r}
+                properties={properties}
+                onLink={(property_id) => link.mutate({ id: r.id, property_id })}
+                onDelete={() => setRenderIdToDelete(r.id)}
+                deleteDisabled={remove.isPending}
+                onRegenerate={(edited) =>
+                  regenerate.mutate({
+                    prompt: edited.prompt,
+                    style: edited.style,
+                    source_image_url: r.source_image_url,
+                    property_id: r.property_id,
+                  })
+                }
+                regenerating={regenerate.isPending}
+              />
             ))}
+
           </div>
         )}
       </div>
@@ -934,3 +878,183 @@ function StatusBadge({ status }: { status: string }) {
     </Badge>
   );
 }
+
+const RENDER_STYLES = ["modern", "scandinavian", "industrial", "farmhouse", "mid-century", "coastal"] as const;
+
+type RenderRow = {
+  id: string;
+  prompt: string | null;
+  style: string | null;
+  status: string;
+  error: string | null;
+  property_id: string | null;
+  source_image_url: string | null;
+  source_signed_url: string | null;
+  signed_url: string | null;
+  properties: { address: string } | null;
+};
+
+type PropertyOption = { id: string; address: string };
+
+function RenderCard({
+  r,
+  properties,
+  onLink,
+  onDelete,
+  deleteDisabled,
+  onRegenerate,
+  regenerating,
+}: {
+  r: RenderRow;
+  properties: PropertyOption[];
+  onLink: (property_id: string | null) => void;
+  onDelete: () => void;
+  deleteDisabled: boolean;
+  onRegenerate: (edited: { prompt: string; style: string }) => void;
+  regenerating: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [editPrompt, setEditPrompt] = useState(r.prompt ?? "");
+  const [editStyle, setEditStyle] = useState<string>(r.style ?? "modern");
+
+  function startEdit() {
+    setEditPrompt(r.prompt ?? "");
+    setEditStyle(r.style ?? "modern");
+    setEditing(true);
+  }
+
+  return (
+    <div className="surface p-3 space-y-2">
+      {r.status === "ready" && r.signed_url ? (
+        <BeforeAfterSlider
+          before={r.source_signed_url}
+          after={r.signed_url}
+          filename={`render-${r.id}.png`}
+        />
+      ) : (
+        <div className="aspect-video bg-black/20 rounded overflow-hidden flex items-center justify-center">
+          <span className="text-xs text-[var(--w55)]">
+            {r.status === "failed" ? "Failed" : "Rendering…"}
+          </span>
+        </div>
+      )}
+      <div className="flex items-center gap-2 flex-wrap">
+        <StatusBadge status={r.status} />
+        {r.style && <Badge variant="outline" className="text-xs">{r.style}</Badge>}
+        {r.properties && (
+          <Badge variant="outline" className="text-xs">
+            <Link2 className="h-3 w-3 mr-1" />
+            {r.properties.address}
+          </Badge>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="space-y-2 pt-1">
+          <div>
+            <label className="text-[10px] uppercase tracking-wide text-[var(--w55)]">Prompt</label>
+            <Textarea
+              rows={3}
+              value={editPrompt}
+              onChange={(e) => setEditPrompt(e.target.value)}
+              className="text-xs"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase tracking-wide text-[var(--w55)]">Style</label>
+            <Select value={editStyle} onValueChange={setEditStyle}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RENDER_STYLES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditing(false)}
+              disabled={regenerating}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                onRegenerate({ prompt: editPrompt.trim(), style: editStyle });
+                setEditing(false);
+              }}
+              disabled={regenerating || editPrompt.trim().length < 4}
+            >
+              {regenerating ? (
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              Regenerate
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-[var(--w55)] line-clamp-2">{r.prompt}</p>
+          {r.status === "failed" && r.error && (
+            <p className="text-xs text-red-400 line-clamp-2">{r.error}</p>
+          )}
+          <div className="flex items-center justify-between pt-1">
+            <Select
+              value={r.property_id ?? "none"}
+              onValueChange={(v) => onLink(v === "none" ? null : v)}
+            >
+              <SelectTrigger className="h-8 text-xs flex-1 mr-2">
+                <SelectValue placeholder="Link to…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Unlinked</SelectItem>
+                {properties.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.address}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={startEdit}
+              title="Edit prompt or style, then regenerate"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() =>
+                onRegenerate({ prompt: r.prompt ?? "", style: r.style ?? "modern" })
+              }
+              disabled={regenerating || !r.prompt}
+              title="Regenerate with the same prompt and style"
+            >
+              <RefreshCw className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`} />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={onDelete}
+              disabled={deleteDisabled}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
