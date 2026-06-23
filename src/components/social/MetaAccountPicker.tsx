@@ -17,6 +17,7 @@ import {
   listAvailableMetaAccounts,
   saveMetaAccountSelection,
 } from "@/lib/social-oauth.functions";
+import { listMySocialAccounts } from "@/lib/social.functions";
 
 type Props = {
   open: boolean;
