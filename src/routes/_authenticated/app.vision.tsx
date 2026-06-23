@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw, Images } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,11 +32,14 @@ import {
   getVisionCapabilities,
   uploadSourcePhoto,
   deleteSourcePhoto,
+  getSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
   property: fallback(z.string().uuid().optional(), undefined),
+  sourcePhotoId: fallback(z.string().uuid().optional(), undefined),
 });
+
 
 export const Route = createFileRoute("/_authenticated/app/vision")({
   validateSearch: zodValidator(visionSearchSchema),
