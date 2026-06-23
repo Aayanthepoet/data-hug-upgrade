@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { FileSignature, Loader2, Download, ExternalLink, Ban } from "lucide-react";
+import { FileSignature, Loader2, Download, ExternalLink, Ban, ListChecks } from "lucide-react";
+
 import {
   createContract,
   listContractsForProperty,
@@ -179,7 +181,13 @@ function ContractRowItem({
         </div>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
+        <Button asChild variant="ghost" size="sm" title="View signing status">
+          <Link to="/app/contracts/$contractId" params={{ contractId: contract.id }}>
+            <ListChecks className="h-3.5 w-3.5" />
+          </Link>
+        </Button>
         {contract.pdf_storage_path && (
+
           <Button
             variant="outline"
             size="sm"
