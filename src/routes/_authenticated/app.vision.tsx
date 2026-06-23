@@ -226,7 +226,7 @@ function VisionPage() {
                 {uploading ? "Uploading…" : "Upload room photo"}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={ACCEPT_ATTR}
                   className="hidden"
                   disabled={uploading}
                   onChange={(e) => {
@@ -238,7 +238,7 @@ function VisionPage() {
               </label>
             )}
             <p className="text-xs text-[var(--w55)]">
-              Used as the "before" frame in the compare slider and exports.
+              {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
             </p>
           </div>
         </div>
