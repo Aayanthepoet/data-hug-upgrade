@@ -111,6 +111,12 @@ function NotificationSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const sendTest = useMutation({
+    mutationFn: (phone: string) => testSmsFn({ data: { phone } }),
+    onSuccess: () => toast.success("Test SMS sent — check your phone in a moment."),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (isLoading || !prefs) {
     return (
       <div className="flex justify-center py-20">
