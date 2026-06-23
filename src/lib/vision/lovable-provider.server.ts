@@ -26,6 +26,7 @@ export function createLovableVisionProvider(apiKey: string): VisionProvider {
         model: "openai/gpt-image-2",
         prompt: fullPrompt,
         quality: "low",
+        size: RESOLUTION_SIZES[input.resolution],
       };
       if (input.sourceImageUrl) {
         // gpt-image-2 accepts an input image via `image` for edits.
