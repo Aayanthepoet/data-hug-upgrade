@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardAnalyticsWidget } from "@/components/app/DashboardAnalyticsWidget";
+import { OptOutTrendsWidget } from "@/components/app/OptOutTrendsWidget";
+
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Overview — PropAI" }] }),
@@ -52,6 +54,11 @@ function Overview() {
       <div className="mt-10">
         <DashboardAnalyticsWidget />
       </div>
+
+      <div className="mt-6">
+        <OptOutTrendsWidget />
+      </div>
+
 
       <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Link
