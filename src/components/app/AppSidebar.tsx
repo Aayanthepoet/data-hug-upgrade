@@ -48,7 +48,9 @@ const items = [
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
   { title: "Audit Log", url: "/app/audit", icon: ScrollText },
+  { title: "SMS Opt-outs", url: "/app/opt-outs", icon: ShieldOff },
 ];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
