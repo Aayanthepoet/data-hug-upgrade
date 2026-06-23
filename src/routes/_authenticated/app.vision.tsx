@@ -51,6 +51,7 @@ function VisionPage() {
         data: {
           prompt,
           style,
+          resolution,
           property_id: propertyId === "none" ? null : propertyId,
         },
       }),
