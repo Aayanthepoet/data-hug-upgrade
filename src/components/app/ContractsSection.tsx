@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { FileSignature, Loader2, Download, ExternalLink, Ban } from "lucide-react";
+import { FileSignature, Loader2, Download, ExternalLink, Ban, ListChecks } from "lucide-react";
+
 import {
   createContract,
   listContractsForProperty,

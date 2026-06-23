@@ -57,6 +57,7 @@ import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
+import { Route as AuthenticatedAppContractsContractIdRouteImport } from './routes/_authenticated/app.contracts.$contractId'
 import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
 
@@ -319,6 +320,12 @@ const AuthenticatedAppLeadsLeadIdRoute =
     path: '/$leadId',
     getParentRoute: () => AuthenticatedAppLeadsRoute,
   } as any)
+const AuthenticatedAppContractsContractIdRoute =
+  AuthenticatedAppContractsContractIdRouteImport.update({
+    id: '/contracts/$contractId',
+    path: '/contracts/$contractId',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppAuctionsAuctionIdRoute =
   AuthenticatedAppAuctionsAuctionIdRouteImport.update({
     id: '/$auctionId',
@@ -368,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
+  '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -418,6 +426,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
+  '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -471,6 +480,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/_authenticated/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
+  '/_authenticated/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
@@ -524,6 +534,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/agent/$threadId'
     | '/app/auctions/$auctionId'
+    | '/app/contracts/$contractId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
@@ -574,6 +585,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/agent/$threadId'
     | '/app/auctions/$auctionId'
+    | '/app/contracts/$contractId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
@@ -626,6 +638,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/app/agent/$threadId'
     | '/_authenticated/app/auctions/$auctionId'
+    | '/_authenticated/app/contracts/$contractId'
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
@@ -1007,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLeadsLeadIdRouteImport
       parentRoute: typeof AuthenticatedAppLeadsRoute
     }
+    '/_authenticated/app/contracts/$contractId': {
+      id: '/_authenticated/app/contracts/$contractId'
+      path: '/contracts/$contractId'
+      fullPath: '/app/contracts/$contractId'
+      preLoaderRoute: typeof AuthenticatedAppContractsContractIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/auctions/$auctionId': {
       id: '/_authenticated/app/auctions/$auctionId'
       path: '/$auctionId'
@@ -1116,6 +1136,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -1137,6 +1158,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppContractsContractIdRoute:
+    AuthenticatedAppContractsContractIdRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
