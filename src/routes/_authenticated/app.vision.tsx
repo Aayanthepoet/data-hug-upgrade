@@ -159,7 +159,7 @@ function VisionPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending}>
+          <Button onClick={() => generate.mutate()} disabled={generate.isPending || !resolutionSupported}>
             {generate.isPending ? "Rendering…" : "Generate redesign"}
           </Button>
         </div>
