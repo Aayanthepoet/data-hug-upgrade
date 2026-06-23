@@ -118,6 +118,25 @@ function NotificationSettingsPage() {
   const update = <K extends keyof Prefs>(key: K, value: Prefs[K]) =>
     setPrefs((p) => (p ? { ...p, [key]: value } : p));
 
+  // E.164: leading '+', country code 1-3 digits (no leading 0), then up to 14
+  // more digits. Total digits 8-15. Accept user input that may include spaces,
+  // dashes, parens — we strip them before validating and before saving.
+  const normalizePhone = (raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return "";
+    // Keep leading + if present, strip everything non-digit after.
+    const hasPlus = trimmed.startsWith("+");
+    const digits = trimmed.replace(/\D+/g, "");
+    return hasPlus ? `+${digits}` : digits;
+  };
+  const E164_RE = /^\+[1-9]\d{7,14}$/;
+  const rawPhone = prefs.sms_phone ?? "";
+  const normalizedPhone = normalizePhone(rawPhone);
+  const phoneTouched = rawPhone.length > 0;
+  const phoneValid = E164_RE.test(normalizedPhone);
+  const phoneError = prefs.channel_sms && phoneTouched && !phoneValid;
+  const phoneBlockingSave = prefs.channel_sms && !phoneValid;
+
   const browserTz =
     typeof Intl !== "undefined"
       ? Intl.DateTimeFormat().resolvedOptions().timeZone
