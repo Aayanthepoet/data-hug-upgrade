@@ -346,8 +346,12 @@ function VisionPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending || !resolutionSupported}>
-            {generate.isPending ? "Rendering…" : "Generate redesign"}
+          <Button
+            onClick={() => generate.mutate()}
+            disabled={generate.isPending || !resolutionSupported || uploading}
+            title={uploading ? "Wait for the source photo to finish uploading" : undefined}
+          >
+            {generate.isPending ? "Rendering…" : uploading ? "Waiting for upload…" : "Generate redesign"}
           </Button>
         </div>
       </div>
