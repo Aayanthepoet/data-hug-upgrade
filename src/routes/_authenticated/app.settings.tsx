@@ -375,3 +375,40 @@ function Row({
     </div>
   );
 }
+
+/**
+ * Resize an image to fit within maxSize x maxSize (preserving aspect ratio)
+ * and re-encode as JPEG. Skips upscaling.
+ */
+async function compressImage(file: File, maxSize: number, quality: number): Promise<Blob> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result as string);
+    fr.onerror = () => reject(new Error("Could not read image"));
+    fr.readAsDataURL(file);
+  });
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("Could not decode image"));
+    el.src = dataUrl;
+  });
+
+  const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas not supported");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", quality),
+  );
+  if (!blob) throw new Error("Could not encode image");
+  return blob;
+}
