@@ -17,6 +17,7 @@ import {
   listAvailableMetaAccounts,
   saveMetaAccountSelection,
 } from "@/lib/social-oauth.functions";
+import { listMySocialAccounts } from "@/lib/social.functions";
 
 type Props = {
   open: boolean;
@@ -27,6 +28,7 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
   const qc = useQueryClient();
   const listFn = useServerFn(listAvailableMetaAccounts);
   const saveFn = useServerFn(saveMetaAccountSelection);
+  const listAcctsFn = useServerFn(listMySocialAccounts);
 
   const [pageIds, setPageIds] = useState<Set<string>>(new Set());
   const [igIds, setIgIds] = useState<Set<string>>(new Set());
@@ -36,8 +38,16 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
     queryFn: () => listFn(),
     enabled: open,
   });
+  const connectedQ = useQuery({
+    queryKey: ["my-social-accounts"],
+    queryFn: () => listAcctsFn(),
+    enabled: open,
+  });
 
   const pages = q.data?.pages ?? [];
+  const connectedIds = new Set(
+    (connectedQ.data ?? []).map((a) => a.external_account_id),
+  );
 
   // When data first loads, default-select everything.
   useMemo(() => {
@@ -113,42 +123,50 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
           </div>
         ) : (
           <div className="space-y-4 max-h-[420px] overflow-y-auto py-2">
-            {pages.map((p) => (
-              <div key={p.external_id} className="border border-border rounded-lg p-3">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={pageIds.has(p.external_id)}
-                    onCheckedChange={() => togglePage(p.external_id)}
-                    className="mt-0.5"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      <Facebook className="w-4 h-4 text-[#1877F2]" />
-                      {p.name}
-                    </div>
-                    <p className="text-xs text-[var(--w55)] mt-0.5">Facebook Page · {p.external_id}</p>
-                  </div>
-                </label>
-                {p.linked_instagram && (
-                  <label className="flex items-center gap-3 cursor-pointer mt-2 ml-7 pt-2 border-t border-border">
+            {pages.map((p) => {
+              const pageConnected = connectedIds.has(p.external_id);
+              const igConnected = p.linked_instagram
+                ? connectedIds.has(p.linked_instagram.external_id)
+                : false;
+              return (
+                <div key={p.external_id} className="border border-border rounded-lg p-3">
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <Checkbox
-                      checked={igIds.has(p.linked_instagram.external_id)}
-                      onCheckedChange={() => toggleIg(p.linked_instagram!.external_id)}
+                      checked={pageIds.has(p.external_id)}
+                      onCheckedChange={() => togglePage(p.external_id)}
+                      className="mt-0.5"
                     />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Instagram className="w-4 h-4 text-[#E1306C]" />
-                        {p.linked_instagram.username}
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Facebook className="w-4 h-4 text-[#1877F2]" />
+                        <span className="flex-1">{p.name}</span>
+                        <StatusBadge connected={pageConnected} />
                       </div>
-                      <p className="text-xs text-[var(--w55)]">Instagram Business · linked to this Page</p>
+                      <p className="text-xs text-[var(--w55)] mt-0.5">Facebook Page · {p.external_id}</p>
                     </div>
                   </label>
-                )}
-                {!p.linked_instagram && (
-                  <p className="text-xs text-[var(--w35)] mt-2 ml-7">No Instagram Business account linked to this Page</p>
-                )}
-              </div>
-            ))}
+                  {p.linked_instagram && (
+                    <label className="flex items-center gap-3 cursor-pointer mt-2 ml-7 pt-2 border-t border-border">
+                      <Checkbox
+                        checked={igIds.has(p.linked_instagram.external_id)}
+                        onCheckedChange={() => toggleIg(p.linked_instagram!.external_id)}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Instagram className="w-4 h-4 text-[#E1306C]" />
+                          <span className="flex-1">{p.linked_instagram.username}</span>
+                          <StatusBadge connected={igConnected} />
+                        </div>
+                        <p className="text-xs text-[var(--w55)]">Instagram Business · linked to this Page</p>
+                      </div>
+                    </label>
+                  )}
+                  {!p.linked_instagram && (
+                    <p className="text-xs text-[var(--w35)] mt-2 ml-7">No Instagram Business account linked to this Page</p>
+                  )}
+                </div>
+              );
+            })}
             {pages.length === 0 && (
               <p className="text-sm text-[var(--w55)] text-center py-6">
                 No Pages found. You need at least one Facebook Page admin role.
@@ -171,5 +189,17 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function StatusBadge({ connected }: { connected: boolean }) {
+  return connected ? (
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 border border-green-500/30">
+      ● Connected
+    </span>
+  ) : (
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--w55)] border border-border">
+      Not connected
+    </span>
   );
 }
