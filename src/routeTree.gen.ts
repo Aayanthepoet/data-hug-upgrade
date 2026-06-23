@@ -58,6 +58,7 @@ import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/pu
 import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
 import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
+import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
 import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
@@ -332,6 +333,12 @@ const AuthenticatedAppSocialComposeRoute =
     path: '/compose',
     getParentRoute: () => AuthenticatedAppSocialRoute,
   } as any)
+const AuthenticatedAppSocialBusinessPortfolioRoute =
+  AuthenticatedAppSocialBusinessPortfolioRouteImport.update({
+    id: '/business-portfolio',
+    path: '/business-portfolio',
+    getParentRoute: () => AuthenticatedAppSocialRoute,
+  } as any)
 const AuthenticatedAppSettingsPublicProfileRoute =
   AuthenticatedAppSettingsPublicProfileRouteImport.update({
     id: '/public-profile',
@@ -442,6 +449,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
+  '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -502,6 +510,7 @@ export interface FileRoutesByTo {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
+  '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -565,6 +574,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
+  '/_authenticated/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -628,6 +638,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/app/settings/public-profile'
+    | '/app/social/business-portfolio'
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -688,6 +699,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/app/settings/public-profile'
+    | '/app/social/business-portfolio'
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -750,6 +762,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/_authenticated/app/settings/public-profile'
+    | '/_authenticated/app/social/business-portfolio'
     | '/_authenticated/app/social/compose'
     | '/_authenticated/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -1143,6 +1156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
       parentRoute: typeof AuthenticatedAppSocialRoute
     }
+    '/_authenticated/app/social/business-portfolio': {
+      id: '/_authenticated/app/social/business-portfolio'
+      path: '/business-portfolio'
+      fullPath: '/app/social/business-portfolio'
+      preLoaderRoute: typeof AuthenticatedAppSocialBusinessPortfolioRouteImport
+      parentRoute: typeof AuthenticatedAppSocialRoute
+    }
     '/_authenticated/app/settings/public-profile': {
       id: '/_authenticated/app/settings/public-profile'
       path: '/public-profile'
@@ -1298,11 +1318,14 @@ const AuthenticatedAppSettingsRouteWithChildren =
   )
 
 interface AuthenticatedAppSocialRouteChildren {
+  AuthenticatedAppSocialBusinessPortfolioRoute: typeof AuthenticatedAppSocialBusinessPortfolioRoute
   AuthenticatedAppSocialComposeRoute: typeof AuthenticatedAppSocialComposeRoute
 }
 
 const AuthenticatedAppSocialRouteChildren: AuthenticatedAppSocialRouteChildren =
   {
+    AuthenticatedAppSocialBusinessPortfolioRoute:
+      AuthenticatedAppSocialBusinessPortfolioRoute,
     AuthenticatedAppSocialComposeRoute: AuthenticatedAppSocialComposeRoute,
   }
 
