@@ -258,6 +258,7 @@ function VisionPage() {
         URL.revokeObjectURL(sourcePreview);
       }
       setSourcePath(null);
+      setSourcePhotoId(null);
       setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
