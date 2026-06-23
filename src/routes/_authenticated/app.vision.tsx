@@ -315,11 +315,45 @@ function VisionPage() {
   const [resolution, setResolution] = useState<"hd" | "2k" | "4k">("hd");
   // Auto-link: when navigated from a property page (?property=<uuid>) we
   // prefill the selector so the next render is attached without extra clicks.
-  const { property: prefillProperty } = Route.useSearch();
+  const { property: prefillProperty, sourcePhotoId: prefillSourcePhotoId } = Route.useSearch();
   const [propertyId, setPropertyId] = useState<string>(prefillProperty ?? "none");
   useEffect(() => {
     if (prefillProperty) setPropertyId(prefillProperty);
   }, [prefillProperty]);
+
+  // Reuse from library: when ?sourcePhotoId=<uuid> is present we fetch the
+  // existing photo's signed URL and storage path, then set it as the active
+  // "before" image without re-uploading or re-running the cropper. Effect
+  // guards against re-triggering once the photo is already loaded.
+  const getSourcePhotoFn = useServerFn(getSourcePhoto);
+  useEffect(() => {
+    if (!prefillSourcePhotoId) return;
+    if (sourcePhotoId === prefillSourcePhotoId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const photo = await getSourcePhotoFn({ data: { id: prefillSourcePhotoId } });
+        if (cancelled) return;
+        if (sourcePreview && sourcePreview.startsWith("blob:")) {
+          URL.revokeObjectURL(sourcePreview);
+        }
+        setSourcePhotoId(photo.id);
+        setSourcePath(photo.storage_path);
+        setSourcePreview(photo.signed_url);
+        toast.success("Loaded from library", { description: photo.filename });
+      } catch (e) {
+        if (cancelled) return;
+        toast.error("Couldn't load that photo", {
+          description: e instanceof Error ? e.message : "Load failed",
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillSourcePhotoId]);
+
 
   const { data: renders = [] } = useQuery({
     queryKey: ["vision-renders"],
