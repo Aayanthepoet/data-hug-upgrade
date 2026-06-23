@@ -48,15 +48,47 @@ function VisionPage() {
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Validation contract for the source photo. Keep these constants in sync
+  // with the server validator in `uploadSourcePhoto`; the server is the
+  // source of truth but we pre-check on the client so users get an instant
+  // explanation instead of waiting for a round-trip rejection.
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
+  const ALLOWED_LABEL = "JPG, PNG, WebP, or HEIC";
+  const MAX_BYTES = 12 * 1024 * 1024; // 12 MB
+  const MIN_BYTES = 1024; // 1 KB — reject empty / 0-byte uploads
+  const ACCEPT_ATTR = ALLOWED_TYPES.join(",");
+
+  function formatMB(bytes: number) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   async function onSourceFile(file: File) {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Pick an image file");
+    // 1. Type — accept by MIME, fall back to extension for HEIC on Safari
+    //    (some browsers report an empty MIME for .heic).
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const looksLikeAllowed =
+      (file.type && ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) ||
+      ["jpg", "jpeg", "png", "webp", "heic", "heif"].includes(ext);
+    if (!looksLikeAllowed) {
+      toast.error("Unsupported file type", {
+        description: `Please upload a ${ALLOWED_LABEL} image. Got "${file.type || ext || "unknown"}".`,
+      });
       return;
     }
-    if (file.size > 12 * 1024 * 1024) {
-      toast.error("Image too large (max 12MB)");
+    // 2. Size — too small (likely empty/corrupted) or too large.
+    if (file.size < MIN_BYTES) {
+      toast.error("File looks empty", {
+        description: "The selected image is under 1 KB. Try another file.",
+      });
       return;
     }
+    if (file.size > MAX_BYTES) {
+      toast.error("Image too large", {
+        description: `Max ${formatMB(MAX_BYTES)} — your file is ${formatMB(file.size)}.`,
+      });
+      return;
+    }
+
     setUploading(true);
     try {
       const buf = await file.arrayBuffer();
@@ -68,13 +100,18 @@ function VisionPage() {
       }
       const base64 = btoa(bin);
       const res = await uploadFn({
-        data: { filename: file.name, contentType: file.type, base64 },
+        data: {
+          filename: file.name,
+          contentType: file.type || `image/${ext === "jpg" ? "jpeg" : ext}`,
+          base64,
+        },
       });
       setSourcePath(res.path);
       setSourcePreview(res.signed_url);
-      toast.success("Source photo uploaded");
+      toast.success("Source photo uploaded", { description: file.name });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      const msg = e instanceof Error ? e.message : "Upload failed";
+      toast.error("Couldn't upload that photo", { description: msg });
     } finally {
       setUploading(false);
     }
@@ -189,7 +226,7 @@ function VisionPage() {
                 {uploading ? "Uploading…" : "Upload room photo"}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={ACCEPT_ATTR}
                   className="hidden"
                   disabled={uploading}
                   onChange={(e) => {
@@ -201,7 +238,7 @@ function VisionPage() {
               </label>
             )}
             <p className="text-xs text-[var(--w55)]">
-              Used as the "before" frame in the compare slider and exports.
+              {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
             </p>
           </div>
         </div>
