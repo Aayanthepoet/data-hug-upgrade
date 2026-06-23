@@ -300,6 +300,81 @@ export const uploadSourcePhoto = createServerFn({ method: "POST" })
     return { id: photoRow.id as string, path, signed_url: signed?.signedUrl ?? null };
   });
 
+// List the caller's source-photo library, newest first, with short-lived
+// signed thumbnails so the library page can render previews without exposing
+// the bucket. RLS scopes rows to the user — we add a redundant filter for
+// belt-and-suspenders.
+const ListSourcePhotosInput = z
+  .object({
+    limit: z.number().int().min(1).max(200).optional(),
+  })
+  .default({});
+
+export const listSourcePhotos = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ListSourcePhotosInput.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: rows, error } = await supabase
+      .from("vision_source_photos")
+      .select(
+        "id, storage_path, filename, content_type, byte_size, original_filename, original_byte_size, was_cropped, crop_aspect, crop_max_edge, created_at",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 100);
+    if (error) throw new Error(error.message);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const out = await Promise.all(
+      (rows ?? []).map(async (r) => {
+        let signedUrl: string | null = null;
+        if (r.storage_path) {
+          const { data: signed } = await supabaseAdmin.storage
+            .from(BUCKET)
+            .createSignedUrl(r.storage_path, 60 * 60);
+          signedUrl = signed?.signedUrl ?? null;
+        }
+        return { ...r, signed_url: signedUrl };
+      }),
+    );
+    return out;
+  });
+
+// Fetch a single source photo by id (with signed URL). Used when reusing a
+// library photo as the "before" of a new render — the vision page receives
+// just the id via a search param and loads the rest here.
+export const getSourcePhoto = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("vision_source_photos")
+      .select("id, storage_path, filename, content_type, byte_size, user_id")
+      .eq("id", data.id)
+      .single();
+    if (error) throw new Error(error.message);
+    if (row.user_id !== userId) throw new Error("Forbidden");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let signedUrl: string | null = null;
+    if (row.storage_path) {
+      const { data: signed } = await supabaseAdmin.storage
+        .from(BUCKET)
+        .createSignedUrl(row.storage_path, 60 * 60);
+      signedUrl = signed?.signedUrl ?? null;
+    }
+    return {
+      id: row.id as string,
+      storage_path: row.storage_path as string,
+      filename: row.filename as string,
+      signed_url: signedUrl,
+    };
+  });
+
+
 // Delete a previously uploaded source photo: removes the storage object and
 // its `vision_source_photos` row. Ownership is double-enforced (RLS + check).
 export const deleteSourcePhoto = createServerFn({ method: "POST" })

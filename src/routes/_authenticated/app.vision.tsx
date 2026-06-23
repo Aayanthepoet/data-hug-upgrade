@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Trash2, Link2, Upload, X, Loader2, AlertCircle, RefreshCw, Images } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,11 +32,14 @@ import {
   getVisionCapabilities,
   uploadSourcePhoto,
   deleteSourcePhoto,
+  getSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
   property: fallback(z.string().uuid().optional(), undefined),
+  sourcePhotoId: fallback(z.string().uuid().optional(), undefined),
 });
+
 
 export const Route = createFileRoute("/_authenticated/app/vision")({
   validateSearch: zodValidator(visionSearchSchema),
@@ -312,11 +315,45 @@ function VisionPage() {
   const [resolution, setResolution] = useState<"hd" | "2k" | "4k">("hd");
   // Auto-link: when navigated from a property page (?property=<uuid>) we
   // prefill the selector so the next render is attached without extra clicks.
-  const { property: prefillProperty } = Route.useSearch();
+  const { property: prefillProperty, sourcePhotoId: prefillSourcePhotoId } = Route.useSearch();
   const [propertyId, setPropertyId] = useState<string>(prefillProperty ?? "none");
   useEffect(() => {
     if (prefillProperty) setPropertyId(prefillProperty);
   }, [prefillProperty]);
+
+  // Reuse from library: when ?sourcePhotoId=<uuid> is present we fetch the
+  // existing photo's signed URL and storage path, then set it as the active
+  // "before" image without re-uploading or re-running the cropper. Effect
+  // guards against re-triggering once the photo is already loaded.
+  const getSourcePhotoFn = useServerFn(getSourcePhoto);
+  useEffect(() => {
+    if (!prefillSourcePhotoId) return;
+    if (sourcePhotoId === prefillSourcePhotoId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const photo = await getSourcePhotoFn({ data: { id: prefillSourcePhotoId } });
+        if (cancelled) return;
+        if (sourcePreview && sourcePreview.startsWith("blob:")) {
+          URL.revokeObjectURL(sourcePreview);
+        }
+        setSourcePhotoId(photo.id);
+        setSourcePath(photo.storage_path);
+        setSourcePreview(photo.signed_url);
+        toast.success("Loaded from library", { description: photo.filename });
+      } catch (e) {
+        if (cancelled) return;
+        toast.error("Couldn't load that photo", {
+          description: e instanceof Error ? e.message : "Load failed",
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillSourcePhotoId]);
+
 
   const { data: renders = [] } = useQuery({
     queryKey: ["vision-renders"],
@@ -423,16 +460,25 @@ function VisionPage() {
   return (
     <>
     <div className="space-y-6">
-      <div>
-        <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
-        <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">
-          Property <span className="h-italic">redesign</span>
-        </h1>
-        <p className="text-[var(--w55)] mt-3 max-w-xl">
-          Generate redesign concepts for distressed rooms to show sellers the after-state.
-          Renders are saved to your library with status, prompt, and property linkage.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
+          <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">
+            Property <span className="h-italic">redesign</span>
+          </h1>
+          <p className="text-[var(--w55)] mt-3 max-w-xl">
+            Generate redesign concepts for distressed rooms to show sellers the after-state.
+            Renders are saved to your library with status, prompt, and property linkage.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link to="/app/vision/library">
+            <Images className="h-3.5 w-3.5 mr-1.5" />
+            Source photo library
+          </Link>
+        </Button>
       </div>
+
 
       <div className="surface p-6 space-y-3">
         <div>
