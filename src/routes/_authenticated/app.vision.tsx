@@ -457,6 +457,28 @@ function VisionPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Link failed"),
   });
 
+  // Re-run a previous render with the same prompt, style, and source photo.
+  // Resolution isn't persisted on the row, so we use the current selector
+  // value (the only resolution the user has actively chosen for this session).
+  const regenerate = useMutation({
+    mutationFn: (r: { prompt: string; style: string | null; source_image_url: string | null; property_id: string | null }) =>
+      generateFn({
+        data: {
+          prompt: r.prompt,
+          style: (r.style ?? "modern") as typeof style,
+          resolution,
+          property_id: r.property_id,
+          source_image_url: r.source_image_url,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Regenerated");
+      qc.invalidateQueries({ queryKey: ["vision-renders"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Regenerate failed"),
+  });
+
+
   return (
     <>
     <div className="space-y-6">
