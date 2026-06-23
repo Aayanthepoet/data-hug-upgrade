@@ -24,6 +24,34 @@ export const sendOutreach = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // 0. Compliance gate — SMS sends to a suppressed phone number are
+    //    blocked, logged, and never hit the provider. This is the hard
+    //    enforcement of carrier-required STOP/UNSUBSCRIBE handling.
+    if (data.channel === "sms") {
+      const { data: suppressed, error: supErr } = await supabase.rpc(
+        "is_phone_suppressed",
+        { _phone: data.to },
+      );
+      if (supErr) throw new Error(supErr.message);
+      if (suppressed) {
+        await supabase.from("outreach_messages").insert({
+          user_id: userId,
+          owner_id: data.owner_id ?? null,
+          contact_id: data.contact_id ?? null,
+          campaign_id: data.campaign_id ?? null,
+          channel: "sms",
+          direction: "outbound",
+          to_value: data.to,
+          body: data.body,
+          status: "blocked",
+          error: "Recipient is on the SMS opt-out registry",
+        });
+        throw new Error(
+          `Blocked: ${data.to} has opted out of SMS. Restore via the Opt-outs registry to message them again.`,
+        );
+      }
+    }
+
     // 1. Insert a queued row so we always have an audit record even if the
     //    provider call throws.
     const { data: inserted, error: insErr } = await supabase
