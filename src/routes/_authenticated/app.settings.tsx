@@ -156,6 +156,7 @@ function SettingsPage() {
     onSuccess: () => {
       toast.success("Avatar updated", { description: "Your new profile picture is live." });
       qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+      // Preview is cleared once the new signed URL loads (see signed-URL effect)
     },
     onError: (e: Error) => {
       toast.error("Avatar upload failed", { description: e.message });
