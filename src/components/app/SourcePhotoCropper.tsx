@@ -16,14 +16,20 @@ const ASPECTS: Record<AspectKey, number | undefined> = {
   "16:9": 16 / 9,
 };
 
+export type CropMeta = {
+  aspect: AspectKey;
+  maxEdge: number;
+};
+
 type Props = {
   /** The file the user picked; the dialog is open while non-null. */
   file: File | null;
   onCancel: () => void;
   /** Upload the original file untouched. */
   onUseOriginal: (file: File) => void;
-  /** Upload a new File generated from the chosen crop + scale. */
-  onConfirmCrop: (file: File) => void;
+  /** Upload a new File generated from the chosen crop + scale, with the
+   *  settings the user picked so we can persist them as metadata. */
+  onConfirmCrop: (file: File, meta: CropMeta) => void;
 };
 
 /**
