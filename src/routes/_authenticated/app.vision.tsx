@@ -357,14 +357,58 @@ function VisionPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Render failed"),
   });
 
+  // Soft-hidden renders during the undo window. We optimistically filter
+  // these from the list and only call the server delete after the timeout
+  // fires without an undo click.
+  const [hiddenRenderIds, setHiddenRenderIds] = useState<Set<string>>(new Set());
+
   const remove = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
     onSuccess: () => {
-      toast.success("Deleted");
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Delete failed"),
   });
+
+  function softDeleteRender(id: string) {
+    setHiddenRenderIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+
+    let undone = false;
+    const UNDO_MS = 6000;
+    const timer = setTimeout(() => {
+      if (undone) return;
+      remove.mutate(id, {
+        onSettled: () => {
+          setHiddenRenderIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        },
+      });
+    }, UNDO_MS);
+
+    toast.success("Render deleted", {
+      duration: UNDO_MS,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          clearTimeout(timer);
+          setHiddenRenderIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          toast.success("Restore complete");
+        },
+      },
+    });
+  }
 
   const link = useMutation({
     mutationFn: ({ id, property_id }: { id: string; property_id: string | null }) =>
