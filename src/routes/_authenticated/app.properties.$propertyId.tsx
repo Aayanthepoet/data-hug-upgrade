@@ -9,6 +9,8 @@ import { upsertWatchlistItem } from "@/lib/watchlist.functions";
 import { createAuction } from "@/lib/auctions/auctions.functions";
 import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/comps/comps.functions";
 import { listRenders, deleteRender, linkRenderToProperty } from "@/lib/vision/vision.functions";
+import { ContractsSection } from "@/components/app/ContractsSection";
+
 import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
