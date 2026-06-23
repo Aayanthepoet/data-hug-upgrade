@@ -127,11 +127,23 @@ function VisionPage() {
             <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="hd">HD · 1024 × 1024</SelectItem>
-                <SelectItem value="2k">2K · 2048 × 2048</SelectItem>
-                <SelectItem value="4k">4K · 4096 × 4096</SelectItem>
+                <SelectItem value="hd" disabled={!supported.includes("hd")}>
+                  HD · 1024 × 1024{!supported.includes("hd") && " — unavailable"}
+                </SelectItem>
+                <SelectItem value="2k" disabled={!supported.includes("2k")}>
+                  2K · 2048 × 2048{!supported.includes("2k") && " — unavailable"}
+                </SelectItem>
+                <SelectItem value="4k" disabled={!supported.includes("4k")}>
+                  4K · 4096 × 4096{!supported.includes("4k") && " — unavailable"}
+                </SelectItem>
               </SelectContent>
             </Select>
+            {!resolutionSupported && (
+              <p className="text-xs text-red-400 mt-1">
+                {resolution.toUpperCase()} isn't available on the current renderer
+                {caps?.provider ? ` (${caps.provider})` : ""}. Pick a supported tier.
+              </p>
+            )}
           </div>
           <div>
             <label className="text-xs text-[var(--w55)]">Link to property (optional)</label>
