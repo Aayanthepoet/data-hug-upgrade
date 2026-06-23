@@ -33,10 +33,31 @@ function SocialHubPage() {
   const listAccts = useServerFn(listMySocialAccounts);
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
+  const connectMeta = useServerFn(connectMetaSimulated);
+  const disconnect = useServerFn(disconnectSocialAccount);
 
   const postsQ = useQuery({ queryKey: ["my-social-posts"], queryFn: () => list() });
   const accountsQ = useQuery({ queryKey: ["my-social-accounts"], queryFn: () => listAccts() });
   const profileQ = useQuery({ queryKey: ["my-public-profile"], queryFn: () => getProfile() });
+
+  // Surface OAuth callback errors from /api/public/oauth/meta/callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("meta_error");
+    const ok = params.get("connected");
+    if (err) {
+      toast.error(
+        err === "not_configured"
+          ? "Meta OAuth isn't configured yet. Use Connect (Simulated) to test the flow."
+          : `Meta connect failed: ${err}`,
+      );
+      window.history.replaceState({}, "", "/app/social");
+    } else if (ok === "meta") {
+      toast.success("Facebook + Instagram connected.");
+      window.history.replaceState({}, "", "/app/social");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    }
+  }, [qc]);
 
   const actMut = useMutation({
     mutationFn: (vars: { post_id: string; action: "publish" | "unpublish" | "delete" }) =>
@@ -48,8 +69,27 @@ function SocialHubPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const connectMetaMut = useMutation({
+    mutationFn: () => connectMeta(),
+    onSuccess: () => {
+      toast.success("Simulated Facebook + Instagram accounts connected.");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const disconnectMut = useMutation({
+    mutationFn: (account_id: string) => disconnect({ data: { account_id } }),
+    onSuccess: () => {
+      toast.success("Disconnected.");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const slug = profileQ.data?.public_slug;
   const profileEnabled = profileQ.data?.public_enabled;
+  const metaConnected = accountsQ.data?.some((a) => a.platform === "facebook" || a.platform === "instagram");
 
   return (
     <div className="max-w-5xl">
