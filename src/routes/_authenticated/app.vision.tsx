@@ -98,15 +98,31 @@ function VisionPage() {
     }
 
     setUploading(true);
+    setUploadPhase("encoding");
+    setUploadProgress(0);
+    let creepTimer: ReturnType<typeof setInterval> | null = null;
     try {
       const buf = await file.arrayBuffer();
-      // Chunked btoa avoids "Maximum call stack" on large images.
+      // Chunked btoa avoids "Maximum call stack" on large images. We also
+      // yield to the event loop every chunk so the progress bar paints.
       let bin = "";
       const bytes = new Uint8Array(buf);
-      for (let i = 0; i < bytes.length; i += 0x8000) {
+      const total = bytes.length;
+      for (let i = 0; i < total; i += 0x8000) {
         bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 0x8000)));
+        // Encoding owns 0 → 60% of the bar.
+        setUploadProgress(Math.min(60, Math.round(((i + 0x8000) / total) * 60)));
+        await new Promise((r) => setTimeout(r, 0));
       }
       const base64 = btoa(bin);
+
+      // Network phase: creep from 60 → 90 while the RPC is in flight.
+      setUploadPhase("sending");
+      setUploadProgress(60);
+      creepTimer = setInterval(() => {
+        setUploadProgress((p) => (p < 90 ? p + 2 : p));
+      }, 150);
+
       const res = await uploadFn({
         data: {
           filename: file.name,
@@ -114,16 +130,28 @@ function VisionPage() {
           base64,
         },
       });
+      if (creepTimer) clearInterval(creepTimer);
+      setUploadProgress(100);
+      setUploadPhase("done");
       setSourcePath(res.path);
       setSourcePreview(res.signed_url);
       toast.success("Source photo uploaded", { description: file.name });
     } catch (e) {
+      if (creepTimer) clearInterval(creepTimer);
       const msg = e instanceof Error ? e.message : "Upload failed";
       toast.error("Couldn't upload that photo", { description: msg });
+      setUploadProgress(0);
+      setUploadPhase("idle");
     } finally {
       setUploading(false);
+      // Let the "done" 100% frame paint briefly, then reset.
+      setTimeout(() => {
+        setUploadProgress(0);
+        setUploadPhase("idle");
+      }, 600);
     }
   }
+
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
