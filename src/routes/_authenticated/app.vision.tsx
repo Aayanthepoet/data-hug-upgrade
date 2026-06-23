@@ -600,11 +600,22 @@ function VisionPage() {
         onCancel={() => setPendingFile(null)}
         onUseOriginal={(f) => {
           setPendingFile(null);
-          void uploadFile(f);
+          void uploadFile(f, {
+            originalFilename: f.name,
+            originalByteSize: f.size,
+            wasCropped: false,
+          });
         }}
-        onConfirmCrop={(f) => {
+        onConfirmCrop={(f, meta) => {
+          const original = pendingFile;
           setPendingFile(null);
-          void uploadFile(f);
+          void uploadFile(f, {
+            originalFilename: original?.name,
+            originalByteSize: original?.size,
+            wasCropped: true,
+            cropAspect: meta.aspect,
+            cropMaxEdge: meta.maxEdge,
+          });
         }}
       />
     </>
