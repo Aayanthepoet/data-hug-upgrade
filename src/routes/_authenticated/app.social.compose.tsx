@@ -85,19 +85,6 @@ function ComposePage() {
         },
       });
     },
-          property_id: propertyId || null,
-          landing_slug: draft.landing_slug,
-          headline: draft.headline,
-          subheadline: draft.subheadline,
-          body_md: draft.body_md,
-          hero_image_url: hero,
-          cta_url: null,
-          tags: draft.tags,
-          publish,
-          variants: draft.variants,
-        },
-      });
-    },
     onSuccess: (res, publish) => {
       toast.success(publish ? "Published! Your SEO landing page is live." : "Draft saved.");
       if (publish && profileQ.data?.public_slug) {
