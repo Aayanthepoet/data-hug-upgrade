@@ -246,9 +246,35 @@ function VisionPage() {
           <label className="text-xs text-[var(--w55)]">Describe the room</label>
           <Textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
         </div>
-        <div>
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!uploading && !sourcePreview) {
+              setIsDragging(true);
+            }
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            if (!uploading && !sourcePreview) {
+              const file = e.dataTransfer.files?.[0];
+              if (file) {
+                onSourceFile(file);
+              }
+            }
+          }}
+          className={`space-y-1.5 p-3 rounded-lg border transition-all duration-200 ${
+            isDragging
+              ? "border-primary bg-primary/5 shadow-[0_0_12px_rgba(59,130,246,0.1)]"
+              : "border-transparent bg-transparent"
+          }`}
+        >
           <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
-          <div className="flex flex-wrap items-center gap-3 mt-1">
+          <div className="flex flex-wrap items-center gap-3">
             {sourcePreview ? (
               <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10">
                 <img src={sourcePreview} alt="source" className="h-full w-full object-cover" />
@@ -302,10 +328,14 @@ function VisionPage() {
               </div>
             ) : (
               <label
-                className={`cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5 ${uploading ? "opacity-60 pointer-events-none" : ""}`}
+                className={`cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed text-xs transition-colors duration-150 ${
+                  isDragging
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-white/15 text-[var(--w55)] hover:bg-white/5"
+                } ${uploading ? "opacity-60 pointer-events-none" : ""}`}
               >
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                {uploading ? "Uploading…" : "Upload room photo"}
+                {uploading ? "Uploading…" : isDragging ? "Drop your photo here" : "Upload room photo"}
                 <input
                   type="file"
                   accept={ACCEPT_ATTR}
@@ -320,8 +350,8 @@ function VisionPage() {
               </label>
             )}
             {!uploadError && !sourcePreview && (
-              <p className="text-xs text-[var(--w55)]">
-                {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
+              <p className={`text-xs transition-colors duration-150 ${isDragging ? "text-primary/90 font-medium animate-pulse" : "text-[var(--w55)]"}`}>
+                {isDragging ? "Release to upload!" : `${ALLOWED_LABEL} · up to ${formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.`}
               </p>
             )}
           </div>
