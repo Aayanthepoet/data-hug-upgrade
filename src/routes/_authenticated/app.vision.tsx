@@ -56,6 +56,7 @@ function VisionPage() {
   const [uploadPhase, setUploadPhase] = useState<"idle" | "encoding" | "sending" | "done">("idle");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [failedFile, setFailedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
