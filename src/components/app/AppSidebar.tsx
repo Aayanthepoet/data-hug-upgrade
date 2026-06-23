@@ -53,6 +53,7 @@ const items = [
   { title: "Outreach", url: "/app/outreach", icon: Send },
   { title: "Vision Studio", url: "/app/vision", icon: Eye },
   { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
+  { title: "Social Amplifier", url: "/app/social", icon: Share2 },
   { title: "Audit Log", url: "/app/audit", icon: ScrollText },
   { title: "SMS Opt-outs", url: "/app/opt-outs", icon: ShieldOff },
   { title: "Settings", url: "/app/settings", icon: Settings },
