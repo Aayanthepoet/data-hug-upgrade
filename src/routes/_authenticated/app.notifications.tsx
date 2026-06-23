@@ -7,6 +7,7 @@ import { Bell, MessageSquare, UserPlus, Gavel, Smartphone, Loader2, CheckCircle2
 import {
   getNotificationPreferences,
   updateNotificationPreferences,
+  sendTestSms,
 } from "@/lib/notifications.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ function NotificationSettingsPage() {
   const qc = useQueryClient();
   const getFn = useServerFn(getNotificationPreferences);
   const updateFn = useServerFn(updateNotificationPreferences);
+  const testSmsFn = useServerFn(sendTestSms);
 
   const { data, isLoading } = useQuery({
     queryKey: ["notification-prefs"],
@@ -106,6 +108,12 @@ function NotificationSettingsPage() {
       toast.success("Notification preferences saved");
       qc.invalidateQueries({ queryKey: ["notification-prefs"] });
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const sendTest = useMutation({
+    mutationFn: (phone: string) => testSmsFn({ data: { phone } }),
+    onSuccess: () => toast.success("Test SMS sent — check your phone in a moment."),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -243,6 +251,25 @@ function NotificationSettingsPage() {
                 Will be saved as <span className="font-mono text-[var(--w70)]">{normalizedPhone}</span>
               </p>
             )}
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!phoneValid || sendTest.isPending}
+                onClick={() => sendTest.mutate(normalizedPhone)}
+              >
+                {sendTest.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                ) : (
+                  <Smartphone className="h-3.5 w-3.5 mr-2" />
+                )}
+                Send test SMS
+              </Button>
+              <p className="text-xs text-[var(--w55)] mt-1.5">
+                Sends a one-time message to verify delivery. Standard carrier rates apply.
+              </p>
+            </div>
           </div>
         )}
       </section>
