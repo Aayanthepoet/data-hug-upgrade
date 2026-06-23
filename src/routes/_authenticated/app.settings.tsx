@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { LogOut, User as UserIcon, Mail, Building2, Calendar } from "lucide-react";
+import { LogOut, User as UserIcon, Mail, Building2, Calendar, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,8 @@ function SettingsPage() {
 
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
@@ -53,6 +55,57 @@ function SettingsPage() {
       setCompany(profile.company ?? "");
     }
   }, [profile]);
+
+  // Resolve signed URL for avatar (private bucket)
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      if (!profile?.avatar_url) {
+        setAvatarUrl(null);
+        return;
+      }
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(profile.avatar_url, 3600);
+      if (!cancelled && !error) setAvatarUrl(data?.signedUrl ?? null);
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.avatar_url]);
+
+  const uploadAvatar = useMutation({
+    mutationFn: async (file: File) => {
+      if (!user?.id) throw new Error("Not signed in");
+      if (!file.type.startsWith("image/")) throw new Error("File must be an image");
+      if (file.size > 5 * 1024 * 1024) throw new Error("Image must be under 5MB");
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+
+      // Delete previous avatar if any
+      if (profile?.avatar_url) {
+        await supabase.storage.from("avatars").remove([profile.avatar_url]);
+      }
+
+      const { error: dbErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path })
+        .eq("id", user.id);
+      if (dbErr) throw dbErr;
+    },
+    onSuccess: () => {
+      toast.success("Avatar updated");
+      qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const save = useMutation({
     mutationFn: async () => {
@@ -117,6 +170,41 @@ function SettingsPage() {
           <Building2 className="h-4 w-4" /> Profile
         </h2>
         <div className="grid gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <UserIcon className="h-8 w-8 text-[var(--w45)]" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadAvatar.mutate(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadAvatar.isPending}
+              >
+                {uploadAvatar.isPending ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading…</>
+                ) : (
+                  <><Upload className="h-4 w-4 mr-2" /> Upload avatar</>
+                )}
+              </Button>
+              <p className="text-xs text-[var(--w45)] mt-1.5">PNG or JPG, up to 5MB</p>
+            </div>
+          </div>
+
           <div className="grid gap-1.5">
             <Label htmlFor="full_name">Full name</Label>
             <Input
