@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
         // Match most recent outbound to this number and mark replied.
         const { data: outbound } = await supabaseAdmin
           .from("outreach_messages")
-          .select("id")
+          .select("id, user_id, owner_id, contact_id, campaign_id")
           .eq("provider", "twilio")
           .eq("to_value", from)
           .eq("direction", "outbound")
@@ -44,20 +44,23 @@ export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
             .from("outreach_messages")
             .update({ status: "replied", response: body, replied_at: now })
             .eq("id", outbound.id);
-        }
 
-        // Log the inbound message itself.
-        await supabaseAdmin.from("outreach_messages").insert({
-          channel: "sms",
-          direction: "inbound",
-          provider: "twilio",
-          provider_message_id: messageSid || null,
-          to_value: to,
-          from_value: from,
-          body,
-          status: "delivered",
-          received_at: now,
-        });
+          // Log the inbound as its own row, linked to the same owner/campaign.
+          await supabaseAdmin.from("outreach_messages").insert({
+            user_id: outbound.user_id,
+            owner_id: outbound.owner_id,
+            contact_id: outbound.contact_id,
+            campaign_id: outbound.campaign_id,
+            channel: "sms",
+            direction: "inbound",
+            provider: "twilio",
+            provider_message_id: messageSid || null,
+            to_value: from,
+            body,
+            status: "delivered",
+            sent_at: now,
+          });
+        }
 
         // Empty TwiML = no auto-reply.
         return new Response("<Response/>", {
