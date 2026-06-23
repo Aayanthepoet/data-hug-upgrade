@@ -65,6 +65,7 @@ function NotificationSettingsPage() {
   const qc = useQueryClient();
   const getFn = useServerFn(getNotificationPreferences);
   const updateFn = useServerFn(updateNotificationPreferences);
+  const testSmsFn = useServerFn(sendTestSms);
 
   const { data, isLoading } = useQuery({
     queryKey: ["notification-prefs"],
