@@ -14,6 +14,7 @@ import {
   deleteRender,
   linkRenderToProperty,
   listPropertiesForRender,
+  getVisionCapabilities,
 } from "@/lib/vision/vision.functions";
 
 export const Route = createFileRoute("/_authenticated/app/vision")({
