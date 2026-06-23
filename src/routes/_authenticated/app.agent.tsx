@@ -219,7 +219,7 @@ function AgentLayout() {
         {activeId ? (
           <Outlet />
         ) : (
-          <div className="surface flex-1 flex flex-col items-center justify-center text-center px-6">
+          <div className="surface flex-1 flex flex-col items-center justify-center text-center px-6 py-8 overflow-y-auto">
             <div
               className="h-14 w-14 rounded-2xl flex items-center justify-center mb-5"
               style={{ background: "var(--cyan-d)", border: "1px solid var(--cyan-b)" }}
@@ -233,7 +233,23 @@ function AgentLayout() {
             <Button className="mt-6" onClick={() => create.mutate()} disabled={create.isPending}>
               <Plus className="h-4 w-4 mr-2" /> New chat
             </Button>
+            <div className="mt-8 w-full max-w-2xl">
+              <p className="text-xs uppercase tracking-wider text-[var(--w55)] mb-3">
+                Watch a 18-second intro
+              </p>
+              <video
+                src="/propai-intro.mp4"
+                className="w-full rounded-xl border border-border shadow-lg"
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            </div>
           </div>
+
         )}
       </div>
     </div>
