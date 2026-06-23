@@ -170,6 +170,41 @@ function SettingsPage() {
           <Building2 className="h-4 w-4" /> Profile
         </h2>
         <div className="grid gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <UserIcon className="h-8 w-8 text-[var(--w45)]" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadAvatar.mutate(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadAvatar.isPending}
+              >
+                {uploadAvatar.isPending ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading…</>
+                ) : (
+                  <><Upload className="h-4 w-4 mr-2" /> Upload avatar</>
+                )}
+              </Button>
+              <p className="text-xs text-[var(--w45)] mt-1.5">PNG or JPG, up to 5MB</p>
+            </div>
+          </div>
+
           <div className="grid gap-1.5">
             <Label htmlFor="full_name">Full name</Label>
             <Input
