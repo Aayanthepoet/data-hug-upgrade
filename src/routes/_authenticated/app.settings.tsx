@@ -48,7 +48,15 @@ function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clean up object URLs when replaced/unmounted
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     if (profile) {
@@ -88,7 +96,21 @@ function SettingsPage() {
         throw new Error(`Image is ${mb}MB — max 5MB`);
       }
 
-      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      // Compress/resize unless GIF (preserve animation)
+      let upload: Blob = file;
+      let ext = "jpg";
+      let contentType = "image/jpeg";
+      if (file.type === "image/gif") {
+        upload = file;
+        ext = "gif";
+        contentType = "image/gif";
+      } else {
+        const compressed = await compressImage(file, 512, 0.9);
+        upload = compressed;
+        ext = "jpg";
+        contentType = "image/jpeg";
+      }
+
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
       // Get a signed upload URL so we can drive the PUT via XHR for progress
