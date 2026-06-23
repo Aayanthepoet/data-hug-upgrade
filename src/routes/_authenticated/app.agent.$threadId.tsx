@@ -1,13 +1,25 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport, type UIMessage, type FileUIPart } from "ai";
 import { useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, Sparkles, FileDown, ListChecks, Loader2 } from "lucide-react";
+import {
+  Bot,
+  Sparkles,
+  FileDown,
+  ListChecks,
+  Loader2,
+  Paperclip,
+  FileText,
+  ChevronDown,
+} from "lucide-react";
 import { exportConversationToPdf } from "@/lib/export-pdf";
+import { exportConversationToCsv } from "@/lib/export-csv";
 import { TaskPlan, type TaskPlanData } from "@/components/app/TaskPlan";
+import { VoiceInputButton } from "@/components/app/VoiceInputButton";
+import { AttachmentChips } from "@/components/app/AttachmentChips";
 import { getChatThreadMessages } from "@/lib/chat-threads.functions";
 
 import {
@@ -21,6 +33,11 @@ import {
   PromptInputTextarea,
   PromptInputSubmit,
   PromptInputFooter,
+  PromptInputProvider,
+  PromptInputActionMenu,
+  PromptInputActionMenuTrigger,
+  PromptInputActionMenuContent,
+  PromptInputActionAddAttachments,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
@@ -32,6 +49,12 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
