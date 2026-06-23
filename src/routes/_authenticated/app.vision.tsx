@@ -43,7 +43,13 @@ function VisionPage() {
   );
   const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
   const [resolution, setResolution] = useState<"hd" | "2k" | "4k">("hd");
-  const [propertyId, setPropertyId] = useState<string>("none");
+  // Auto-link: when navigated from a property page (?property=<uuid>) we
+  // prefill the selector so the next render is attached without extra clicks.
+  const { property: prefillProperty } = Route.useSearch();
+  const [propertyId, setPropertyId] = useState<string>(prefillProperty ?? "none");
+  useEffect(() => {
+    if (prefillProperty) setPropertyId(prefillProperty);
+  }, [prefillProperty]);
 
   const { data: renders = [] } = useQuery({
     queryKey: ["vision-renders"],
