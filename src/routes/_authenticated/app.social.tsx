@@ -164,6 +164,22 @@ function SocialHubPage() {
         <p className="text-xs text-[var(--w55)] mt-3">
           Meta OAuth is scaffolded at <code>/api/public/oauth/meta/start</code>. Add <code>META_APP_ID</code> and <code>META_APP_SECRET</code> secrets to switch from simulated to real Facebook + Instagram posting.
         </p>
+
+        <Link
+          to="/app/social/business-portfolio"
+          className="mt-4 border border-border rounded-lg p-4 flex items-center justify-between hover:border-cyan/50 transition-colors"
+        >
+          <div className="flex items-start gap-3">
+            <Building2 className="w-5 h-5 text-cyan mt-0.5" />
+            <div>
+              <p className="font-medium text-sm">Business Portfolio</p>
+              <p className="text-xs text-[var(--w55)]">
+                Attach and verify a Meta Business Portfolio when you're ready. Skipped during connect.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs text-cyan">Manage →</span>
+        </Link>
       </section>
 
       <MetaAccountPicker open={pickerOpen} onOpenChange={setPickerOpen} />
