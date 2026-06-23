@@ -1599,6 +1599,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      seed_notify_vault: {
+        Args: { _secret: string; _url: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
