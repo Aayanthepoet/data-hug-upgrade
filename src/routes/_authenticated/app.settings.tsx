@@ -1,0 +1,216 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { LogOut, User as UserIcon, Mail, Building2, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+export const Route = createFileRoute("/_authenticated/app/settings")({
+  head: () => ({ meta: [{ title: "Settings — PropAI" }] }),
+  component: SettingsPage,
+});
+
+function SettingsPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, company, avatar_url, created_at, updated_at")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [fullName, setFullName] = useState("");
+  const [company, setCompany] = useState("");
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setCompany(profile.company ?? "");
+    }
+  }, [profile]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) throw new Error("Not signed in");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: fullName, company })
+        .eq("id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Profile updated");
+      qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resetPassword = useMutation({
+    mutationFn: async () => {
+      if (!user?.email) throw new Error("No email on account");
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => toast.success("Password reset email sent"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  async function signOut() {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  const createdAt = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString()
+    : "—";
+
+  return (
+    <div className="space-y-8 max-w-2xl">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="mt-1 text-sm text-[var(--w55)]">
+          Manage your profile and account.
+        </p>
+      </div>
+
+      <section className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <UserIcon className="h-4 w-4" /> Account
+        </h2>
+        <div className="grid gap-3 text-sm">
+          <Row icon={Mail} label="Email" value={user?.email ?? "—"} />
+          <Row icon={Calendar} label="Member since" value={createdAt} />
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <Building2 className="h-4 w-4" /> Profile
+        </h2>
+        <div className="grid gap-4">
+          <div className="grid gap-1.5">
+            <Label htmlFor="full_name">Full name</Label>
+            <Input
+              id="full_name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={isLoading}
+              placeholder="Your name"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="company">Company</Label>
+            <Input
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              disabled={isLoading}
+              placeholder="Company name"
+            />
+          </div>
+          <div>
+            <Button
+              onClick={() => save.mutate()}
+              disabled={save.isPending || isLoading}
+            >
+              {save.isPending ? "Saving…" : "Save changes"}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+        <h2 className="text-lg font-semibold">Security</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm text-[var(--w55)]">
+            Send a password reset link to your email.
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => resetPassword.mutate()}
+            disabled={resetPassword.isPending}
+          >
+            {resetPassword.isPending ? "Sending…" : "Reset password"}
+          </Button>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-red-900/40 bg-red-950/10 p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-red-300">Danger zone</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm text-[var(--w55)]">
+            Sign out of this device.
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <LogOut className="h-4 w-4 mr-2" /> Sign out
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You'll need to sign in again to access your workspace.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={signOut}>Sign out</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Row({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2 border-b border-border/50 last:border-0">
+      <div className="flex items-center gap-2 text-[var(--w55)]">
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
+      </div>
+      <span className="font-mono text-xs truncate">{value}</span>
+    </div>
+  );
+}
