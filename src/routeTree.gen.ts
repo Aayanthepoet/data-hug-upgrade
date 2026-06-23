@@ -41,6 +41,8 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
+import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
@@ -217,6 +219,17 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksTwilioVoiceRoute =
+  ApiPublicHooksTwilioVoiceRouteImport.update({
+    id: '/api/public/hooks/twilio-voice',
+    path: '/api/public/hooks/twilio-voice',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksTwilioSmsRoute = ApiPublicHooksTwilioSmsRouteImport.update({
+  id: '/api/public/hooks/twilio-sms',
+  path: '/api/public/hooks/twilio-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksOutreachReplyRoute =
   ApiPublicHooksOutreachReplyRouteImport.update({
     id: '/api/public/hooks/outreach-reply',
@@ -289,6 +302,8 @@ export interface FileRoutesByFullPath {
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
+  '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -327,6 +342,8 @@ export interface FileRoutesByTo {
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
+  '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -368,6 +385,8 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
+  '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -409,6 +428,8 @@ export interface FileRouteTypes {
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/twilio-sms'
+    | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -447,6 +468,8 @@ export interface FileRouteTypes {
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/twilio-sms'
+    | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -487,6 +510,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/search'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/twilio-sms'
+    | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -507,6 +532,8 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
+  ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
+  ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -738,6 +765,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/twilio-voice': {
+      id: '/api/public/hooks/twilio-voice'
+      path: '/api/public/hooks/twilio-voice'
+      fullPath: '/api/public/hooks/twilio-voice'
+      preLoaderRoute: typeof ApiPublicHooksTwilioVoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/twilio-sms': {
+      id: '/api/public/hooks/twilio-sms'
+      path: '/api/public/hooks/twilio-sms'
+      fullPath: '/api/public/hooks/twilio-sms'
+      preLoaderRoute: typeof ApiPublicHooksTwilioSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/outreach-reply': {
       id: '/api/public/hooks/outreach-reply'
       path: '/api/public/hooks/outreach-reply'
@@ -896,6 +937,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
+  ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
+  ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
