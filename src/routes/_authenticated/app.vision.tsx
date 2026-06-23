@@ -212,8 +212,55 @@ function VisionPage() {
     }
   }
 
+  /**
+   * Remove the current source photo: deletes the storage object + DB row when
+   * one was saved server-side, then clears local preview state.
+   */
+  async function removeSourcePhoto() {
+    const id = sourcePhotoId;
+    setRemovingSource(true);
+    try {
+      if (id) {
+        await deleteSourceFn({ data: { id } });
+      }
+      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(sourcePreview);
+      }
+      setSourcePath(null);
+      setSourcePhotoId(null);
+      setSourcePreview(null);
+      if (id) toast.success("Source photo removed");
+    } catch (e) {
+      toast.error("Couldn't remove photo", {
+        description: e instanceof Error ? e.message : "Delete failed",
+      });
+    } finally {
+      setRemovingSource(false);
+    }
+  }
 
-  const [prompt, setPrompt] = useState(
+  /**
+   * Replace the current source photo: deletes the existing one (best-effort)
+   * and then runs the standard upload flow (which may open the cropper).
+   */
+  async function replaceSourcePhoto(file: File) {
+    const id = sourcePhotoId;
+    if (id) {
+      try {
+        await deleteSourceFn({ data: { id } });
+      } catch (e) {
+        // Don't block the replace — surface the issue but keep going.
+        toast.error("Couldn't delete the previous photo", {
+          description: e instanceof Error ? e.message : "Delete failed",
+        });
+      }
+      setSourcePhotoId(null);
+      setSourcePath(null);
+    }
+    onSourceFile(file);
+  }
+
+
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
   );
   const [style, setStyle] = useState<"modern" | "scandinavian" | "industrial" | "farmhouse" | "mid-century" | "coastal">("modern");
