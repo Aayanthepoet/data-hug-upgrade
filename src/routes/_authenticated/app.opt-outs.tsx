@@ -45,6 +45,22 @@ function OptOutsPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [testDigestOpen, setTestDigestOpen] = useState(false);
+
+  // Pull the admin's verified email from their profile so we can show it
+  // before sending a test digest (server enforces sending to this address).
+  const { data: myEmail } = useQuery({
+    queryKey: ["my-profile-email", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data?.email ?? user?.email ?? null;
+    },
+  });
 
   const sendTestDigestFn = useServerFn(sendTestComplianceDigest);
   const sendTestDigest = useMutation({
@@ -56,6 +72,7 @@ function OptOutsPage() {
         },
       }),
     onSuccess: (r) => {
+      setTestDigestOpen(false);
       if (r.queued > 0) toast.success(`Test digest queued to ${r.recipientEmail}`);
       else if (r.suppressed > 0) toast.error(`${r.recipientEmail} is on the suppression list`);
       else toast.error("Digest could not be sent");
