@@ -156,9 +156,29 @@ function OptOutsPage() {
             Carrier-required suppression list. Numbers here are blocked from all outbound SMS until restored.
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="btn-primary gap-2">
-          <Plus className="h-4 w-4" /> Add opt-out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => exportOptOutsCsv(rows)}
+            disabled={rows.length === 0}
+            title="Export current view to CSV"
+          >
+            <FileDown className="h-4 w-4" /> CSV
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => exportOptOutsPdf(rows)}
+            disabled={rows.length === 0}
+            title="Export current view to PDF"
+          >
+            <FileText className="h-4 w-4" /> PDF
+          </Button>
+          <Button onClick={() => setAddOpen(true)} className="btn-primary gap-2">
+            <Plus className="h-4 w-4" /> Add opt-out
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
