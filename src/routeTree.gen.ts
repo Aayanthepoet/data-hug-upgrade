@@ -48,6 +48,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
+import { Route as ApiPublicHooksSignwellRouteImport } from './routes/api/public/hooks/signwell'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
 import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
@@ -266,6 +267,11 @@ const ApiPublicHooksTwilioSmsRoute = ApiPublicHooksTwilioSmsRouteImport.update({
   path: '/api/public/hooks/twilio-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSignwellRoute = ApiPublicHooksSignwellRouteImport.update({
+  id: '/api/public/hooks/signwell',
+  path: '/api/public/hooks/signwell',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksOutreachReplyRoute =
   ApiPublicHooksOutreachReplyRouteImport.update({
     id: '/api/public/hooks/outreach-reply',
@@ -370,6 +376,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -471,6 +479,7 @@ export interface FileRoutesById {
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
+  '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -523,6 +532,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
@@ -572,6 +582,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
@@ -623,6 +634,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
+    | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/lovable/email/queue/process'
@@ -649,6 +661,7 @@ export interface RootRouteChildren {
   ApiPublicHooksComplianceDigestRoute: typeof ApiPublicHooksComplianceDigestRoute
   ApiPublicHooksNotifySmsRoute: typeof ApiPublicHooksNotifySmsRoute
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
+  ApiPublicHooksSignwellRoute: typeof ApiPublicHooksSignwellRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -931,6 +944,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksTwilioSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/signwell': {
+      id: '/api/public/hooks/signwell'
+      path: '/api/public/hooks/signwell'
+      fullPath: '/api/public/hooks/signwell'
+      preLoaderRoute: typeof ApiPublicHooksSignwellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/outreach-reply': {
       id: '/api/public/hooks/outreach-reply'
       path: '/api/public/hooks/outreach-reply'
@@ -1154,6 +1174,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksComplianceDigestRoute: ApiPublicHooksComplianceDigestRoute,
   ApiPublicHooksNotifySmsRoute: ApiPublicHooksNotifySmsRoute,
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
+  ApiPublicHooksSignwellRoute: ApiPublicHooksSignwellRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
