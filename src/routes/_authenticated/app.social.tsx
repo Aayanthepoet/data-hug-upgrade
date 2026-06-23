@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Globe, ExternalLink, Trash2, Share2 } from "lucide-react";
+import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2 } from "lucide-react";
 import {
   listMyPosts,
   listMySocialAccounts,
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
+import { connectMetaSimulated, disconnectSocialAccount } from "@/lib/social-oauth.functions";
 import { Button } from "@/components/ui/button";
 
 const PLATFORMS = [
@@ -31,10 +33,31 @@ function SocialHubPage() {
   const listAccts = useServerFn(listMySocialAccounts);
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
+  const connectMeta = useServerFn(connectMetaSimulated);
+  const disconnect = useServerFn(disconnectSocialAccount);
 
   const postsQ = useQuery({ queryKey: ["my-social-posts"], queryFn: () => list() });
   const accountsQ = useQuery({ queryKey: ["my-social-accounts"], queryFn: () => listAccts() });
   const profileQ = useQuery({ queryKey: ["my-public-profile"], queryFn: () => getProfile() });
+
+  // Surface OAuth callback errors from /api/public/oauth/meta/callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("meta_error");
+    const ok = params.get("connected");
+    if (err) {
+      toast.error(
+        err === "not_configured"
+          ? "Meta OAuth isn't configured yet. Use Connect (Simulated) to test the flow."
+          : `Meta connect failed: ${err}`,
+      );
+      window.history.replaceState({}, "", "/app/social");
+    } else if (ok === "meta") {
+      toast.success("Facebook + Instagram connected.");
+      window.history.replaceState({}, "", "/app/social");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    }
+  }, [qc]);
 
   const actMut = useMutation({
     mutationFn: (vars: { post_id: string; action: "publish" | "unpublish" | "delete" }) =>
@@ -46,8 +69,27 @@ function SocialHubPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const connectMetaMut = useMutation({
+    mutationFn: () => connectMeta(),
+    onSuccess: () => {
+      toast.success("Simulated Facebook + Instagram accounts connected.");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const disconnectMut = useMutation({
+    mutationFn: (account_id: string) => disconnect({ data: { account_id } }),
+    onSuccess: () => {
+      toast.success("Disconnected.");
+      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const slug = profileQ.data?.public_slug;
   const profileEnabled = profileQ.data?.public_enabled;
+  const metaConnected = accountsQ.data?.some((a) => a.platform === "facebook" || a.platform === "instagram");
 
   return (
     <div className="max-w-5xl">
@@ -74,35 +116,65 @@ function SocialHubPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Connected social accounts</h2>
+          <div className="flex items-center gap-2">
+            {!metaConnected ? (
+              <Button
+                onClick={() => connectMetaMut.mutate()}
+                disabled={connectMetaMut.isPending}
+                className="btn-primary px-3 py-1.5 text-xs h-auto inline-flex items-center gap-1.5"
+              >
+                <Link2 className="w-3.5 h-3.5" />
+                {connectMetaMut.isPending ? "Connecting…" : "Connect Facebook + Instagram (Simulated)"}
+              </Button>
+            ) : null}
+          </div>
         </div>
         <div className="grid sm:grid-cols-3 gap-3">
           {PLATFORMS.map((p) => {
             const acct = accountsQ.data?.find((a) => a.platform === p.id);
+            const isMeta = p.id === "facebook" || p.id === "instagram";
+            const simulated = (acct?.display_name ?? "").includes("Simulated");
             return (
               <div key={p.id} className="border border-border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-sm">{p.label}</span>
                   {acct ? (
-                    <span className="text-xs text-green-400">● Connected</span>
+                    <span className="text-xs text-green-400">● Connected{simulated ? " (sim)" : ""}</span>
                   ) : (
                     <span className="text-xs text-[var(--w35)]">Not connected</span>
                   )}
                 </div>
                 {acct ? (
-                  <p className="text-xs text-[var(--w55)] truncate">{acct.display_name}</p>
-                ) : (
-                  <button className="text-xs text-cyan hover:underline" disabled>
-                    Connect (coming soon)
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-[var(--w55)] truncate flex-1">{acct.display_name}</p>
+                    <button
+                      onClick={() => disconnectMut.mutate(acct.id)}
+                      className="text-xs text-[var(--w55)] hover:text-red-400"
+                      title="Disconnect"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : isMeta ? (
+                  <button
+                    onClick={() => connectMetaMut.mutate()}
+                    disabled={connectMetaMut.isPending}
+                    className="text-xs text-cyan hover:underline"
+                  >
+                    Connect (simulated)
                   </button>
+                ) : (
+                  <span className="text-xs text-[var(--w35)]">Coming soon</span>
                 )}
               </div>
             );
           })}
         </div>
         <p className="text-xs text-[var(--w55)] mt-3">
-          OAuth setup for each provider arrives in the next release. Today, publishing creates the SEO landing page and saves social-ready captions you can copy-paste.
+          Meta OAuth is scaffolded at <code>/api/public/oauth/meta/start</code>. Add <code>META_APP_ID</code> and <code>META_APP_SECRET</code> secrets to switch from simulated to real Facebook + Instagram posting.
         </p>
       </section>
+
 
       <section>
         <h2 className="font-semibold mb-3">Your posts</h2>
