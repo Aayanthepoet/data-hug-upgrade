@@ -225,30 +225,63 @@ function VisionPage() {
   }
 
   /**
-   * Remove the current source photo: deletes the storage object + DB row when
-   * one was saved server-side, then clears local preview state.
+   * Remove the current source photo with an undo window. We hide the photo
+   * from the UI immediately and snapshot the state; the actual server delete
+   * is deferred ~6s so the toast's "Undo" button can restore it. If the user
+   * undoes, we cancel the pending server call and put the snapshot back.
    */
-  async function removeSourcePhoto() {
-    const id = sourcePhotoId;
-    setRemovingSource(true);
-    try {
-      if (id) {
-        await deleteSourceFn({ data: { id } });
+  function removeSourcePhoto() {
+    const snapshot = {
+      id: sourcePhotoId,
+      path: sourcePath,
+      preview: sourcePreview,
+    };
+
+    // Locally hide the photo right away so the UI reflects the intent.
+    setSourcePath(null);
+    setSourcePhotoId(null);
+    setSourcePreview(null);
+
+    // If there was never a server-side row, nothing to defer or undo.
+    if (!snapshot.id) {
+      if (snapshot.preview && snapshot.preview.startsWith("blob:")) {
+        URL.revokeObjectURL(snapshot.preview);
       }
-      if (sourcePreview && sourcePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(sourcePreview);
-      }
-      setSourcePath(null);
-      setSourcePhotoId(null);
-      setSourcePreview(null);
-      if (id) toast.success("Source photo removed");
-    } catch (e) {
-      toast.error("Couldn't remove photo", {
-        description: e instanceof Error ? e.message : "Delete failed",
-      });
-    } finally {
-      setRemovingSource(false);
+      return;
     }
+
+    let undone = false;
+    const UNDO_MS = 6000;
+    const timer = setTimeout(async () => {
+      if (undone) return;
+      setRemovingSource(true);
+      try {
+        await deleteSourceFn({ data: { id: snapshot.id! } });
+      } catch (e) {
+        // The undo window already closed, so restoring the UI now would be
+        // misleading. Surface the error and keep the photo hidden.
+        toast.error("Couldn't remove photo", {
+          description: e instanceof Error ? e.message : "Delete failed",
+        });
+      } finally {
+        setRemovingSource(false);
+      }
+    }, UNDO_MS);
+
+    toast.success("Source photo removed", {
+      duration: UNDO_MS,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          clearTimeout(timer);
+          setSourcePath(snapshot.path);
+          setSourcePhotoId(snapshot.id);
+          setSourcePreview(snapshot.preview);
+          toast.success("Restore complete");
+        },
+      },
+    });
   }
 
   /**
