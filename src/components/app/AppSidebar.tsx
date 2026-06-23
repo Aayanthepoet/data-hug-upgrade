@@ -27,6 +27,8 @@ import {
   Gavel,
   Send,
   ScrollText,
+  ShieldOff,
+
 } from "lucide-react";
 
 const items = [
