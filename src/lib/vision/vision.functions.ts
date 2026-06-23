@@ -159,7 +159,7 @@ export const listRenders = createServerFn({ method: "GET" })
     let q = supabase
       .from("media_assets")
       .select(
-        "id, prompt, style, status, error, provider, property_id, owner_id, storage_path, created_at, properties(address, city, state)",
+        "id, prompt, style, status, error, provider, property_id, owner_id, storage_path, source_image_url, created_at, properties(address, city, state)",
       )
       .eq("user_id", userId)
       .eq("asset_type", "image")
