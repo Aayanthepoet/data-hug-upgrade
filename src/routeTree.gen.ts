@@ -48,6 +48,7 @@ import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
+import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
@@ -261,6 +262,12 @@ const ApiPublicHooksCloseAuctionsRoute =
     path: '/api/public/hooks/close-auctions',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAppVisionLibraryRoute =
+  AuthenticatedAppVisionLibraryRouteImport.update({
+    id: '/library',
+    path: '/library',
+    getParentRoute: () => AuthenticatedAppVisionRoute,
+  } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
     id: '/search',
@@ -311,7 +318,7 @@ export interface FileRoutesByFullPath {
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
-  '/app/vision': typeof AuthenticatedAppVisionRoute
+  '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
@@ -354,7 +362,7 @@ export interface FileRoutesByTo {
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
-  '/app/vision': typeof AuthenticatedAppVisionRoute
+  '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -364,6 +372,7 @@ export interface FileRoutesByTo {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
@@ -400,7 +409,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
-  '/_authenticated/app/vision': typeof AuthenticatedAppVisionRoute
+  '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -410,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
@@ -456,6 +466,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
@@ -544,6 +556,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
+    | '/_authenticated/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
@@ -853,6 +866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/vision/library': {
+      id: '/_authenticated/app/vision/library'
+      path: '/library'
+      fullPath: '/app/vision/library'
+      preLoaderRoute: typeof AuthenticatedAppVisionLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppVisionRoute
+    }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
       path: '/search'
@@ -930,6 +950,20 @@ const AuthenticatedAppPropertiesRouteWithChildren =
     AuthenticatedAppPropertiesRouteChildren,
   )
 
+interface AuthenticatedAppVisionRouteChildren {
+  AuthenticatedAppVisionLibraryRoute: typeof AuthenticatedAppVisionLibraryRoute
+}
+
+const AuthenticatedAppVisionRouteChildren: AuthenticatedAppVisionRouteChildren =
+  {
+    AuthenticatedAppVisionLibraryRoute: AuthenticatedAppVisionLibraryRoute,
+  }
+
+const AuthenticatedAppVisionRouteWithChildren =
+  AuthenticatedAppVisionRoute._addFileChildren(
+    AuthenticatedAppVisionRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRoute
   AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRouteWithChildren
@@ -944,7 +978,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
-  AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRoute
+  AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -963,7 +997,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
-  AuthenticatedAppVisionRoute: AuthenticatedAppVisionRoute,
+  AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
