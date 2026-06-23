@@ -257,6 +257,26 @@ function SettingsPage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
+                    const MAX_SIZE_MB = 5;
+                    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+                    
+                    if (file.size > MAX_SIZE_BYTES) {
+                      const mb = (file.size / 1024 / 1024).toFixed(1);
+                      toast.error("File is too large", {
+                        description: `The selected image is ${mb}MB. Please select a file smaller than ${MAX_SIZE_MB}MB.`
+                      });
+                      e.target.value = "";
+                      return;
+                    }
+                    
+                    if (!file.type.startsWith("image/")) {
+                      toast.error("Invalid file type", {
+                        description: "Only image files are allowed (PNG, JPG, WebP, GIF)."
+                      });
+                      e.target.value = "";
+                      return;
+                    }
+
                     if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setPreviewUrl(URL.createObjectURL(file));
                     uploadAvatar.mutate(file);
