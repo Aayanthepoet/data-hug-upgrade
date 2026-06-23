@@ -263,6 +263,7 @@ function VisionPage() {
   });
 
   return (
+    <>
     <div className="space-y-6">
       <div>
         <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
