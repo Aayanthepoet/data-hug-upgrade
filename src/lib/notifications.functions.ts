@@ -159,3 +159,29 @@ export const sendTestSms = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+export const wireSmsTriggers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isAdmin) throw new Error("Admins only.");
+
+    const url =
+      process.env.NOTIFY_PUBLIC_URL ||
+      "https://project--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app";
+    const secret = process.env.NOTIFY_HOOK_SECRET;
+    if (!secret) throw new Error("NOTIFY_HOOK_SECRET is not configured.");
+
+    const { error } = await supabase.rpc("seed_notify_vault", {
+      _url: url,
+      _secret: secret,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true, url };
+  });
+
