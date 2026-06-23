@@ -67,8 +67,9 @@ export const getChatThreadMessages = createServerFn({ method: "POST" })
     const messages: StoredMessage[] = (rows ?? []).map((r) => ({
       id: r.message_id ?? r.id,
       role: r.role as StoredMessage["role"],
-      parts: (Array.isArray(r.parts) ? r.parts : []) as unknown[],
+      parts: (Array.isArray(r.parts) ? r.parts : []) as Json,
     }));
+
 
     return { thread, messages };
   });
