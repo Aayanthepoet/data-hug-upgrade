@@ -16,7 +16,10 @@ const GenerateInput = z.object({
   resolution: z.enum(RESOLUTIONS).default("hd"),
   property_id: z.string().uuid().nullable().optional(),
   owner_id: z.string().uuid().nullable().optional(),
-  source_image_url: z.string().url().nullable().optional(),
+  // Either a public URL OR a storage path inside the `vision-renders` bucket
+  // (e.g. "<userId>/sources/abc.png"). Paths are signed at read-time so the
+  // before/after slider always gets a fresh link.
+  source_image_url: z.string().min(1).max(1024).nullable().optional(),
 });
 
 const BUCKET = "vision-renders";
