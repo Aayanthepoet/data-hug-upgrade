@@ -32,6 +32,7 @@ import {
   ShieldOff,
   LogOut,
   Settings,
+  Share2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
