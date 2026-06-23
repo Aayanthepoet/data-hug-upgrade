@@ -35,6 +35,7 @@ import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
 import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
 import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
@@ -191,6 +192,12 @@ const AuthenticatedAppOptOutsRoute = AuthenticatedAppOptOutsRouteImport.update({
   path: '/opt-outs',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -339,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -387,6 +395,7 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -438,6 +447,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/notifications'
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
@@ -537,6 +548,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/notifications'
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
@@ -587,6 +599,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
+    | '/_authenticated/app/notifications'
     | '/_authenticated/app/opt-outs'
     | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
@@ -827,6 +840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOptOutsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/notifications': {
+      id: '/_authenticated/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/leads': {
       id: '/_authenticated/app/leads'
       path: '/leads'
@@ -1065,6 +1085,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
+  AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOptOutsRoute: typeof AuthenticatedAppOptOutsRoute
   AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
@@ -1085,6 +1106,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
+  AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOptOutsRoute: AuthenticatedAppOptOutsRoute,
   AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
