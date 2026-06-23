@@ -1,14 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getPublicAgent } from "@/lib/social-public.functions";
 
 type AgentResponse = Awaited<ReturnType<typeof getPublicAgent>>;
+type AgentData = NonNullable<AgentResponse>;
 
-const agentQuery = (slug: string, fn: typeof getPublicAgent) =>
+const agentQuery = (slug: string) =>
   queryOptions({
     queryKey: ["public-agent", slug],
-    queryFn: () => fn({ data: { slug } }) as Promise<AgentResponse>,
+    queryFn: () => getPublicAgent({ data: { slug } }) as Promise<AgentResponse>,
   });
 
 export const Route = createFileRoute("/agents/$slug")({

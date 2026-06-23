@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AgentsSlugRouteImport } from './routes/agents.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
@@ -115,6 +116,11 @@ const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsSlugRoute = AgentsSlugRouteImport.update({
+  id: '/agents/$slug',
+  path: '/agents/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -363,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/agents/$slug': typeof AgentsSlugRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/agents/$slug': typeof AgentsSlugRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/agents/$slug': typeof AgentsSlugRoute
   '/api/chat': typeof ApiChatRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/app'
     | '/dashboard'
+    | '/agents/$slug'
     | '/api/chat'
     | '/api/transcribe'
     | '/email/unsubscribe'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/dashboard'
+    | '/agents/$slug'
     | '/api/chat'
     | '/api/transcribe'
     | '/email/unsubscribe'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/app'
     | '/_authenticated/dashboard'
+    | '/agents/$slug'
     | '/api/chat'
     | '/api/transcribe'
     | '/email/unsubscribe'
@@ -690,6 +702,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  AgentsSlugRoute: typeof AgentsSlugRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -785,6 +798,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/$slug': {
+      id: '/agents/$slug'
+      path: '/agents/$slug'
+      fullPath: '/agents/$slug'
+      preLoaderRoute: typeof AgentsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -1245,6 +1265,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  AgentsSlugRoute: AgentsSlugRoute,
   ApiChatRoute: ApiChatRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
