@@ -402,7 +402,7 @@ function VisionPage() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => void removeSourcePhoto()}
+                      onClick={() => setIsDeleteSourceDialogOpen(true)}
                       className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
                       aria-label="Remove source photo"
                     >
@@ -428,7 +428,7 @@ function VisionPage() {
                     </label>
                     <button
                       type="button"
-                      onClick={() => void removeSourcePhoto()}
+                      onClick={() => setIsDeleteSourceDialogOpen(true)}
                       className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-500/20 text-[11px] text-red-300 hover:bg-red-500/10 transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
