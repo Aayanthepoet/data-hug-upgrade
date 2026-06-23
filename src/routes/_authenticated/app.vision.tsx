@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trash2, Link2 } from "lucide-react";
+import { Trash2, Link2, Upload, X } from "lucide-react";
 import { BeforeAfterSlider } from "@/components/app/BeforeAfterSlider";
 import {
   generateRedesign,
@@ -18,6 +18,7 @@ import {
   linkRenderToProperty,
   listPropertiesForRender,
   getVisionCapabilities,
+  uploadSourcePhoto,
 } from "@/lib/vision/vision.functions";
 
 const visionSearchSchema = z.object({
@@ -38,6 +39,46 @@ function VisionPage() {
   const linkFn = useServerFn(linkRenderToProperty);
   const propsFn = useServerFn(listPropertiesForRender);
   const capsFn = useServerFn(getVisionCapabilities);
+  const uploadFn = useServerFn(uploadSourcePhoto);
+
+  // Source photo (the "before"): uploaded to the private vision-renders
+  // bucket; we keep the storage path for the render row and a signed URL
+  // for the local preview while composing.
+  const [sourcePath, setSourcePath] = useState<string | null>(null);
+  const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onSourceFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      toast.error("Image too large (max 12MB)");
+      return;
+    }
+    setUploading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      // Chunked btoa avoids "Maximum call stack" on large images.
+      let bin = "";
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + 0x8000)));
+      }
+      const base64 = btoa(bin);
+      const res = await uploadFn({
+        data: { filename: file.name, contentType: file.type, base64 },
+      });
+      setSourcePath(res.path);
+      setSourcePreview(res.signed_url);
+      toast.success("Source photo uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
@@ -75,10 +116,13 @@ function VisionPage() {
           style,
           resolution,
           property_id: propertyId === "none" ? null : propertyId,
+          source_image_url: sourcePath,
         },
       }),
     onSuccess: () => {
       toast.success("Redesign rendered");
+      setSourcePath(null);
+      setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Render failed"),
@@ -120,6 +164,46 @@ function VisionPage() {
         <div>
           <label className="text-xs text-[var(--w55)]">Describe the room</label>
           <Textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+        </div>
+        <div>
+          <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
+          <div className="flex items-center gap-3 mt-1">
+            {sourcePreview ? (
+              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10">
+                <img src={sourcePreview} alt="source" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSourcePath(null);
+                    setSourcePreview(null);
+                  }}
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center"
+                  aria-label="Remove source photo"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5">
+                <Upload className="h-3 w-3" />
+                {uploading ? "Uploading…" : "Upload room photo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onSourceFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+            <p className="text-xs text-[var(--w55)]">
+              Used as the "before" frame in the compare slider and exports.
+            </p>
+          </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
@@ -194,7 +278,7 @@ function VisionPage() {
               <div key={r.id} className="surface p-3 space-y-2">
                 {r.status === "ready" && r.signed_url ? (
                   <BeforeAfterSlider
-                    before={r.source_image_url}
+                    before={r.source_signed_url}
                     after={r.signed_url}
                     filename={`render-${r.id}.png`}
                   />
