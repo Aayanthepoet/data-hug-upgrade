@@ -29,6 +29,7 @@ function VisionPage() {
   const deleteFn = useServerFn(deleteRender);
   const linkFn = useServerFn(linkRenderToProperty);
   const propsFn = useServerFn(listPropertiesForRender);
+  const capsFn = useServerFn(getVisionCapabilities);
 
   const [prompt, setPrompt] = useState(
     "Living room with hardwood floors, large windows, neutral walls — propose a redesign that maximizes resale appeal",
@@ -45,6 +46,12 @@ function VisionPage() {
     queryKey: ["vision-properties"],
     queryFn: () => propsFn(),
   });
+  const { data: caps } = useQuery({
+    queryKey: ["vision-capabilities"],
+    queryFn: () => capsFn(),
+  });
+  const supported = caps?.supportedResolutions ?? ["hd", "2k", "4k"];
+  const resolutionSupported = supported.includes(resolution);
 
   const generate = useMutation({
     mutationFn: () =>
