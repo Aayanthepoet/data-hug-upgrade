@@ -60,9 +60,19 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const isActive = (url: string, exact?: boolean) =>
     exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
+
+  async function signOut() {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -85,6 +95,26 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {user && (
+        <SidebarFooter className="border-t border-border p-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={signOut}
+                className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-950/20"
+                title="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+                {!collapsed && (
+                  <span className="flex-1 text-left truncate text-xs">
+                    {user.email}
+                  </span>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
