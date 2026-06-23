@@ -558,6 +558,19 @@ function VisionPage() {
         )}
       </div>
     </div>
+      <SourcePhotoCropper
+        file={pendingFile}
+        onCancel={() => setPendingFile(null)}
+        onUseOriginal={(f) => {
+          setPendingFile(null);
+          void uploadFile(f);
+        }}
+        onConfirmCrop={(f) => {
+          setPendingFile(null);
+          void uploadFile(f);
+        }}
+      />
+    </>
   );
 }
 
