@@ -120,7 +120,15 @@ function VisionPage() {
     setPendingFile(file);
   }
 
-  async function uploadFile(file: File) {
+  type UploadMeta = {
+    originalFilename?: string;
+    originalByteSize?: number;
+    wasCropped?: boolean;
+    cropAspect?: string;
+    cropMaxEdge?: number;
+  };
+
+  async function uploadFile(file: File, meta: UploadMeta = {}) {
     // Re-validate (cropped file size may differ from the original).
     if (!validateFile(file).ok) return;
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -165,6 +173,11 @@ function VisionPage() {
           filename: file.name,
           contentType: file.type || `image/${ext === "jpg" ? "jpeg" : ext}`,
           base64,
+          originalFilename: meta.originalFilename ?? null,
+          originalByteSize: meta.originalByteSize ?? null,
+          wasCropped: meta.wasCropped ?? false,
+          cropAspect: meta.cropAspect ?? null,
+          cropMaxEdge: meta.cropMaxEdge ?? null,
         },
       });
       if (creepTimer) clearInterval(creepTimer);
