@@ -76,7 +76,13 @@ function SettingsPage() {
       const { data, error } = await supabase.storage
         .from("avatars")
         .createSignedUrl(profile.avatar_url, 3600);
-      if (!cancelled && !error) setAvatarUrl(data?.signedUrl ?? null);
+      if (!cancelled && !error) {
+        setAvatarUrl(data?.signedUrl ?? null);
+        setPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+      }
     }
     load();
     return () => {
