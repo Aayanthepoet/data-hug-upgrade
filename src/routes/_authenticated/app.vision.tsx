@@ -705,6 +705,54 @@ function VisionPage() {
           });
         }}
       />
+
+      <AlertDialog open={isDeleteSourceDialogOpen} onOpenChange={setIsDeleteSourceDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove source photo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this source photo? This will permanently delete the file and remove it as your "before" image.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                setIsDeleteSourceDialogOpen(false);
+                void removeSourcePhoto();
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={renderIdToDelete !== null} onOpenChange={(open) => !open && setRenderIdToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete render history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this render? This action cannot be undone and will permanently remove this item from your library history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                if (renderIdToDelete) {
+                  remove.mutate(renderIdToDelete);
+                  setRenderIdToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
