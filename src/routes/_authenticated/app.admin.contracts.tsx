@@ -1,9 +1,21 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, FileSignature, Loader2, RefreshCw, ShieldAlert } from "lucide-react";
-import { getContractsHealth } from "@/lib/contracts/admin.functions";
+import { useState } from "react";
+import {
+  AlertTriangle,
+  FileSignature,
+  Loader2,
+  RefreshCw,
+  Search,
+  ShieldAlert,
+} from "lucide-react";
+import {
+  getContractsHealth,
+  listContractsAdmin,
+} from "@/lib/contracts/admin.functions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/app/admin/contracts")({
   component: AdminContractsPage,
@@ -44,16 +56,30 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const STATUS_ORDER = ["draft", "sent", "viewed", "signed", "declined", "cancelled", "error"];
+const FILTER_OPTIONS = ["all", ...STATUS_ORDER] as const;
+type FilterStatus = (typeof FILTER_OPTIONS)[number];
 
 function AdminContractsPage() {
-  const fn = useServerFn(getContractsHealth);
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const healthFn = useServerFn(getContractsHealth);
+  const listFn = useServerFn(listContractsAdmin);
+
+  const [status, setStatus] = useState<FilterStatus>("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  const health = useQuery({
     queryKey: ["admin", "contracts-health"],
-    queryFn: () => fn(),
+    queryFn: () => healthFn(),
     refetchInterval: 30_000,
   });
 
-  if (isLoading || !data) {
+  const list = useQuery({
+    queryKey: ["admin", "contracts-list", status, search],
+    queryFn: () => listFn({ data: { status, search: search || undefined, limit: 100 } }),
+  });
+
+  const data = health.data;
+  if (health.isLoading || !data) {
     return (
       <div className="p-6 flex items-center gap-2 text-sm text-[var(--w55)]">
         <Loader2 className="h-4 w-4 animate-spin" /> Loading contract health…
@@ -77,8 +103,16 @@ function AdminContractsPage() {
             Admin overview across all users. Auto-refreshes every 30s.
           </p>
         </div>
-        <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
-          {isFetching ? (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={health.isFetching}
+          onClick={() => {
+            health.refetch();
+            list.refetch();
+          }}
+        >
+          {health.isFetching ? (
             <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
           ) : (
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
@@ -87,7 +121,6 @@ function AdminContractsPage() {
         </Button>
       </header>
 
-      {/* Headline stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat label="Total contracts" value={data.total} />
         <Stat
@@ -107,7 +140,6 @@ function AdminContractsPage() {
         />
       </div>
 
-      {/* Status breakdown */}
       <section className="surface p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)] mb-4">
           Counts by status
@@ -120,10 +152,14 @@ function AdminContractsPage() {
               const n = data.byStatus[s] ?? 0;
               const pct = data.total ? Math.round((n / data.total) * 100) : 0;
               return (
-                <div
+                <button
+                  type="button"
                   key={s}
+                  onClick={() => setStatus(s as FilterStatus)}
                   className={
-                    "rounded-md border p-3 " + (STATUS_TONE[s] ?? STATUS_TONE.draft)
+                    "rounded-md border p-3 text-left transition hover:opacity-80 " +
+                    (STATUS_TONE[s] ?? STATUS_TONE.draft) +
+                    (status === s ? " ring-2 ring-offset-1 ring-offset-background ring-current" : "")
                   }
                 >
                   <div className="flex items-baseline justify-between">
@@ -131,22 +167,19 @@ function AdminContractsPage() {
                     <span className="text-xs opacity-70">{pct}%</span>
                   </div>
                   <div className="text-2xl font-semibold tabular-nums mt-1">{n}</div>
-                </div>
+                </button>
               );
             })}
           </div>
         )}
       </section>
 
-      {/* Failures */}
-      <section className="surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)] mb-3 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-400" />
-          Failed webhooks & errors
-        </h2>
-        {data.errors.length === 0 ? (
-          <p className="text-xs text-[var(--w55)]">No errors recorded.</p>
-        ) : (
+      {data.errors.length > 0 && (
+        <section className="surface p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)] mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            Failed webhooks & errors
+          </h2>
           <ul className="divide-y divide-border rounded-md border border-border">
             {data.errors.map((c) => (
               <li key={c.id} className="p-3 text-sm flex items-start justify-between gap-3">
@@ -163,32 +196,76 @@ function AdminContractsPage() {
                   <p className="text-[11px] text-[var(--w55)] mt-1 tabular-nums">
                     user {String(c.user_id).slice(0, 8)}… ·{" "}
                     {new Date(String(c.updated_at)).toLocaleString()}
-                    {c.signwell_document_id ? ` · doc ${String(c.signwell_document_id).slice(0, 8)}…` : ""}
                   </p>
                 </div>
                 <Link
-                  to="/app/contracts/$contractId"
+                  to="/app/admin/contracts/$contractId"
                   params={{ contractId: String(c.id) }}
                   className="text-xs text-blue-300 hover:underline shrink-0"
                 >
-                  Open
+                  Review
                 </Link>
               </li>
             ))}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Recent activity */}
-      <section className="surface p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)] mb-3">
-          Recent updates
-        </h2>
-        {data.recent.length === 0 ? (
-          <p className="text-xs text-[var(--w55)]">No recent activity.</p>
+      <section className="surface p-5 space-y-4">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--w55)]">
+            Contracts
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 flex-wrap">
+              {FILTER_OPTIONS.map((opt) => (
+                <button
+                  type="button"
+                  key={opt}
+                  onClick={() => setStatus(opt)}
+                  className={
+                    "text-[11px] uppercase tracking-wider rounded px-2 py-1 border transition " +
+                    (status === opt
+                      ? "bg-foreground/10 border-foreground/40 text-foreground"
+                      : "border-border text-[var(--w55)] hover:text-foreground")
+                  }
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <form
+              className="flex items-center gap-1"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSearch(searchInput.trim());
+              }}
+            >
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-[var(--w55)]" />
+                <Input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="buyer / seller / email"
+                  className="h-8 w-56 pl-7 text-xs"
+                />
+              </div>
+              <Button type="submit" size="sm" variant="outline">
+                Search
+              </Button>
+            </form>
+          </div>
+        </div>
+
+        {list.isLoading ? (
+          <p className="text-xs text-[var(--w55)] flex items-center gap-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
+          </p>
+        ) : (list.data?.contracts ?? []).length === 0 ? (
+          <p className="text-xs text-[var(--w55)]">No contracts match.</p>
         ) : (
           <ul className="divide-y divide-border rounded-md border border-border">
-            {data.recent.map((c) => (
+            {list.data!.contracts.map((c) => (
               <li key={c.id} className="p-3 text-sm flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -196,25 +273,29 @@ function AdminContractsPage() {
                     <span className="font-medium truncate">
                       {c.buyer_name} ← {c.seller_name}
                     </span>
-                    <span className="text-xs text-[var(--w55)]">
-                      $
-                      {Number(c.purchase_price).toLocaleString(undefined, {
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
+                    {c.purchase_price != null && (
+                      <span className="text-xs text-[var(--w55)] tabular-nums">
+                        $
+                        {Number(c.purchase_price).toLocaleString(undefined, {
+                          maximumFractionDigits: 0,
+                        })}
+                      </span>
+                    )}
                   </div>
                   <p className="text-[11px] text-[var(--w55)] mt-1 tabular-nums">
                     user {String(c.user_id).slice(0, 8)}… ·{" "}
                     {new Date(String(c.updated_at)).toLocaleString()}
-                    {c.signed_at ? ` · signed ${new Date(String(c.signed_at)).toLocaleDateString()}` : ""}
+                    {c.signed_at
+                      ? ` · signed ${new Date(String(c.signed_at)).toLocaleDateString()}`
+                      : ""}
                   </p>
                 </div>
                 <Link
-                  to="/app/contracts/$contractId"
+                  to="/app/admin/contracts/$contractId"
                   params={{ contractId: String(c.id) }}
                   className="text-xs text-blue-300 hover:underline shrink-0"
                 >
-                  Open
+                  Review
                 </Link>
               </li>
             ))}

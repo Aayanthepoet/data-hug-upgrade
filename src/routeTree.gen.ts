@@ -61,6 +61,7 @@ import { Route as AuthenticatedAppContractsContractIdRouteImport } from './route
 import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
 import { Route as AuthenticatedAppAdminContractsRouteImport } from './routes/_authenticated/app.admin.contracts'
+import { Route as AuthenticatedAppAdminContractsContractIdRouteImport } from './routes/_authenticated/app.admin.contracts.$contractId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -345,6 +346,12 @@ const AuthenticatedAppAdminContractsRoute =
     path: '/admin/contracts',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAdminContractsContractIdRoute =
+  AuthenticatedAppAdminContractsContractIdRouteImport.update({
+    id: '/$contractId',
+    path: '/$contractId',
+    getParentRoute: () => AuthenticatedAppAdminContractsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -380,7 +387,7 @@ export interface FileRoutesByFullPath {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
-  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
+  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRouteWithChildren
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -432,7 +440,7 @@ export interface FileRoutesByTo {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
-  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
+  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRouteWithChildren
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -450,6 +458,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -487,7 +496,7 @@ export interface FileRoutesById {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
-  '/_authenticated/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
+  '/_authenticated/app/admin/contracts': typeof AuthenticatedAppAdminContractsRouteWithChildren
   '/_authenticated/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/_authenticated/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/_authenticated/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -505,6 +514,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -560,6 +570,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/admin/contracts/$contractId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/admin/contracts/$contractId'
   id:
     | '__root__'
     | '/'
@@ -666,6 +678,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/app/admin/contracts/$contractId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1061,6 +1074,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/admin/contracts/$contractId': {
+      id: '/_authenticated/app/admin/contracts/$contractId'
+      path: '/$contractId'
+      fullPath: '/app/admin/contracts/$contractId'
+      preLoaderRoute: typeof AuthenticatedAppAdminContractsContractIdRouteImport
+      parentRoute: typeof AuthenticatedAppAdminContractsRoute
+    }
   }
 }
 
@@ -1137,6 +1157,21 @@ const AuthenticatedAppVisionRouteWithChildren =
     AuthenticatedAppVisionRouteChildren,
   )
 
+interface AuthenticatedAppAdminContractsRouteChildren {
+  AuthenticatedAppAdminContractsContractIdRoute: typeof AuthenticatedAppAdminContractsContractIdRoute
+}
+
+const AuthenticatedAppAdminContractsRouteChildren: AuthenticatedAppAdminContractsRouteChildren =
+  {
+    AuthenticatedAppAdminContractsContractIdRoute:
+      AuthenticatedAppAdminContractsContractIdRoute,
+  }
+
+const AuthenticatedAppAdminContractsRouteWithChildren =
+  AuthenticatedAppAdminContractsRoute._addFileChildren(
+    AuthenticatedAppAdminContractsRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgentRoute: typeof AuthenticatedAppAgentRouteWithChildren
   AuthenticatedAppAuctionsRoute: typeof AuthenticatedAppAuctionsRouteWithChildren
@@ -1156,7 +1191,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
-  AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRoute
+  AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRouteWithChildren
   AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
 }
 
@@ -1179,7 +1214,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
-  AuthenticatedAppAdminContractsRoute: AuthenticatedAppAdminContractsRoute,
+  AuthenticatedAppAdminContractsRoute:
+    AuthenticatedAppAdminContractsRouteWithChildren,
   AuthenticatedAppContractsContractIdRoute:
     AuthenticatedAppContractsContractIdRoute,
 }
