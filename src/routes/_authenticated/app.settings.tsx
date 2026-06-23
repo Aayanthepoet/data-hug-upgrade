@@ -159,6 +159,10 @@ function SettingsPage() {
     },
     onError: (e: Error) => {
       toast.error("Avatar upload failed", { description: e.message });
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     },
     onSettled: () => {
       setUploadProgress(null);
