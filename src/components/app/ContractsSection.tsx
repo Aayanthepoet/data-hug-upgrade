@@ -31,12 +31,14 @@ type ContractRow = {
   closing_date: string;
   status: string;
   pdf_storage_path: string | null;
+  signed_pdf_storage_path: string | null;
   signwell_document_id: string | null;
   signed_pdf_url: string | null;
   signed_at: string | null;
   error_message: string | null;
   created_at: string;
 };
+
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-slate-500/15 text-slate-300 border-slate-500/30",
@@ -135,10 +137,11 @@ function ContractRowItem({
   const dl = useMutation({
     mutationFn: () => pdfFn({ data: { contract_id: contract.id } }),
     onSuccess: (r) => {
-      window.open(r.signed_pdf_url || r.url, "_blank", "noopener");
+      window.open(r.url, "_blank", "noopener");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const cancel = useMutation({
     mutationFn: () => cancelFn({ data: { contract_id: contract.id } }),
@@ -182,16 +185,17 @@ function ContractRowItem({
             size="sm"
             disabled={dl.isPending}
             onClick={() => dl.mutate()}
-            title={contract.signed_pdf_url ? "Open signed PDF" : "Open PDF"}
+            title={contract.signed_pdf_storage_path ? "Open signed PDF" : "Open PDF"}
           >
             {dl.isPending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : contract.signed_pdf_url ? (
+            ) : contract.signed_pdf_storage_path ? (
               <ExternalLink className="h-3.5 w-3.5" />
             ) : (
               <Download className="h-3.5 w-3.5" />
             )}
           </Button>
+
         )}
         {canCancel && (
           <Button

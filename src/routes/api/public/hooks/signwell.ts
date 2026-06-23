@@ -71,7 +71,9 @@ export const Route = createFileRoute("/api/public/hooks/signwell")({
           status: string;
           signed_at?: string;
           signed_pdf_url?: string;
+          signed_pdf_storage_path?: string;
         } = { status: newStatus };
+
         if (newStatus === "signed") {
           update.signed_at = new Date().toISOString();
           const signedUrl =
@@ -79,6 +81,51 @@ export const Route = createFileRoute("/api/public/hooks/signwell")({
             doc?.files?.find((f) => f.pdf_url)?.pdf_url ||
             undefined;
           if (signedUrl) update.signed_pdf_url = signedUrl;
+
+          // Fetch the signed PDF from SignWell and archive it in our private
+          // storage bucket so it survives any SignWell URL expiry.
+          try {
+            const apiKey = process.env.SIGNWELL_API_KEY;
+            if (apiKey && docId) {
+              // Resolve which contract row this is so we know the owner folder.
+              const { data: row } = await supabaseAdmin
+                .from("contracts")
+                .select("id, user_id")
+                .eq(contractId ? "id" : "signwell_document_id", contractId ?? docId)
+                .maybeSingle();
+
+              if (row?.id && row.user_id) {
+                const pdfResp = await fetch(
+                  `https://www.signwell.com/api/v1/documents/${encodeURIComponent(docId)}/completed_pdf/?url_only=false`,
+                  { headers: { "X-Api-Key": apiKey, Accept: "application/pdf" } },
+                );
+                if (pdfResp.ok) {
+                  const bytes = new Uint8Array(await pdfResp.arrayBuffer());
+                  const path = `${row.user_id}/${row.id}-signed.pdf`;
+                  const { error: upErr } = await supabaseAdmin.storage
+                    .from("contracts")
+                    .upload(
+                      path,
+                      new Blob([bytes as BlobPart], { type: "application/pdf" }),
+                      { contentType: "application/pdf", upsert: true },
+                    );
+                  if (upErr) {
+                    console.error("[signwell] signed pdf upload failed", upErr.message);
+                  } else {
+                    update.signed_pdf_storage_path = path;
+                  }
+                } else {
+                  console.error(
+                    "[signwell] completed_pdf fetch failed",
+                    pdfResp.status,
+                    await pdfResp.text().catch(() => ""),
+                  );
+                }
+              }
+            }
+          } catch (e) {
+            console.error("[signwell] signed pdf archive error", (e as Error).message);
+          }
         }
 
         let query = supabaseAdmin.from("contracts").update(update);
@@ -92,6 +139,7 @@ export const Route = createFileRoute("/api/public/hooks/signwell")({
         }
 
         return Response.json({ ok: true, status: newStatus });
+
       },
       GET: async () => new Response("SignWell webhook OK", { status: 200 }),
     },

@@ -498,6 +498,7 @@ export type Database = {
           seller_email: string | null
           seller_name: string
           signed_at: string | null
+          signed_pdf_storage_path: string | null
           signed_pdf_url: string | null
           signwell_document_id: string | null
           status: string
@@ -517,6 +518,7 @@ export type Database = {
           seller_email?: string | null
           seller_name: string
           signed_at?: string | null
+          signed_pdf_storage_path?: string | null
           signed_pdf_url?: string | null
           signwell_document_id?: string | null
           status?: string
@@ -536,6 +538,7 @@ export type Database = {
           seller_email?: string | null
           seller_name?: string
           signed_at?: string | null
+          signed_pdf_storage_path?: string | null
           signed_pdf_url?: string | null
           signwell_document_id?: string | null
           status?: string

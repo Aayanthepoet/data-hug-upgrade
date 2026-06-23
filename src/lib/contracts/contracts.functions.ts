@@ -35,18 +35,27 @@ export const getContractPdfUrl = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("contracts")
-      .select("pdf_storage_path, signed_pdf_url")
+      .select("pdf_storage_path, signed_pdf_storage_path, signed_pdf_url")
       .eq("id", data.contract_id)
       .eq("user_id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row?.pdf_storage_path) throw new Error("No PDF for this contract.");
+    if (!row) throw new Error("Contract not found.");
+
+    // Prefer the archived signed PDF, then the original draft PDF.
+    const path = row.signed_pdf_storage_path || row.pdf_storage_path;
+    if (!path) throw new Error("No PDF for this contract.");
     const { data: signed, error: e2 } = await supabase.storage
       .from("contracts")
-      .createSignedUrl(row.pdf_storage_path, 60 * 10);
+      .createSignedUrl(path, 60 * 10);
     if (e2) throw new Error(e2.message);
-    return { url: signed.signedUrl, signed_pdf_url: row.signed_pdf_url };
+    return {
+      url: signed.signedUrl,
+      is_signed: Boolean(row.signed_pdf_storage_path),
+      signed_pdf_url: row.signed_pdf_url,
+    };
   });
+
 
 export const cancelContract = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
