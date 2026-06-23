@@ -132,6 +132,8 @@ function PropertyDetailPage() {
 
       <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
 
+      <VisionGallerySection propertyId={propertyId} />
+
 
 
       {data.groups.length === 0 && (
