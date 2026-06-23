@@ -192,15 +192,19 @@ function VisionPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {renders.map((r) => (
               <div key={r.id} className="surface p-3 space-y-2">
-                <div className="aspect-video bg-black/20 rounded overflow-hidden flex items-center justify-center">
-                  {r.status === "ready" && r.signed_url ? (
-                    <img src={r.signed_url} alt={r.prompt ?? ""} className="w-full h-full object-cover" />
-                  ) : (
+                {r.status === "ready" && r.signed_url ? (
+                  <BeforeAfterSlider
+                    before={r.source_image_url}
+                    after={r.signed_url}
+                    filename={`render-${r.id}.png`}
+                  />
+                ) : (
+                  <div className="aspect-video bg-black/20 rounded overflow-hidden flex items-center justify-center">
                     <span className="text-xs text-[var(--w55)]">
                       {r.status === "failed" ? "Failed" : "Rendering…"}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 flex-wrap">
                   <StatusBadge status={r.status} />
                   {r.style && <Badge variant="outline" className="text-xs">{r.style}</Badge>}
