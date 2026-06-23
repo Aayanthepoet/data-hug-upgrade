@@ -45,6 +45,22 @@ function OptOutsPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [testDigestOpen, setTestDigestOpen] = useState(false);
+
+  // Pull the admin's verified email from their profile so we can show it
+  // before sending a test digest (server enforces sending to this address).
+  const { data: myEmail } = useQuery({
+    queryKey: ["my-profile-email", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data?.email ?? user?.email ?? null;
+    },
+  });
 
   const sendTestDigestFn = useServerFn(sendTestComplianceDigest);
   const sendTestDigest = useMutation({
@@ -56,6 +72,7 @@ function OptOutsPage() {
         },
       }),
     onSuccess: (r) => {
+      setTestDigestOpen(false);
       if (r.queued > 0) toast.success(`Test digest queued to ${r.recipientEmail}`);
       else if (r.suppressed > 0) toast.error(`${r.recipientEmail} is on the suppression list`);
       else toast.error("Digest could not be sent");
@@ -179,12 +196,12 @@ function OptOutsPage() {
           <Button
             variant="outline"
             className="gap-2"
-            onClick={() => sendTestDigest.mutate()}
-            disabled={sendTestDigest.isPending}
+            onClick={() => setTestDigestOpen(true)}
+            disabled={!myEmail}
             title="Send the weekly compliance digest to your own email right now"
           >
             <Send className="h-4 w-4" />
-            {sendTestDigest.isPending ? "Sending…" : "Send test digest"}
+            Send test digest
           </Button>
           <Button
             variant="outline"
@@ -332,6 +349,38 @@ function OptOutsPage() {
       </div>
 
       <AddOptOutDialog open={addOpen} onClose={() => setAddOpen(false)} />
+
+      <Dialog open={testDigestOpen} onOpenChange={setTestDigestOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send test compliance digest</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-[var(--w55)]">
+              This will render the current weekly digest and email it only to your verified admin address:
+            </p>
+            <div className="surface p-3 font-mono text-sm break-all">
+              {myEmail ?? "—"}
+            </div>
+            <p className="text-xs text-[var(--w45)]">
+              The subject is prefixed with <span className="font-mono">[TEST]</span>. This does not affect
+              the scheduled Monday digest or the dashboard snapshot.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTestDigestOpen(false)} disabled={sendTestDigest.isPending}>
+              Cancel
+            </Button>
+            <Button
+              className="btn-primary"
+              onClick={() => sendTestDigest.mutate()}
+              disabled={!myEmail || sendTestDigest.isPending}
+            >
+              {sendTestDigest.isPending ? "Sending…" : `Send to ${myEmail ?? ""}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
