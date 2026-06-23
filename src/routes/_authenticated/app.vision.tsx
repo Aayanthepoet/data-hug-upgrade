@@ -165,6 +165,46 @@ function VisionPage() {
           <label className="text-xs text-[var(--w55)]">Describe the room</label>
           <Textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
         </div>
+        <div>
+          <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
+          <div className="flex items-center gap-3 mt-1">
+            {sourcePreview ? (
+              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10">
+                <img src={sourcePreview} alt="source" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSourcePath(null);
+                    setSourcePreview(null);
+                  }}
+                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center"
+                  aria-label="Remove source photo"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5">
+                <Upload className="h-3 w-3" />
+                {uploading ? "Uploading…" : "Upload room photo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onSourceFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+            <p className="text-xs text-[var(--w55)]">
+              Used as the "before" frame in the compare slider and exports.
+            </p>
+          </div>
+        </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
             <label className="text-xs text-[var(--w55)]">Style</label>
