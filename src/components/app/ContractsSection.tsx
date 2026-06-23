@@ -31,12 +31,14 @@ type ContractRow = {
   closing_date: string;
   status: string;
   pdf_storage_path: string | null;
+  signed_pdf_storage_path: string | null;
   signwell_document_id: string | null;
   signed_pdf_url: string | null;
   signed_at: string | null;
   error_message: string | null;
   created_at: string;
 };
+
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-slate-500/15 text-slate-300 border-slate-500/30",
