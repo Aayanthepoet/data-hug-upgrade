@@ -57,6 +57,7 @@ import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/pu
 import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
 import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
+import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
@@ -323,6 +324,12 @@ const AuthenticatedAppSocialComposeRoute =
     path: '/social/compose',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppSettingsPublicProfileRoute =
+  AuthenticatedAppSettingsPublicProfileRouteImport.update({
+    id: '/public-profile',
+    path: '/public-profile',
+    getParentRoute: () => AuthenticatedAppSettingsRoute,
+  } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
     id: '/search',
@@ -399,7 +406,7 @@ export interface FileRoutesByFullPath {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
-  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -455,7 +463,7 @@ export interface FileRoutesByTo {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
-  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -470,6 +478,7 @@ export interface FileRoutesByTo {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -514,7 +523,7 @@ export interface FileRoutesById {
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
-  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -529,6 +538,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/settings/public-profile'
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -644,6 +655,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/search'
+    | '/app/settings/public-profile'
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -702,6 +714,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
+    | '/_authenticated/app/settings/public-profile'
     | '/_authenticated/app/social/compose'
     | '/_authenticated/app/vision/library'
     | '/agents/$slug/p/$postSlug'
@@ -1084,6 +1097,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/settings/public-profile': {
+      id: '/_authenticated/app/settings/public-profile'
+      path: '/public-profile'
+      fullPath: '/app/settings/public-profile'
+      preLoaderRoute: typeof AuthenticatedAppSettingsPublicProfileRouteImport
+      parentRoute: typeof AuthenticatedAppSettingsRoute
+    }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
       path: '/search'
@@ -1202,6 +1222,21 @@ const AuthenticatedAppPropertiesRouteWithChildren =
     AuthenticatedAppPropertiesRouteChildren,
   )
 
+interface AuthenticatedAppSettingsRouteChildren {
+  AuthenticatedAppSettingsPublicProfileRoute: typeof AuthenticatedAppSettingsPublicProfileRoute
+}
+
+const AuthenticatedAppSettingsRouteChildren: AuthenticatedAppSettingsRouteChildren =
+  {
+    AuthenticatedAppSettingsPublicProfileRoute:
+      AuthenticatedAppSettingsPublicProfileRoute,
+  }
+
+const AuthenticatedAppSettingsRouteWithChildren =
+  AuthenticatedAppSettingsRoute._addFileChildren(
+    AuthenticatedAppSettingsRouteChildren,
+  )
+
 interface AuthenticatedAppVisionRouteChildren {
   AuthenticatedAppVisionLibraryRoute: typeof AuthenticatedAppVisionLibraryRoute
 }
@@ -1245,7 +1280,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
-  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRouteWithChildren
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
@@ -1269,7 +1304,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
-  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRouteWithChildren,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
