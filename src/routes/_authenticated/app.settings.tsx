@@ -239,6 +239,20 @@ function SettingsPage() {
                 )}
               </Button>
               <p className="text-xs text-[var(--w45)] mt-1.5">PNG or JPG, up to 5MB</p>
+              {uploadAvatar.isPending && (
+                <div className="mt-3 space-y-1.5">
+                  <Progress value={uploadPhase === "saving" ? 100 : uploadProgress ?? 0} className="h-1.5" />
+                  <div className="flex justify-between text-xs text-[var(--w55)]">
+                    <span>
+                      {uploadPhase === "saving"
+                        ? "Saving to profile…"
+                        : uploadProgress != null
+                          ? `Uploading… ${uploadProgress}%`
+                          : "Preparing…"}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
