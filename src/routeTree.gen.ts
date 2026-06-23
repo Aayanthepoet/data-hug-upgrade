@@ -30,6 +30,7 @@ import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
 import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppSocialRouteImport } from './routes/_authenticated/app.social'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
@@ -170,6 +171,11 @@ const AuthenticatedAppVisionRoute = AuthenticatedAppVisionRouteImport.update({
 const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppSocialRoute = AuthenticatedAppSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppSettingsRoute =
@@ -320,9 +326,9 @@ const AuthenticatedAppVisionLibraryRoute =
   } as any)
 const AuthenticatedAppSocialComposeRoute =
   AuthenticatedAppSocialComposeRouteImport.update({
-    id: '/social/compose',
-    path: '/social/compose',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/compose',
+    path: '/compose',
+    getParentRoute: () => AuthenticatedAppSocialRoute,
   } as any)
 const AuthenticatedAppSettingsPublicProfileRoute =
   AuthenticatedAppSettingsPublicProfileRouteImport.update({
@@ -407,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
+  '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -464,6 +471,7 @@ export interface FileRoutesByTo {
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
+  '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -524,6 +532,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
+  '/_authenticated/app/social': typeof AuthenticatedAppSocialRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -584,6 +593,7 @@ export interface FileRouteTypes {
     | '/app/properties'
     | '/app/scoring'
     | '/app/settings'
+    | '/app/social'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -641,6 +651,7 @@ export interface FileRouteTypes {
     | '/app/properties'
     | '/app/scoring'
     | '/app/settings'
+    | '/app/social'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -700,6 +711,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties'
     | '/_authenticated/app/scoring'
     | '/_authenticated/app/settings'
+    | '/_authenticated/app/social'
     | '/_authenticated/app/videos'
     | '/_authenticated/app/vision'
     | '/_authenticated/app/watchlist'
@@ -908,6 +920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/social': {
+      id: '/_authenticated/app/social'
+      path: '/social'
+      fullPath: '/app/social'
+      preLoaderRoute: typeof AuthenticatedAppSocialRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/settings': {
       id: '/_authenticated/app/settings'
       path: '/settings'
@@ -1092,10 +1111,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/social/compose': {
       id: '/_authenticated/app/social/compose'
-      path: '/social/compose'
+      path: '/compose'
       fullPath: '/app/social/compose'
       preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppSocialRoute
     }
     '/_authenticated/app/settings/public-profile': {
       id: '/_authenticated/app/settings/public-profile'
@@ -1237,6 +1256,20 @@ const AuthenticatedAppSettingsRouteWithChildren =
     AuthenticatedAppSettingsRouteChildren,
   )
 
+interface AuthenticatedAppSocialRouteChildren {
+  AuthenticatedAppSocialComposeRoute: typeof AuthenticatedAppSocialComposeRoute
+}
+
+const AuthenticatedAppSocialRouteChildren: AuthenticatedAppSocialRouteChildren =
+  {
+    AuthenticatedAppSocialComposeRoute: AuthenticatedAppSocialComposeRoute,
+  }
+
+const AuthenticatedAppSocialRouteWithChildren =
+  AuthenticatedAppSocialRoute._addFileChildren(
+    AuthenticatedAppSocialRouteChildren,
+  )
+
 interface AuthenticatedAppVisionRouteChildren {
   AuthenticatedAppVisionLibraryRoute: typeof AuthenticatedAppVisionLibraryRoute
 }
@@ -1281,13 +1314,13 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRouteWithChildren
+  AuthenticatedAppSocialRoute: typeof AuthenticatedAppSocialRouteWithChildren
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRouteWithChildren
   AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
-  AuthenticatedAppSocialComposeRoute: typeof AuthenticatedAppSocialComposeRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -1305,6 +1338,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRouteWithChildren,
+  AuthenticatedAppSocialRoute: AuthenticatedAppSocialRouteWithChildren,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
@@ -1313,7 +1347,6 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
     AuthenticatedAppAdminContractsRouteWithChildren,
   AuthenticatedAppContractsContractIdRoute:
     AuthenticatedAppContractsContractIdRoute,
-  AuthenticatedAppSocialComposeRoute: AuthenticatedAppSocialComposeRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
