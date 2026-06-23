@@ -62,6 +62,8 @@ function VisionPage() {
   const [sourcePhotoId, setSourcePhotoId] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [removingSource, setRemovingSource] = useState(false);
+  const [isDeleteSourceDialogOpen, setIsDeleteSourceDialogOpen] = useState(false);
+  const [renderIdToDelete, setRenderIdToDelete] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   // The server fn is a single request, so we can't observe true upload
   // bytes-sent. Instead we drive a two-phase bar: real progress during
