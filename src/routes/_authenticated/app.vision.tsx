@@ -292,11 +292,8 @@ function VisionPage() {
               </div>
             </div>
           ) : null}
-            <p className="text-xs text-[var(--w55)]">
-              {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
-            </p>
-          </div>
         </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
             <label className="text-xs text-[var(--w55)]">Style</label>
