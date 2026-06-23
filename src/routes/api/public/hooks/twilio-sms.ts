@@ -28,6 +28,28 @@ export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const now = new Date().toISOString();
 
+        // Detect STOP / opt-out keywords (carrier-standard).
+        const normalized = body.trim().toUpperCase();
+        const stopKeywords = ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"];
+        const startKeywords = ["START", "UNSTOP", "YES"];
+        const matchedStop = stopKeywords.find((k) => normalized === k || normalized.startsWith(k + " "));
+        const matchedStart = startKeywords.find((k) => normalized === k);
+
+        if (matchedStop) {
+          await supabaseAdmin
+            .from("sms_opt_outs")
+            .upsert(
+              { phone: from, keyword: matchedStop, source: "inbound_sms", reason: body },
+              { onConflict: "phone", ignoreDuplicates: false },
+            );
+        } else if (matchedStart) {
+          await supabaseAdmin
+            .from("sms_opt_outs")
+            .update({ restored_at: now, notes: `Restored via inbound "${matchedStart}"` })
+            .eq("phone", from)
+            .is("restored_at", null);
+        }
+
         // Match most recent outbound to this number and mark replied.
         const { data: outbound } = await supabaseAdmin
           .from("outreach_messages")

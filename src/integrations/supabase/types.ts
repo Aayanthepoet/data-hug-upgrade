@@ -1073,6 +1073,48 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_opt_outs: {
+        Row: {
+          created_at: string
+          id: string
+          keyword: string | null
+          notes: string | null
+          opted_out_at: string
+          phone: string
+          reason: string | null
+          restored_at: string | null
+          restored_by: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword?: string | null
+          notes?: string | null
+          opted_out_at?: string
+          phone: string
+          reason?: string | null
+          restored_at?: string | null
+          restored_by?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword?: string | null
+          notes?: string | null
+          opted_out_at?: string
+          phone?: string
+          reason?: string | null
+          restored_at?: string | null
+          restored_by?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string

@@ -33,6 +33,7 @@ import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
 import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
+import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
@@ -174,6 +175,11 @@ const AuthenticatedAppOutreachRoute =
     path: '/outreach',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppOptOutsRoute = AuthenticatedAppOptOutsRouteImport.update({
+  id: '/opt-outs',
+  path: '/opt-outs',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
@@ -385,6 +393,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
+  '/_authenticated/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
@@ -430,6 +439,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
@@ -472,6 +482,7 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/lead-lists'
     | '/app/leads'
+    | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
     | '/app/properties'
@@ -516,6 +527,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
+    | '/_authenticated/app/opt-outs'
     | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
@@ -735,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOutreachRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/opt-outs': {
+      id: '/_authenticated/app/opt-outs'
+      path: '/opt-outs'
+      fullPath: '/app/opt-outs'
+      preLoaderRoute: typeof AuthenticatedAppOptOutsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/leads': {
       id: '/_authenticated/app/leads'
       path: '/leads'
@@ -918,6 +937,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
+  AuthenticatedAppOptOutsRoute: typeof AuthenticatedAppOptOutsRoute
   AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
@@ -936,6 +956,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
+  AuthenticatedAppOptOutsRoute: AuthenticatedAppOptOutsRoute,
   AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
