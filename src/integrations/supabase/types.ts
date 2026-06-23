@@ -770,9 +770,17 @@ export type Database = {
         Row: {
           asset_type: string
           created_at: string
+          error: string | null
           id: string
           metadata: Json
+          owner_id: string | null
           prompt: string | null
+          property_id: string | null
+          provider: string | null
+          source_image_url: string | null
+          status: string
+          storage_path: string | null
+          style: string | null
           updated_at: string
           url: string
           user_id: string
@@ -780,9 +788,17 @@ export type Database = {
         Insert: {
           asset_type?: string
           created_at?: string
+          error?: string | null
           id?: string
           metadata?: Json
+          owner_id?: string | null
           prompt?: string | null
+          property_id?: string | null
+          provider?: string | null
+          source_image_url?: string | null
+          status?: string
+          storage_path?: string | null
+          style?: string | null
           updated_at?: string
           url: string
           user_id: string
@@ -790,14 +806,37 @@ export type Database = {
         Update: {
           asset_type?: string
           created_at?: string
+          error?: string | null
           id?: string
           metadata?: Json
+          owner_id?: string | null
           prompt?: string | null
+          property_id?: string | null
+          provider?: string | null
+          source_image_url?: string | null
+          status?: string
+          storage_path?: string | null
+          style?: string | null
           updated_at?: string
           url?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_assets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       outreach_messages: {
         Row: {
