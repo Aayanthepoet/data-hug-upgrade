@@ -208,6 +208,9 @@ function VisionPage() {
       }),
     onSuccess: () => {
       toast.success("Redesign rendered");
+      if (sourcePreview && sourcePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(sourcePreview);
+      }
       setSourcePath(null);
       setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
