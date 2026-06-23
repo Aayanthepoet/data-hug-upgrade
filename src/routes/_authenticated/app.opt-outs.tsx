@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ShieldAlert, Search, Plus, RotateCcw, Trash2, Ban } from "lucide-react";
+import { ShieldAlert, Search, Plus, RotateCcw, Trash2, Ban, FileDown, FileText } from "lucide-react";
+import { exportOptOutsCsv, exportOptOutsPdf } from "@/lib/export-opt-outs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -155,9 +156,29 @@ function OptOutsPage() {
             Carrier-required suppression list. Numbers here are blocked from all outbound SMS until restored.
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="btn-primary gap-2">
-          <Plus className="h-4 w-4" /> Add opt-out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => exportOptOutsCsv(rows)}
+            disabled={rows.length === 0}
+            title="Export current view to CSV"
+          >
+            <FileDown className="h-4 w-4" /> CSV
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => exportOptOutsPdf(rows)}
+            disabled={rows.length === 0}
+            title="Export current view to PDF"
+          >
+            <FileText className="h-4 w-4" /> PDF
+          </Button>
+          <Button onClick={() => setAddOpen(true)} className="btn-primary gap-2">
+            <Plus className="h-4 w-4" /> Add opt-out
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

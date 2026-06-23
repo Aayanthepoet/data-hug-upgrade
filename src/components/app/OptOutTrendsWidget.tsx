@@ -10,9 +10,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { ShieldOff, TrendingUp, TrendingDown } from "lucide-react";
+import { ShieldOff, TrendingUp, TrendingDown, FileDown, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { exportTrendsCsv, exportTrendsPdf } from "@/lib/export-opt-outs";
 
 type Row = { opted_out_at: string; keyword: string | null; restored_at: string | null };
 
@@ -141,12 +142,37 @@ export function OptOutTrendsWidget() {
             {activeTotal} currently suppressed · {total - activeTotal} restored
           </div>
         </div>
-        <Link
-          to="/app/opt-outs"
-          className="text-xs text-cyan hover:underline whitespace-nowrap"
-        >
-          Manage registry →
-        </Link>
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <button
+            onClick={() => exportTrendsCsv(series, byKeyword)}
+            disabled={total === 0}
+            className="text-xs text-[var(--w55)] hover:text-foreground disabled:opacity-40 flex items-center gap-1 px-2 py-1 rounded border border-border"
+            title="Export trends as CSV"
+          >
+            <FileDown className="h-3 w-3" /> CSV
+          </button>
+          <button
+            onClick={() =>
+              exportTrendsPdf(series, byKeyword, {
+                totalDays: DAYS,
+                total,
+                active: activeTotal,
+                deltaPct,
+              })
+            }
+            disabled={total === 0}
+            className="text-xs text-[var(--w55)] hover:text-foreground disabled:opacity-40 flex items-center gap-1 px-2 py-1 rounded border border-border"
+            title="Export trends as PDF"
+          >
+            <FileText className="h-3 w-3" /> PDF
+          </button>
+          <Link
+            to="/app/opt-outs"
+            className="text-xs text-cyan hover:underline"
+          >
+            Manage →
+          </Link>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-[1.6fr_1fr] gap-6">
