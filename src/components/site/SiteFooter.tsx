@@ -23,6 +23,8 @@ export function SiteFooter() {
           <ul className="space-y-2 text-[var(--w65)]">
             <li><a href="/#contact" className="hover:text-white">Contact</a></li>
             <li><a href="mailto:hello@propai.io" className="hover:text-white">hello@propai.io</a></li>
+            <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+            <li><Link to="/terms" className="hover:text-white">Terms &amp; Conditions</Link></li>
           </ul>
         </div>
       </div>
