@@ -48,6 +48,13 @@ function VisionPage() {
   const [sourcePath, setSourcePath] = useState<string | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // The server fn is a single request, so we can't observe true upload
+  // bytes-sent. Instead we drive a two-phase bar: real progress during
+  // base64 encoding (we own the loop), then a creeping estimate during the
+  // network round-trip that snaps to 100 on success.
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "encoding" | "sending" | "done">("idle");
+
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
