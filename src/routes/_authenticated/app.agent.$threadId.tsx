@@ -138,9 +138,14 @@ function ChatView({
   const [taskMode, setTaskMode] = useState(false);
 
   async function handleSubmit(message: PromptInputMessage) {
-    const text = message.text?.trim();
-    if (!text || isLoading) return;
-    await sendMessage({ text: taskMode ? `[TASK MODE] ${text}` : text });
+    const text = message.text?.trim() ?? "";
+    const files = (message.files ?? []) as FileUIPart[];
+    if (!text && files.length === 0) return;
+    if (isLoading) return;
+    await sendMessage({
+      text: taskMode && text ? `[TASK MODE] ${text}` : text,
+      files: files.length > 0 ? files : undefined,
+    });
   }
 
   return (
@@ -148,20 +153,40 @@ function ChatView({
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-lg font-semibold truncate">{title}</h1>
         {messages.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              try {
-                exportConversationToPdf(messages);
-                toast.success("PDF report downloaded");
-              } catch (e) {
-                toast.error((e as Error).message ?? "Failed to export PDF");
-              }
-            }}
-          >
-            <FileDown className="h-4 w-4 mr-2" /> Export PDF
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4 mr-2" /> Export
+                <ChevronDown className="h-3 w-3 ml-1.5 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => {
+                  try {
+                    exportConversationToPdf(messages);
+                    toast.success("PDF report downloaded");
+                  } catch (e) {
+                    toast.error((e as Error).message ?? "Failed to export PDF");
+                  }
+                }}
+              >
+                <FileDown className="h-4 w-4 mr-2" /> PDF report
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  try {
+                    exportConversationToCsv(messages);
+                    toast.success("CSV transcript downloaded");
+                  } catch (e) {
+                    toast.error((e as Error).message ?? "Failed to export CSV");
+                  }
+                }}
+              >
+                <FileText className="h-4 w-4 mr-2" /> CSV transcript
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
@@ -178,7 +203,7 @@ function ChatView({
                 </div>
                 <h2 className="text-xl font-semibold">PropAI Agent</h2>
                 <p className="text-sm text-[var(--w55)] mt-2 max-w-md">
-                  Ask me to summarize leads, draft outreach, or build a task plan.
+                  Ask me to summarize leads, draft outreach, or build a task plan. Use the mic to dictate, or attach an image or PDF for analysis.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6 w-full max-w-xl">
                   {SUGGESTIONS.map((s) => (
@@ -200,7 +225,43 @@ function ChatView({
               <Message key={m.id} from={m.role}>
                 {m.role === "user" ? (
                   <MessageContent>
-                    {m.parts.map((p, i) => (p.type === "text" ? <span key={i}>{p.text}</span> : null))}
+                    <div className="space-y-2">
+                      {m.parts.some((p) => p.type === "file") && (
+                        <div className="flex flex-wrap gap-2">
+                          {m.parts.map((p, i) => {
+                            if (p.type !== "file") return null;
+                            const fp = p as {
+                              filename?: string;
+                              mediaType?: string;
+                              url?: string;
+                            };
+                            const isImg = fp.mediaType?.startsWith("image/");
+                            if (isImg && fp.url) {
+                              return (
+                                <img
+                                  key={i}
+                                  src={fp.url}
+                                  alt={fp.filename ?? "attachment"}
+                                  className="max-h-40 rounded-lg border border-border"
+                                />
+                              );
+                            }
+                            return (
+                              <div
+                                key={i}
+                                className="inline-flex items-center gap-1.5 text-xs rounded-lg border border-border bg-background/40 px-2 py-1"
+                              >
+                                <FileText className="h-3.5 w-3.5" />
+                                {fp.filename ?? fp.mediaType ?? "file"}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {m.parts.map((p, i) =>
+                        p.type === "text" ? <div key={i}>{p.text}</div> : null,
+                      )}
+                    </div>
                   </MessageContent>
                 ) : (
                   <div className="w-full space-y-3">
@@ -271,31 +332,55 @@ function ChatView({
         </Conversation>
 
         <div className="border-t border-border p-3">
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputTextarea
-              placeholder={taskMode ? "Describe what you need a plan for…" : "Ask about your leads, or draft outreach…"}
-              autoFocus
-            />
-            <PromptInputFooter className="justify-between">
-              <button
-                type="button"
-                onClick={() => setTaskMode((v) => !v)}
-                className={`inline-flex items-center gap-2 text-xs rounded-lg px-3 py-1.5 border transition ${
-                  taskMode
-                    ? "border-cyan bg-[var(--cyan-d)] text-cyan"
-                    : "border-border text-[var(--w55)] hover:text-foreground"
-                }`}
-                aria-pressed={taskMode}
-              >
-                <ListChecks className="h-3.5 w-3.5" />
-                Task mode {taskMode ? "on" : "off"}
-              </button>
-              <PromptInputSubmit
-                status={status}
-                onClick={isLoading ? () => stop() : undefined}
+          <PromptInputProvider>
+            <PromptInput
+              onSubmit={handleSubmit}
+              accept="image/*,application/pdf"
+              multiple
+              maxFiles={5}
+              maxFileSize={10 * 1024 * 1024}
+              onError={(err) => toast.error(err.message)}
+            >
+              <AttachmentChips />
+              <PromptInputTextarea
+                placeholder={taskMode ? "Describe what you need a plan for…" : "Ask about your leads, or draft outreach…"}
+                autoFocus
               />
-            </PromptInputFooter>
-          </PromptInput>
+              <PromptInputFooter className="justify-between">
+                <div className="flex items-center gap-2">
+                  <PromptInputActionMenu>
+                    <PromptInputActionMenuTrigger
+                      aria-label="Attach files"
+                      title="Attach image or PDF"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </PromptInputActionMenuTrigger>
+                    <PromptInputActionMenuContent>
+                      <PromptInputActionAddAttachments label="Image or PDF" />
+                    </PromptInputActionMenuContent>
+                  </PromptInputActionMenu>
+                  <VoiceInputButton />
+                  <button
+                    type="button"
+                    onClick={() => setTaskMode((v) => !v)}
+                    className={`inline-flex items-center gap-2 text-xs rounded-lg px-3 py-1.5 border transition ${
+                      taskMode
+                        ? "border-cyan bg-[var(--cyan-d)] text-cyan"
+                        : "border-border text-[var(--w55)] hover:text-foreground"
+                    }`}
+                    aria-pressed={taskMode}
+                  >
+                    <ListChecks className="h-3.5 w-3.5" />
+                    Task mode {taskMode ? "on" : "off"}
+                  </button>
+                </div>
+                <PromptInputSubmit
+                  status={status}
+                  onClick={isLoading ? () => stop() : undefined}
+                />
+              </PromptInputFooter>
+            </PromptInput>
+          </PromptInputProvider>
         </div>
       </div>
     </div>
