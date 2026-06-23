@@ -670,7 +670,7 @@ function VisionPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => remove.mutate(r.id)}
+                    onClick={() => setRenderIdToDelete(r.id)}
                     disabled={remove.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
