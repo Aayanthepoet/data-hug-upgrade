@@ -799,7 +799,7 @@ function VisionPage() {
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
                 setIsDeleteSourceDialogOpen(false);
-                void removeSourcePhoto();
+                removeSourcePhoto();
               }}
             >
               Remove
