@@ -113,3 +113,49 @@ export const deleteNotification = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const sendTestSms = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ phone: z.string().regex(/^\+[1-9]\d{7,14}$/, "Phone must be E.164 (e.g. +14155551234)") }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const apiKey = process.env.TWILIO_API_KEY;
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+    if (!accountSid || !apiKey || !fromNumber) {
+      throw new Error(
+        "SMS is not fully configured. Missing Twilio credentials — contact your admin.",
+      );
+    }
+
+    const body = "PropAI test alert ✅ — your SMS notifications are working.";
+    const form = new URLSearchParams({
+      To: data.phone,
+      From: fromNumber,
+      Body: body,
+    });
+    const auth = btoa(`${accountSid}:${apiKey}`);
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: form.toString(),
+    });
+
+    if (!resp.ok) {
+      let detail = "";
+      try {
+        const j = (await resp.json()) as { message?: string; code?: number };
+        detail = j.message ? ` (${j.message}${j.code ? `, code ${j.code}` : ""})` : "";
+      } catch {
+        detail = "";
+      }
+      throw new Error(`Twilio rejected the test message${detail}`);
+    }
+    return { ok: true };
+  });
