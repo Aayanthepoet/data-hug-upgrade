@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-rout
 import { useQueryClient } from "@tanstack/react-query";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app/AppSidebar";
+import { NotificationBell } from "@/components/app/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -34,7 +35,8 @@ function AppShell() {
                 Prop<span className="text-cyan">AI</span>
               </Link>
             </div>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-3 text-sm">
+              <NotificationBell />
               <span className="text-[var(--w55)] hidden sm:inline">{user?.email}</span>
               <button onClick={signOut} className="btn-ghost text-xs px-4 py-2">
                 Sign out

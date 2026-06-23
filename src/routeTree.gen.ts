@@ -48,6 +48,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
+import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
@@ -264,6 +265,11 @@ const ApiPublicHooksOutreachReplyRoute =
     path: '/api/public/hooks/outreach-reply',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksNotifySmsRoute = ApiPublicHooksNotifySmsRouteImport.update({
+  id: '/api/public/hooks/notify-sms',
+  path: '/api/public/hooks/notify-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksComplianceDigestRoute =
   ApiPublicHooksComplianceDigestRouteImport.update({
     id: '/api/public/hooks/compliance-digest',
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -401,6 +408,7 @@ export interface FileRoutesByTo {
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
+  '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -548,6 +558,7 @@ export interface FileRouteTypes {
     | '/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/vision/library'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
+    | '/api/public/hooks/notify-sms'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -622,6 +634,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
   ApiPublicHooksComplianceDigestRoute: typeof ApiPublicHooksComplianceDigestRoute
+  ApiPublicHooksNotifySmsRoute: typeof ApiPublicHooksNotifySmsRoute
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
@@ -905,6 +918,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/notify-sms': {
+      id: '/api/public/hooks/notify-sms'
+      path: '/api/public/hooks/notify-sms'
+      fullPath: '/api/public/hooks/notify-sms'
+      preLoaderRoute: typeof ApiPublicHooksNotifySmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/compliance-digest': {
       id: '/api/public/hooks/compliance-digest'
       path: '/api/public/hooks/compliance-digest'
@@ -1110,6 +1130,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
   ApiPublicHooksComplianceDigestRoute: ApiPublicHooksComplianceDigestRoute,
+  ApiPublicHooksNotifySmsRoute: ApiPublicHooksNotifySmsRoute,
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
