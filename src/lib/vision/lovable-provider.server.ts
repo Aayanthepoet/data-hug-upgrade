@@ -2,7 +2,7 @@
 // raw PNG bytes. Throws on any non-2xx so the server function can record a
 // failed render row.
 
-import type { VisionProvider, VisionRenderInput, VisionRenderResult } from "./provider";
+import { RESOLUTION_SIZES, type VisionProvider, type VisionRenderInput, type VisionRenderResult } from "./provider";
 
 export function createLovableVisionProvider(apiKey: string): VisionProvider {
   return {
