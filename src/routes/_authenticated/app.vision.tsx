@@ -460,16 +460,25 @@ function VisionPage() {
   return (
     <>
     <div className="space-y-6">
-      <div>
-        <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
-        <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">
-          Property <span className="h-italic">redesign</span>
-        </h1>
-        <p className="text-[var(--w55)] mt-3 max-w-xl">
-          Generate redesign concepts for distressed rooms to show sellers the after-state.
-          Renders are saved to your library with status, prompt, and property linkage.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Vision Studio · redesign · history</div>
+          <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">
+            Property <span className="h-italic">redesign</span>
+          </h1>
+          <p className="text-[var(--w55)] mt-3 max-w-xl">
+            Generate redesign concepts for distressed rooms to show sellers the after-state.
+            Renders are saved to your library with status, prompt, and property linkage.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link to="/app/vision/library">
+            <Images className="h-3.5 w-3.5 mr-1.5" />
+            Source photo library
+          </Link>
+        </Button>
       </div>
+
 
       <div className="surface p-6 space-y-3">
         <div>
