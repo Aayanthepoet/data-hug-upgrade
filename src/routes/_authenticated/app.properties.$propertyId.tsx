@@ -737,3 +737,111 @@ function ListForAuctionButton({ propertyId, defaultTitle }: { propertyId: string
     </Dialog>
   );
 }
+
+// Inline gallery of Vision Studio renders linked to this property. Reuses
+// listRenders (filtered by property_id), with delete + unlink controls so
+// the user can manage attachments without leaving the detail page.
+function VisionGallerySection({ propertyId }: { propertyId: string }) {
+  const listFn = useServerFn(listRenders);
+  const deleteFn = useServerFn(deleteRender);
+  const linkFn = useServerFn(linkRenderToProperty);
+  const { data: renders = [], refetch, isLoading } = useQuery({
+    queryKey: ["property-renders", propertyId],
+    queryFn: () => listFn({ data: { property_id: propertyId } }),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteFn({ data: { id } }),
+    onSuccess: () => refetch(),
+  });
+  const unlink = useMutation({
+    mutationFn: (id: string) => linkFn({ data: { id, property_id: null } }),
+    onSuccess: () => refetch(),
+  });
+
+  const statusClass: Record<string, string> = {
+    ready: "bg-green-500/15 text-green-300 border-green-500/30",
+    rendering: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    queued: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+    failed: "bg-red-500/15 text-red-300 border-red-500/30",
+  };
+
+  return (
+    <section className="border border-border rounded-lg">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-cyan" />
+          <h2 className="font-medium">Vision Studio renders</h2>
+          <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">
+            · {renders.length} linked
+          </span>
+        </div>
+        <Link
+          to="/app/vision"
+          search={{ property: propertyId }}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-cyan" /> New redesign
+        </Link>
+      </header>
+
+      {isLoading ? (
+        <p className="p-4 text-sm text-[var(--w55)]">Loading…</p>
+      ) : renders.length === 0 ? (
+        <p className="p-4 text-sm text-[var(--w55)]">
+          No renders linked yet. Start a redesign and it'll attach to this property automatically.
+        </p>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+          {renders.map((r) => (
+            <div key={r.id} className="border border-border rounded-md overflow-hidden bg-black/20">
+              <div className="aspect-video flex items-center justify-center bg-black/30">
+                {r.status === "ready" && r.signed_url ? (
+                  <img src={r.signed_url} alt={r.prompt ?? ""} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs text-[var(--w55)]">
+                    {r.status === "failed" ? "Render failed" : "Rendering…"}
+                  </span>
+                )}
+              </div>
+              <div className="p-2.5 space-y-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider border ${statusClass[r.status] ?? ""}`}>
+                    {r.status}
+                  </span>
+                  {r.style && (
+                    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider border border-border text-[var(--w55)]">
+                      {r.style}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[var(--w55)] line-clamp-2">{r.prompt}</p>
+                {r.status === "failed" && r.error && (
+                  <p className="text-xs text-red-400 line-clamp-2">{r.error}</p>
+                )}
+                <div className="flex items-center justify-end gap-1 pt-1">
+                  <button
+                    onClick={() => unlink.mutate(r.id)}
+                    disabled={unlink.isPending}
+                    title="Unlink from this property"
+                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] hover:bg-white/5 text-[var(--w55)]"
+                  >
+                    <Link2 className="h-3 w-3" /> Unlink
+                  </button>
+                  <button
+                    onClick={() => remove.mutate(r.id)}
+                    disabled={remove.isPending}
+                    title="Delete render"
+                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] hover:bg-white/5 text-red-400"
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
