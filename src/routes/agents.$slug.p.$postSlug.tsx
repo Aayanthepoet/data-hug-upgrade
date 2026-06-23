@@ -22,7 +22,8 @@ export const Route = createFileRoute("/agents/$slug/p/$postSlug")({
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return { meta: [{ title: "Post — PropAI" }] };
-    const { post, agent, property } = loaderData;
+    const { post, agent } = loaderData;
+    const property = (loaderData.property as { city: string | null; state: string | null } | null) ?? null;
     const title = `${post.headline} — ${agent.full_name || agent.public_slug}`;
     const desc = post.subheadline || post.body_md.slice(0, 158).replace(/\s+/g, " ").trim();
     const url = `/agents/${params.slug}/p/${params.postSlug}`;
