@@ -185,16 +185,17 @@ function ContractRowItem({
             size="sm"
             disabled={dl.isPending}
             onClick={() => dl.mutate()}
-            title={contract.signed_pdf_url ? "Open signed PDF" : "Open PDF"}
+            title={contract.signed_pdf_storage_path ? "Open signed PDF" : "Open PDF"}
           >
             {dl.isPending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : contract.signed_pdf_url ? (
+            ) : contract.signed_pdf_storage_path ? (
               <ExternalLink className="h-3.5 w-3.5" />
             ) : (
               <Download className="h-3.5 w-3.5" />
             )}
           </Button>
+
         )}
         {canCancel && (
           <Button
