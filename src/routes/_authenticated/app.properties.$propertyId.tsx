@@ -8,7 +8,8 @@ import { getPropertyDetail, type TimelineEvent } from "@/lib/distress/detail.fun
 import { upsertWatchlistItem } from "@/lib/watchlist.functions";
 import { createAuction } from "@/lib/auctions/auctions.functions";
 import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/comps/comps.functions";
-import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw } from "lucide-react";
+import { listRenders, deleteRender, linkRenderToProperty } from "@/lib/vision/vision.functions";
+import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
