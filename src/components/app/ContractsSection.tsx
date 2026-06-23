@@ -137,10 +137,11 @@ function ContractRowItem({
   const dl = useMutation({
     mutationFn: () => pdfFn({ data: { contract_id: contract.id } }),
     onSuccess: (r) => {
-      window.open(r.signed_pdf_url || r.url, "_blank", "noopener");
+      window.open(r.url, "_blank", "noopener");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const cancel = useMutation({
     mutationFn: () => cancelFn({ data: { contract_id: contract.id } }),
