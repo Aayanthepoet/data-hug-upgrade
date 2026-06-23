@@ -55,6 +55,11 @@ function Overview() {
         <DashboardAnalyticsWidget />
       </div>
 
+      <div className="mt-6">
+        <OptOutTrendsWidget />
+      </div>
+
+
       <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Link
           to="/app/agent"
