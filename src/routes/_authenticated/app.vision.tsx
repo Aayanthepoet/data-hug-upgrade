@@ -116,10 +116,13 @@ function VisionPage() {
           style,
           resolution,
           property_id: propertyId === "none" ? null : propertyId,
+          source_image_url: sourcePath,
         },
       }),
     onSuccess: () => {
       toast.success("Redesign rendered");
+      setSourcePath(null);
+      setSourcePreview(null);
       qc.invalidateQueries({ queryKey: ["vision-renders"] });
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Render failed"),
