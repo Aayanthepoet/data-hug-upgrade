@@ -345,10 +345,15 @@ function NotificationSettingsPage() {
         )}
       </section>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex items-center justify-end gap-3">
+        {phoneBlockingSave && (
+          <span className="text-xs text-red-500">
+            Enter a valid E.164 phone number to save SMS alerts.
+          </span>
+        )}
         <Button
           onClick={() => save.mutate()}
-          disabled={save.isPending}
+          disabled={save.isPending || phoneBlockingSave}
         >
           {save.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
           Save preferences
