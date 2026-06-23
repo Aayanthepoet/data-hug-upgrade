@@ -47,6 +47,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
+import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
@@ -254,6 +255,12 @@ const ApiPublicHooksOutreachReplyRoute =
     path: '/api/public/hooks/outreach-reply',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksComplianceDigestRoute =
+  ApiPublicHooksComplianceDigestRouteImport.update({
+    id: '/api/public/hooks/compliance-digest',
+    path: '/api/public/hooks/compliance-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCloseAuctionsRoute =
   ApiPublicHooksCloseAuctionsRouteImport.update({
     id: '/api/public/hooks/close-auctions',
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -365,6 +373,7 @@ export interface FileRoutesByTo {
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -411,6 +420,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
+  '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/app/properties/$propertyId'
     | '/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -545,6 +557,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/search'
     | '/api/public/hooks/close-auctions'
+    | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
@@ -569,6 +582,7 @@ export interface RootRouteChildren {
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
+  ApiPublicHooksComplianceDigestRoute: typeof ApiPublicHooksComplianceDigestRoute
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
@@ -845,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/compliance-digest': {
+      id: '/api/public/hooks/compliance-digest'
+      path: '/api/public/hooks/compliance-digest'
+      fullPath: '/api/public/hooks/compliance-digest'
+      preLoaderRoute: typeof ApiPublicHooksComplianceDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/close-auctions': {
       id: '/api/public/hooks/close-auctions'
       path: '/api/public/hooks/close-auctions'
@@ -999,6 +1020,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
+  ApiPublicHooksComplianceDigestRoute: ApiPublicHooksComplianceDigestRoute,
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
