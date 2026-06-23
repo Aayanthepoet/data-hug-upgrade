@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Globe, ExternalLink, Trash2, Share2 } from "lucide-react";
+import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2 } from "lucide-react";
 import {
   listMyPosts,
   listMySocialAccounts,
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
+import { connectMetaSimulated, disconnectSocialAccount } from "@/lib/social-oauth.functions";
 import { Button } from "@/components/ui/button";
 
 const PLATFORMS = [

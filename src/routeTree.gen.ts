@@ -66,6 +66,8 @@ import { Route as AuthenticatedAppContractsContractIdRouteImport } from './route
 import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
 import { Route as AuthenticatedAppAdminContractsRouteImport } from './routes/_authenticated/app.admin.contracts'
+import { Route as ApiPublicOauthMetaStartRouteImport } from './routes/api/public/oauth/meta.start'
+import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta.callback'
 import { Route as AuthenticatedAppAdminContractsContractIdRouteImport } from './routes/_authenticated/app.admin.contracts.$contractId'
 
 const TermsRoute = TermsRouteImport.update({
@@ -378,6 +380,17 @@ const AuthenticatedAppAdminContractsRoute =
     path: '/admin/contracts',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiPublicOauthMetaStartRoute = ApiPublicOauthMetaStartRouteImport.update({
+  id: '/api/public/oauth/meta/start',
+  path: '/api/public/oauth/meta/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOauthMetaCallbackRoute =
+  ApiPublicOauthMetaCallbackRouteImport.update({
+    id: '/api/public/oauth/meta/callback',
+    path: '/api/public/oauth/meta/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppAdminContractsContractIdRoute =
   AuthenticatedAppAdminContractsContractIdRouteImport.update({
     id: '/$contractId',
@@ -443,6 +456,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
+  '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
+  '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -501,6 +516,8 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
+  '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
+  '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -562,6 +579,8 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
+  '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
+  '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -623,6 +642,8 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/app/admin/contracts/$contractId'
+    | '/api/public/oauth/meta/callback'
+    | '/api/public/oauth/meta/start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -681,6 +702,8 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/app/admin/contracts/$contractId'
+    | '/api/public/oauth/meta/callback'
+    | '/api/public/oauth/meta/start'
   id:
     | '__root__'
     | '/'
@@ -741,6 +764,8 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
     | '/_authenticated/app/admin/contracts/$contractId'
+    | '/api/public/oauth/meta/callback'
+    | '/api/public/oauth/meta/start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -769,6 +794,8 @@ export interface RootRouteChildren {
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
+  ApiPublicOauthMetaCallbackRoute: typeof ApiPublicOauthMetaCallbackRoute
+  ApiPublicOauthMetaStartRoute: typeof ApiPublicOauthMetaStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1172,6 +1199,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/oauth/meta/start': {
+      id: '/api/public/oauth/meta/start'
+      path: '/api/public/oauth/meta/start'
+      fullPath: '/api/public/oauth/meta/start'
+      preLoaderRoute: typeof ApiPublicOauthMetaStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/oauth/meta/callback': {
+      id: '/api/public/oauth/meta/callback'
+      path: '/api/public/oauth/meta/callback'
+      fullPath: '/api/public/oauth/meta/callback'
+      preLoaderRoute: typeof ApiPublicOauthMetaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/admin/contracts/$contractId': {
       id: '/_authenticated/app/admin/contracts/$contractId'
       path: '/$contractId'
@@ -1403,6 +1444,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
+  ApiPublicOauthMetaCallbackRoute: ApiPublicOauthMetaCallbackRoute,
+  ApiPublicOauthMetaStartRoute: ApiPublicOauthMetaStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
