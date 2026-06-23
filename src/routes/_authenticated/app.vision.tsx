@@ -108,6 +108,7 @@ function VisionPage() {
                 <SelectItem value="industrial">Industrial</SelectItem>
                 <SelectItem value="farmhouse">Farmhouse</SelectItem>
                 <SelectItem value="mid-century">Mid-century</SelectItem>
+                <SelectItem value="coastal">Coastal</SelectItem>
               </SelectContent>
             </Select>
           </div>
