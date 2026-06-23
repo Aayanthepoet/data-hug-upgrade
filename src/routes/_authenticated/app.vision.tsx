@@ -257,8 +257,10 @@ function VisionPage() {
                 </button>
               </div>
             ) : (
-              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5">
-                <Upload className="h-3 w-3" />
+              <label
+                className={`cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-dashed border-white/15 text-xs text-[var(--w55)] hover:bg-white/5 ${uploading ? "opacity-60 pointer-events-none" : ""}`}
+              >
+                {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                 {uploading ? "Uploading…" : "Upload room photo"}
                 <input
                   type="file"
@@ -273,6 +275,23 @@ function VisionPage() {
                 />
               </label>
             )}
+            <p className="text-xs text-[var(--w55)]">
+              {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
+            </p>
+          </div>
+          {uploading || uploadPhase === "done" ? (
+            <div className="mt-2 space-y-1" aria-live="polite">
+              <Progress value={uploadProgress} className="h-1.5" />
+              <div className="flex justify-between text-[10px] text-[var(--w55)]">
+                <span>
+                  {uploadPhase === "encoding" && "Preparing image…"}
+                  {uploadPhase === "sending" && "Uploading to library…"}
+                  {uploadPhase === "done" && "Upload complete"}
+                </span>
+                <span>{uploadProgress}%</span>
+              </div>
+            </div>
+          ) : null}
             <p className="text-xs text-[var(--w55)]">
               {ALLOWED_LABEL} · up to {formatMB(MAX_BYTES)}. Used as the "before" frame in the compare slider and exports.
             </p>
