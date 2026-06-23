@@ -231,8 +231,8 @@ function SettingsPage() {
         <div className="grid gap-4">
           <div className="flex items-center gap-4">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              {previewUrl || avatarUrl ? (
+                <img src={previewUrl ?? avatarUrl!} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
                 <UserIcon className="h-8 w-8 text-[var(--w45)]" />
               )}
@@ -245,7 +245,11 @@ function SettingsPage() {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) uploadAvatar.mutate(file);
+                  if (file) {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl(URL.createObjectURL(file));
+                    uploadAvatar.mutate(file);
+                  }
                   e.target.value = "";
                 }}
               />
