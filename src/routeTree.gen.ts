@@ -28,6 +28,7 @@ import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
 import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
 import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
@@ -149,6 +150,12 @@ const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppScoringRoute = AuthenticatedAppScoringRouteImport.update({
   id: '/scoring',
   path: '/scoring',
@@ -317,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -361,6 +369,7 @@ export interface FileRoutesByTo {
   '/app/owners': typeof AuthenticatedAppOwnersRoute
   '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -408,6 +417,7 @@ export interface FileRoutesById {
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
   '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
+    | '/app/settings'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -499,6 +510,7 @@ export interface FileRouteTypes {
     | '/app/owners'
     | '/app/properties'
     | '/app/scoring'
+    | '/app/settings'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -545,6 +557,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/owners'
     | '/_authenticated/app/properties'
     | '/_authenticated/app/scoring'
+    | '/_authenticated/app/settings'
     | '/_authenticated/app/videos'
     | '/_authenticated/app/vision'
     | '/_authenticated/app/watchlist'
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/app/videos'
       preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/scoring': {
@@ -977,6 +997,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
   AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
@@ -996,6 +1017,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
   AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
