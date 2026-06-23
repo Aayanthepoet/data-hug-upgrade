@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -10,7 +10,8 @@ import {
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
-import { connectMetaSimulated, disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { MetaAccountPicker } from "@/components/social/MetaAccountPicker";
 import { Button } from "@/components/ui/button";
 
 const PLATFORMS = [
@@ -33,8 +34,9 @@ function SocialHubPage() {
   const listAccts = useServerFn(listMySocialAccounts);
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
-  const connectMeta = useServerFn(connectMetaSimulated);
   const disconnect = useServerFn(disconnectSocialAccount);
+
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const postsQ = useQuery({ queryKey: ["my-social-posts"], queryFn: () => list() });
   const accountsQ = useQuery({ queryKey: ["my-social-accounts"], queryFn: () => listAccts() });
@@ -53,11 +55,11 @@ function SocialHubPage() {
       );
       window.history.replaceState({}, "", "/app/social");
     } else if (ok === "meta") {
-      toast.success("Facebook + Instagram connected.");
+      // Real OAuth returned — open the picker to choose which Pages/IG to use.
       window.history.replaceState({}, "", "/app/social");
-      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+      setPickerOpen(true);
     }
-  }, [qc]);
+  }, []);
 
   const actMut = useMutation({
     mutationFn: (vars: { post_id: string; action: "publish" | "unpublish" | "delete" }) =>
@@ -69,14 +71,6 @@ function SocialHubPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const connectMetaMut = useMutation({
-    mutationFn: () => connectMeta(),
-    onSuccess: () => {
-      toast.success("Simulated Facebook + Instagram accounts connected.");
-      qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const disconnectMut = useMutation({
     mutationFn: (account_id: string) => disconnect({ data: { account_id } }),
@@ -116,52 +110,49 @@ function SocialHubPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Connected social accounts</h2>
-          <div className="flex items-center gap-2">
-            {!metaConnected ? (
-              <Button
-                onClick={() => connectMetaMut.mutate()}
-                disabled={connectMetaMut.isPending}
-                className="btn-primary px-3 py-1.5 text-xs h-auto inline-flex items-center gap-1.5"
-              >
-                <Link2 className="w-3.5 h-3.5" />
-                {connectMetaMut.isPending ? "Connecting…" : "Connect Facebook + Instagram (Simulated)"}
-              </Button>
-            ) : null}
-          </div>
+          <Button
+            onClick={() => setPickerOpen(true)}
+            className="btn-primary px-3 py-1.5 text-xs h-auto inline-flex items-center gap-1.5"
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            {metaConnected ? "Manage Pages & IG" : "Connect Facebook + Instagram"}
+          </Button>
         </div>
         <div className="grid sm:grid-cols-3 gap-3">
           {PLATFORMS.map((p) => {
-            const acct = accountsQ.data?.find((a) => a.platform === p.id);
+            const accts = accountsQ.data?.filter((a) => a.platform === p.id) ?? [];
             const isMeta = p.id === "facebook" || p.id === "instagram";
-            const simulated = (acct?.display_name ?? "").includes("Simulated");
             return (
               <div key={p.id} className="border border-border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-sm">{p.label}</span>
-                  {acct ? (
-                    <span className="text-xs text-green-400">● Connected{simulated ? " (sim)" : ""}</span>
+                  {accts.length > 0 ? (
+                    <span className="text-xs text-green-400">● {accts.length} connected</span>
                   ) : (
                     <span className="text-xs text-[var(--w35)]">Not connected</span>
                   )}
                 </div>
-                {acct ? (
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs text-[var(--w55)] truncate flex-1">{acct.display_name}</p>
-                    <button
-                      onClick={() => disconnectMut.mutate(acct.id)}
-                      className="text-xs text-[var(--w55)] hover:text-red-400"
-                      title="Disconnect"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                {accts.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {accts.map((a) => (
+                      <div key={a.id} className="flex items-center justify-between gap-2">
+                        <p className="text-xs text-[var(--w55)] truncate flex-1">{a.display_name}</p>
+                        <button
+                          onClick={() => disconnectMut.mutate(a.id)}
+                          className="text-xs text-[var(--w55)] hover:text-red-400"
+                          title="Disconnect"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 ) : isMeta ? (
                   <button
-                    onClick={() => connectMetaMut.mutate()}
-                    disabled={connectMetaMut.isPending}
+                    onClick={() => setPickerOpen(true)}
                     className="text-xs text-cyan hover:underline"
                   >
-                    Connect (simulated)
+                    Choose accounts →
                   </button>
                 ) : (
                   <span className="text-xs text-[var(--w35)]">Coming soon</span>
@@ -174,6 +165,9 @@ function SocialHubPage() {
           Meta OAuth is scaffolded at <code>/api/public/oauth/meta/start</code>. Add <code>META_APP_ID</code> and <code>META_APP_SECRET</code> secrets to switch from simulated to real Facebook + Instagram posting.
         </p>
       </section>
+
+      <MetaAccountPicker open={pickerOpen} onOpenChange={setPickerOpen} />
+
 
 
       <section>
