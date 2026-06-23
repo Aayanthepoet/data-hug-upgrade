@@ -8,8 +8,17 @@ export function createLovableVisionProvider(apiKey: string): VisionProvider {
   return {
     name: "lovable-ai/gpt-image-2",
     async render(input: VisionRenderInput): Promise<VisionRenderResult> {
+      const STYLE_DESCRIPTORS: Record<string, string> = {
+        "modern": "clean lines, neutral palette, minimal decor, matte finishes",
+        "scandinavian": "light woods, soft whites, cozy textiles, abundant natural light",
+        "industrial": "exposed brick, raw steel, dark metals, Edison bulbs, concrete floors",
+        "farmhouse": "shiplap, reclaimed wood beams, cream tones, vintage hardware",
+        "mid-century": "walnut wood, tapered legs, mustard and teal accents, 1960s silhouettes",
+        "coastal": "white-washed wood, soft blues and sandy neutrals, linen textiles, breezy natural light",
+      };
+      const descriptor = STYLE_DESCRIPTORS[input.style] ?? input.style;
       const fullPrompt =
-        `Photorealistic interior redesign of the described room in ${input.style} style. ` +
+        `Photorealistic interior redesign of the described room in ${input.style} style (${descriptor}). ` +
         `Keep room geometry, ceiling height, and window placement realistic. ` +
         `${input.prompt}`;
 
