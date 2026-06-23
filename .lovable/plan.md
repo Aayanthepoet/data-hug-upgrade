@@ -1,71 +1,39 @@
-## AI Voice Caller — Multi-Company Sales
+## Purchase Contracts (PDF + DB + e-signature)
 
-A single Twilio number serves all 9 companies. Inbound: caller picks a company (press 1–9), AI agent qualifies as a sales rep for that company. Outbound: pick a lead + company → AI dials and runs the sales script.
+Add a "Create contract" flow on the property detail page that captures buyer/seller/price/closing, generates a PDF cash-purchase agreement, saves a `contracts` record, and (optionally) sends it via **SignWell** for e-signature.
 
-### Architecture
+### What gets built
 
-```text
-Caller / Lead phone
-        │
-        ▼
-   Twilio number ── inbound webhook ──▶  /api/public/voice/incoming        (TwiML: IVR menu 1–9)
-        │                                       │
-        │                            (DTMF) ──▶ /api/public/voice/route    (loads company, starts AI loop)
-        │                                       │
-        │            ◀──── <Gather> turn ────── /api/public/voice/turn    (transcript → Lovable AI → <Say> reply)
-        │                                       │
-        ▼                                       ▼
-   Outbound trigger  ──▶  /app outbound action  ──▶  Twilio REST API (create call) ──▶ /api/public/voice/outbound  (same turn loop)
-```
+1. **Database** (`contracts` table)
+   - `id`, `user_id`, `property_id`, `buyer_name`, `seller_name`, `purchase_price`, `closing_date`, `status` (`draft` | `sent` | `viewed` | `signed` | `declined` | `cancelled`), `pdf_storage_path`, `signwell_document_id`, `signed_pdf_url`, `signed_at`, `created_at`, `updated_at`
+   - Private storage bucket: `contracts` (user-folder scoped read)
+   - RLS: owner-only CRUD; admins read all
 
-All webhooks live under `/api/public/voice/*` (Lovable's auth-bypass prefix for external callers). Each handler verifies Twilio's `X-Twilio-Signature` HMAC before responding.
+2. **PDF generation** — `pdf-lib` (Worker-compatible, pure JS)
+   - Server fn `createContract({ property_id, buyer_name, seller_name, purchase_price, closing_date, send_for_signature })`
+   - Renders a clean one-page cash-purchase agreement (parties, property address, price, closing date, signature blocks)
+   - Saves to storage at `contracts/{user_id}/{contract_id}.pdf`, inserts row
 
-### What we'll build this turn
+3. **SignWell e-signature** (opt-in toggle in the dialog)
+   - Server fn calls SignWell `POST /v1/documents` with the generated PDF + two recipients (buyer/seller emails)
+   - Stores `signwell_document_id`, sets `status = 'sent'`
+   - Public webhook `/api/public/hooks/signwell` updates status on `document_signed`, `document_completed`, `document_declined`; downloads signed PDF into the same bucket
+   - Requires you to provide `SIGNWELL_API_KEY` (free tier: 3 docs/mo) and a `SIGNWELL_WEBHOOK_SECRET` (we generate)
 
-**1. Twilio connector**
-- Link the Twilio connector. You'll choose the connection holding your account credentials + the number.
+4. **UI on property detail page**
+   - "Create contract" button → dialog with fields (buyer, seller, price [defaults to property ARV], closing date, optional buyer/seller emails + "send for e-signature" switch)
+   - Below the form: list of existing contracts for this property with status badge and "Download PDF" + "Open signing link"
 
-**2. Database (one migration, with GRANTs + RLS)**
-- `companies` — id, owner user_id, name, dtmf_digit (1–9), greeting, sales_script (system prompt), voice ("alice"/"man"/"woman"), is_active. Unique (user_id, dtmf_digit).
-- `call_sessions` — id, user_id, company_id, lead_id (nullable), twilio_call_sid, direction (inbound/outbound), from_number, to_number, status (ringing/in_progress/completed/failed), started_at, ended_at, duration_seconds, outcome (qualified/not_qualified/voicemail/no_answer/callback_requested), summary.
-- `call_turns` — id, session_id, role (user/assistant/system), text, created_at. Stores the running conversation for AI context.
+### Out of scope this turn
 
-**3. Public webhook routes** (`src/routes/api/public/voice/*.ts`)
-- `incoming.ts` — `<Say>` greeting + `<Gather numDigits=1>` for company pick. Validates Twilio signature.
-- `route.ts` — receives DTMF, creates `call_sessions` row, returns TwiML `<Gather input="speech">` prompting the first question.
-- `turn.ts` — receives caller's transcribed speech, appends to `call_turns`, calls Lovable AI (`google/gemini-3-flash-preview`) with the company's `sales_script` + history, persists reply, returns TwiML `<Say>` + next `<Gather>`. Detects natural endings ("not interested", goodbye) and ends the call.
-- `status.ts` — Twilio call status callback; updates `status`, `ended_at`, `duration_seconds`.
+- Multiple custom fields beyond the minimal set (you picked "Minimal").
+- Sequential signing, in-person signing, attachments, counter-signing flows.
+- Editing a contract after it's sent for signature (cancel + recreate instead).
 
-**4. Outbound** (`src/lib/voice/outbound.functions.ts`)
-- `startOutboundCall({ company_id, lead_id, to_number })` — server fn. Verifies user owns the company + lead, then POSTs to Twilio `Calls.json` via the connector gateway with `Url` pointing to `/api/public/voice/outbound` (same turn loop, but the AI opens with the company's outbound script).
+### Order of operations
 
-**5. UI**
-- **`/app/companies`** — list, create, edit the 9 companies (name, DTMF digit, greeting, sales script, voice). Includes inline copy of your Twilio number.
-- **`/app/calls`** — call history table (company, direction, from/to, duration, outcome, summary) with a drawer showing the full turn-by-turn transcript.
-- **Owners page** — "Call with AI" button per owner phone → opens a small dialog to pick which company script to use, then triggers `startOutboundCall`.
+1. Migration (table + bucket + policies) — needs your approval before code lands.
+2. After approval: install `pdf-lib`, add server fns, webhook, UI dialog.
+3. I'll request `SIGNWELL_API_KEY` via the secrets tool when SignWell wiring is ready; PDF + DB work independently of that key.
 
-### Voice stack choice
-
-Going with **Twilio `<Gather>` + Lovable AI + Twilio TTS** (turn-based, ~1–2s latency). This works on Lovable's serverless runtime. Real-time streaming (Twilio Media Streams + OpenAI Realtime) would need a long-lived WebSocket server hosted elsewhere — out of scope for this build.
-
-### Security
-
-- Every `/api/public/voice/*` handler validates Twilio's HMAC signature against `TWILIO_AUTH_TOKEN` before touching the DB.
-- DB writes from webhooks go through `supabaseAdmin` (loaded inside the handler) since the caller has no Supabase session.
-- `companies` and `call_sessions` are user-scoped via RLS for the app UI.
-- Outbound server fn requires `requireSupabaseAuth` and verifies company/lead ownership before placing the call.
-
-### Costs to know
-
-- Twilio: ~$0.0085/min inbound, ~$0.014/min outbound (US), plus ~$1.15/mo per number.
-- Lovable AI: per-request, deducted from workspace credits.
-- Twilio TTS (Polly Neural voices) and speech recognition billed per use.
-
-### What's NOT in this turn
-
-- Sub-second streaming voice (would need external WebSocket infra).
-- Call recording + post-call transcription (Twilio does this server-side; easy follow-up).
-- Voicemail detection / answering-machine handling beyond Twilio's built-in `MachineDetection`.
-- SMS follow-ups after a call (easy follow-up using the same Twilio connection).
-
-Approve to proceed and I'll start with the Twilio connector + migration.
+Approve to start with the migration.
