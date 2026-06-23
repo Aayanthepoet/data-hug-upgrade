@@ -333,27 +333,49 @@ function VisionPage() {
           <label className="text-xs text-[var(--w55)]">Source photo (optional — becomes the "before")</label>
           <div className="flex flex-wrap items-center gap-3">
             {sourcePreview && !uploadError ? (
-              <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10 shrink-0">
-                <img src={sourcePreview} alt="source" className={`h-full w-full object-cover transition-opacity duration-200 ${uploading ? "opacity-40" : ""}`} />
-                {uploading ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <Loader2 className="h-5 w-5 text-white animate-spin" />
+              <div className="flex items-center gap-3">
+                <div className="relative h-20 w-28 rounded overflow-hidden border border-white/10 shrink-0">
+                  <img src={sourcePreview} alt="source" className={`h-full w-full object-cover transition-opacity duration-200 ${uploading || removingSource ? "opacity-40" : ""}`} />
+                  {uploading || removingSource ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <Loader2 className="h-5 w-5 text-white animate-spin" />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void removeSourcePhoto()}
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
+                      aria-label="Remove source photo"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+                {!uploading && !removingSource && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="cursor-pointer inline-flex items-center gap-1 px-2 py-1 rounded border border-white/15 text-[11px] text-[var(--w55)] hover:bg-white/5 transition-colors">
+                      <RefreshCw className="h-3 w-3" />
+                      Replace
+                      <input
+                        type="file"
+                        accept={ACCEPT_ATTR}
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void replaceSourcePhoto(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => void removeSourcePhoto()}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded border border-red-500/20 text-[11px] text-red-300 hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Remove
+                    </button>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (sourcePreview && sourcePreview.startsWith("blob:")) {
-                        URL.revokeObjectURL(sourcePreview);
-                      }
-                      setSourcePath(null);
-                      setSourcePreview(null);
-                    }}
-                    className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
-                    aria-label="Remove source photo"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
                 )}
               </div>
             ) : uploadError && failedFile ? (
