@@ -457,6 +457,28 @@ function VisionPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Link failed"),
   });
 
+  // Re-run a previous render with the same prompt, style, and source photo.
+  // Resolution isn't persisted on the row, so we use the current selector
+  // value (the only resolution the user has actively chosen for this session).
+  const regenerate = useMutation({
+    mutationFn: (r: { prompt: string; style: string | null; source_image_url: string | null; property_id: string | null }) =>
+      generateFn({
+        data: {
+          prompt: r.prompt,
+          style: (r.style ?? "modern") as typeof style,
+          resolution,
+          property_id: r.property_id,
+          source_image_url: r.source_image_url,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Regenerated");
+      qc.invalidateQueries({ queryKey: ["vision-renders"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Regenerate failed"),
+  });
+
+
   return (
     <>
     <div className="space-y-6">
@@ -795,11 +817,28 @@ function VisionPage() {
                   <Button
                     size="icon"
                     variant="ghost"
+                    onClick={() =>
+                      regenerate.mutate({
+                        prompt: r.prompt ?? "",
+                        style: r.style,
+                        source_image_url: r.source_image_url,
+                        property_id: r.property_id,
+                      })
+                    }
+                    disabled={regenerate.isPending || !r.prompt}
+                    title="Regenerate with the same prompt and style"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${regenerate.isPending ? "animate-spin" : ""}`} />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
                     onClick={() => setRenderIdToDelete(r.id)}
                     disabled={remove.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
+
                 </div>
               </div>
             ))}
