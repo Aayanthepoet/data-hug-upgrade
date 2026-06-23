@@ -50,8 +50,24 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
 
-        const body = (await request.json()) as { messages?: unknown };
+        const body = (await request.json()) as { messages?: unknown; threadId?: unknown };
         if (!Array.isArray(body.messages)) return new Response("Messages required", { status: 400 });
+        const threadId = typeof body.threadId === "string" ? body.threadId : "";
+        if (!threadId) return new Response("threadId required", { status: 400 });
+
+        // Verify the thread belongs to this user
+        const { data: thread, error: threadErr } = await supabase
+          .from("chat_threads")
+          .select("id, title")
+          .eq("id", threadId)
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+        if (threadErr || !thread) return new Response("Thread not found", { status: 404 });
+
+        const userId = userData.user.id;
+        const incoming = body.messages as UIMessage[];
+        const lastUserMsg = [...incoming].reverse().find((m) => m.role === "user");
+
 
         const gateway = createLovableAiGatewayProvider(lovableKey);
         const model = gateway("google/gemini-3-flash-preview");
