@@ -45,6 +45,20 @@ export const deleteChatThread = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateChatThreadTitle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ threadId: z.string().uuid(), title: z.string().min(1).max(100) }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: thread, error } = await context.supabase
+      .from("chat_threads")
+      .update({ title: data.title })
+      .eq("id", data.threadId)
+      .select("id, title, created_at, updated_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return thread;
+  });
+
 export const getChatThreadMessages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ threadId: z.string().uuid() }).parse(d))

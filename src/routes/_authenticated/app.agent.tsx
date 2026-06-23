@@ -1,13 +1,14 @@
 import { createFileRoute, Outlet, useNavigate, useParams, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { Bot, Plus, Trash2, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bot, Plus, Trash2, MessageSquare, Edit2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   listChatThreads,
   createChatThread,
   deleteChatThread,
+  updateChatThreadTitle,
 } from "@/lib/chat-threads.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,42 @@ function AgentLayout() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const updateTitleFn = useServerFn(updateChatThreadTitle);
+
+  const updateTitle = useMutation({
+    mutationFn: ({ threadId, title }: { threadId: string; title: string }) =>
+      updateTitleFn({ data: { threadId, title } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["chat-threads"] });
+      setEditingId(null);
+      toast.success("Chat renamed");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleStartEdit = (e: React.MouseEvent, id: string, title: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingId(id);
+    setEditingTitle(title);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    if (!editingTitle.trim()) {
+      toast.error("Title cannot be empty");
+      return;
+    }
+    updateTitle.mutate({ threadId: id, title: editingTitle.trim() });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
   // Auto-redirect to most recent thread when landing on bare /app/agent
   useEffect(() => {
     if (activeId) return;
@@ -87,38 +124,93 @@ function AgentLayout() {
               No conversations yet. Start one with "New chat".
             </div>
           )}
-          {threads.map((t) => (
-            <div
-              key={t.id}
-              className={cn(
-                "group flex items-center gap-1 rounded-lg pr-1 transition",
-                activeId === t.id
-                  ? "bg-[var(--cyan-d)] border border-[var(--cyan-b)]"
-                  : "border border-transparent hover:bg-card/50",
-              )}
-            >
-              <Link
-                to="/app/agent/$threadId"
-                params={{ threadId: t.id }}
-                className="flex-1 flex items-center gap-2 px-2 py-2 text-sm min-w-0"
+          {threads.map((t) => {
+            const isEditing = editingId === t.id;
+            return (
+              <div
+                key={t.id}
+                className={cn(
+                  "group flex items-center gap-1 rounded-lg transition min-h-[38px]",
+                  isEditing ? "p-1 bg-card border border-border" : "pr-1",
+                  !isEditing && activeId === t.id
+                    ? "bg-[var(--cyan-d)] border border-[var(--cyan-b)]"
+                    : !isEditing && "border border-transparent hover:bg-card/50",
+                )}
               >
-                <MessageSquare className="h-3.5 w-3.5 shrink-0 text-[var(--w55)]" />
-                <span className="truncate">{t.title}</span>
-              </Link>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (confirm("Delete this conversation?")) remove.mutate(t.id);
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-card text-[var(--w55)] hover:text-red-400 transition"
-                aria-label="Delete conversation"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ))}
+                {isEditing ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSaveEdit(t.id);
+                    }}
+                    className="flex items-center gap-1 w-full"
+                  >
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                      className="flex-1 bg-background text-foreground text-sm px-2 py-1 rounded border border-border focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] min-w-0"
+                      autoFocus
+                      disabled={updateTitle.isPending}
+                    />
+                    <button
+                      type="submit"
+                      disabled={updateTitle.isPending}
+                      className="p-1 rounded hover:bg-background text-green-500 hover:text-green-400 transition"
+                      aria-label="Save title"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      disabled={updateTitle.isPending}
+                      className="p-1 rounded hover:bg-background text-red-500 hover:text-red-400 transition"
+                      aria-label="Cancel editing"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <Link
+                      to="/app/agent/$threadId"
+                      params={{ threadId: t.id }}
+                      className="flex-1 flex items-center gap-2 px-2 py-2 text-sm min-w-0"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 shrink-0 text-[var(--w55)]" />
+                      <span className="truncate">{t.title}</span>
+                    </Link>
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => handleStartEdit(e, t.id, t.title)}
+                        className="p-1.5 rounded hover:bg-card text-[var(--w55)] hover:text-foreground transition"
+                        aria-label="Rename conversation"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (confirm("Delete this conversation?")) remove.mutate(t.id);
+                        }}
+                        className="p-1.5 rounded hover:bg-card text-[var(--w55)] hover:text-red-400 transition"
+                        aria-label="Delete conversation"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </aside>
 
