@@ -54,7 +54,8 @@ function VisionPage() {
   // network round-trip that snaps to 100 on success.
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadPhase, setUploadPhase] = useState<"idle" | "encoding" | "sending" | "done">("idle");
-
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [failedFile, setFailedFile] = useState<File | null>(null);
 
   // Validation contract for the source photo. Keep these constants in sync
   // with the server validator in `uploadSourcePhoto`; the server is the
@@ -100,6 +101,8 @@ function VisionPage() {
     setUploading(true);
     setUploadPhase("encoding");
     setUploadProgress(0);
+    setUploadError(null);
+    setFailedFile(null);
     let creepTimer: ReturnType<typeof setInterval> | null = null;
     try {
       const buf = await file.arrayBuffer();
@@ -135,6 +138,8 @@ function VisionPage() {
       setUploadPhase("done");
       setSourcePath(res.path);
       setSourcePreview(res.signed_url);
+      setUploadError(null);
+      setFailedFile(null);
       toast.success("Source photo uploaded", { description: file.name });
     } catch (e) {
       if (creepTimer) clearInterval(creepTimer);
@@ -142,6 +147,8 @@ function VisionPage() {
       toast.error("Couldn't upload that photo", { description: msg });
       setUploadProgress(0);
       setUploadPhase("idle");
+      setUploadError(msg);
+      setFailedFile(file);
     } finally {
       setUploading(false);
       // Let the "done" 100% frame paint briefly, then reset.
