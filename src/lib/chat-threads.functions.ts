@@ -63,11 +63,12 @@ export const getChatThreadMessages = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
 
-    const messages: UIMessage[] = (rows ?? []).map((r) => ({
+    const messages: StoredMessage[] = (rows ?? []).map((r) => ({
       id: r.message_id ?? r.id,
-      role: r.role as UIMessage["role"],
-      parts: (Array.isArray(r.parts) ? r.parts : []) as UIMessage["parts"],
+      role: r.role as StoredMessage["role"],
+      parts: (Array.isArray(r.parts) ? r.parts : []) as unknown[],
     }));
 
     return { thread, messages };
   });
+
