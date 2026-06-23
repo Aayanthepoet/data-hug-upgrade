@@ -120,6 +120,15 @@ function NotificationSettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const wireFn = useServerFn(wireSmsTriggers);
+  const wireMut = useMutation({
+    mutationFn: () => wireFn(),
+    onSuccess: (r: { ok: boolean; url: string }) =>
+      toast.success(`SMS trigger pipeline wired to ${r.url}`),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   if (isLoading || !prefs) {
     return (
       <div className="flex justify-center py-20">
