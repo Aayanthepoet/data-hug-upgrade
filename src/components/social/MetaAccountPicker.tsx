@@ -28,6 +28,7 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
   const qc = useQueryClient();
   const listFn = useServerFn(listAvailableMetaAccounts);
   const saveFn = useServerFn(saveMetaAccountSelection);
+  const listAcctsFn = useServerFn(listMySocialAccounts);
 
   const [pageIds, setPageIds] = useState<Set<string>>(new Set());
   const [igIds, setIgIds] = useState<Set<string>>(new Set());
@@ -37,8 +38,16 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
     queryFn: () => listFn(),
     enabled: open,
   });
+  const connectedQ = useQuery({
+    queryKey: ["my-social-accounts"],
+    queryFn: () => listAcctsFn(),
+    enabled: open,
+  });
 
   const pages = q.data?.pages ?? [];
+  const connectedIds = new Set(
+    (connectedQ.data ?? []).map((a) => a.external_account_id),
+  );
 
   // When data first loads, default-select everything.
   useMemo(() => {
