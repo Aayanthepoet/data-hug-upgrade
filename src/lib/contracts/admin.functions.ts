@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(ctx: {
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }> };
+  supabase: { rpc: (fn: "has_role", args: { _user_id: string; _role: "admin" }) => Promise<{ data: boolean | null; error: { message: string } | null }> };
   userId: string;
 }) {
   const { data, error } = await ctx.supabase.rpc("has_role", {
@@ -12,6 +12,7 @@ async function assertAdmin(ctx: {
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden: admin role required.");
 }
+
 
 export const getContractsHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

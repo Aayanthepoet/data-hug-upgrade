@@ -60,6 +60,7 @@ import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppContractsContractIdRouteImport } from './routes/_authenticated/app.contracts.$contractId'
 import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
+import { Route as AuthenticatedAppAdminContractsRouteImport } from './routes/_authenticated/app.admin.contracts'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -338,6 +339,12 @@ const AuthenticatedAppAgentThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAppAgentRoute,
   } as any)
+const AuthenticatedAppAdminContractsRoute =
+  AuthenticatedAppAdminContractsRouteImport.update({
+    id: '/admin/contracts',
+    path: '/admin/contracts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -424,6 +432,7 @@ export interface FileRoutesByTo {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
   '/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -478,6 +487,7 @@ export interface FileRoutesById {
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/admin/contracts': typeof AuthenticatedAppAdminContractsRoute
   '/_authenticated/app/agent/$threadId': typeof AuthenticatedAppAgentThreadIdRoute
   '/_authenticated/app/auctions/$auctionId': typeof AuthenticatedAppAuctionsAuctionIdRoute
   '/_authenticated/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app/'
+    | '/app/admin/contracts'
     | '/app/agent/$threadId'
     | '/app/auctions/$auctionId'
     | '/app/contracts/$contractId'
@@ -583,6 +594,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app'
+    | '/app/admin/contracts'
     | '/app/agent/$threadId'
     | '/app/auctions/$auctionId'
     | '/app/contracts/$contractId'
@@ -636,6 +648,7 @@ export interface FileRouteTypes {
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
+    | '/_authenticated/app/admin/contracts'
     | '/_authenticated/app/agent/$threadId'
     | '/_authenticated/app/auctions/$auctionId'
     | '/_authenticated/app/contracts/$contractId'
@@ -1041,6 +1054,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgentThreadIdRouteImport
       parentRoute: typeof AuthenticatedAppAgentRoute
     }
+    '/_authenticated/app/admin/contracts': {
+      id: '/_authenticated/app/admin/contracts'
+      path: '/admin/contracts'
+      fullPath: '/app/admin/contracts'
+      preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
@@ -1136,6 +1156,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRoute
   AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
 }
 
@@ -1158,6 +1179,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppAdminContractsRoute: AuthenticatedAppAdminContractsRoute,
   AuthenticatedAppContractsContractIdRoute:
     AuthenticatedAppContractsContractIdRoute,
 }
