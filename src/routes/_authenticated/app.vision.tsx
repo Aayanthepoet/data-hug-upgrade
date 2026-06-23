@@ -99,7 +99,7 @@ function VisionPage() {
           <label className="text-xs text-[var(--w55)]">Describe the room</label>
           <Textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} />
         </div>
-        <div className="grid sm:grid-cols-3 gap-3 items-end">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
             <label className="text-xs text-[var(--w55)]">Style</label>
             <Select value={style} onValueChange={(v) => setStyle(v as typeof style)}>
@@ -111,6 +111,17 @@ function VisionPage() {
                 <SelectItem value="farmhouse">Farmhouse</SelectItem>
                 <SelectItem value="mid-century">Mid-century</SelectItem>
                 <SelectItem value="coastal">Coastal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-[var(--w55)]">Resolution</label>
+            <Select value={resolution} onValueChange={(v) => setResolution(v as typeof resolution)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hd">HD · 1024 × 1024</SelectItem>
+                <SelectItem value="2k">2K · 2048 × 2048</SelectItem>
+                <SelectItem value="4k">4K · 4096 × 4096</SelectItem>
               </SelectContent>
             </Select>
           </div>
