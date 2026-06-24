@@ -1,20 +1,32 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   searchDistressedProperties,
   importDistressedProperties,
 } from "@/lib/distress/search.functions";
+import { logLookup } from "@/lib/distress/lookup-history.functions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Download, MapPin, Loader2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Search, Download, MapPin, Loader2, History } from "lucide-react";
+
+const searchSchema = z.object({
+  line1: fallback(z.string(), "").default(""),
+  city: fallback(z.string(), "").default(""),
+  state: fallback(z.string(), "").default(""),
+  zip: fallback(z.string(), "").default(""),
+});
 
 export const Route = createFileRoute("/_authenticated/app/properties/lookup")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Address Lookup — PropAI" },
@@ -34,13 +46,15 @@ function fmtMoney(n: number | null | undefined) {
 }
 
 function AddressLookup() {
-  const [line1, setLine1] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
+  const initial = Route.useSearch();
+  const [line1, setLine1] = useState(initial.line1);
+  const [city, setCity] = useState(initial.city);
+  const [state, setState] = useState(initial.state);
+  const [zip, setZip] = useState(initial.zip);
 
   const search = useServerFn(searchDistressedProperties);
   const importFn = useServerFn(importDistressedProperties);
+  const logFn = useServerFn(logLookup);
 
   const searchMut = useMutation({
     mutationFn: async () => {
@@ -53,10 +67,33 @@ function AddressLookup() {
           limit: 100,
         },
       });
+      // Fire-and-forget history log
+      logFn({
+        data: {
+          line1: line1.trim(),
+          city: city.trim() || null,
+          state: state.trim() || null,
+          zip: zip.trim() || null,
+          matchCount: res.records.length,
+          provider: res.provider,
+          usedFallback: res.usedFallback,
+        },
+      }).catch(() => {});
       return res;
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // Auto-run when arriving with prefilled query params (e.g. from history)
+  const autoRanRef = useRef(false);
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    if (initial.line1.trim()) {
+      autoRanRef.current = true;
+      searchMut.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const navigate = useNavigate();
   const importMut = useMutation({
@@ -94,12 +131,19 @@ function AddressLookup() {
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
-      <header>
-        <h1 className="text-2xl font-semibold">Address Lookup</h1>
-        <p className="text-sm text-muted-foreground">
-          Find a single property by address. Best results when you include city &amp; state or ZIP.
-          Featured live data: NYC boroughs and Philadelphia. Other regions fall back to sample data.
-        </p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Address Lookup</h1>
+          <p className="text-sm text-muted-foreground">
+            Find a single property by address. Best results when you include city &amp; state or ZIP.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/app/properties/lookup-history">
+            <History className="mr-2 h-4 w-4" />
+            History
+          </Link>
+        </Button>
       </header>
 
       <Card>
