@@ -70,6 +70,28 @@ function PropertySearch() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchName, setSearchName] = useState("");
   const [view, setView] = useState<"list" | "map">("list");
+  const [quickQuery, setQuickQuery] = useState("");
+
+  const runQuickSearch = () => {
+    const q = quickQuery.trim();
+    const base = filters();
+    if (!q) { runMutation.mutate(undefined); return; }
+    const zipMatch = q.match(/\b(\d{5})\b/);
+    const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
+    let cityPart = q.replace(/\b\d{5}\b/g, "").replace(/,\s*[A-Za-z]{2}\b/, "").trim().replace(/,$/, "").trim();
+    const override: DistressFilters = {
+      ...base,
+      zip: zipMatch ? zipMatch[1] : undefined,
+      city: cityPart || undefined,
+      state: stateMatch ? stateMatch[1].toUpperCase() : base.state,
+      county: undefined,
+    };
+    if (override.state) setState(override.state);
+    setCity(override.city ?? "");
+    setZip(override.zip ?? "");
+    setCounty("");
+    runMutation.mutate(override);
+  };
 
   const counties = getCountiesForState(state);
   const activeCounty = counties.find((c) => c.name === county);
@@ -170,6 +192,22 @@ function PropertySearch() {
         <p className="text-xs text-[var(--w55)] mt-2">
           Currently using <Badge variant="outline">mock data</Badge> — swap in a paid provider (ATTOM / BatchData) without changing this UI.
         </p>
+      </div>
+
+      {/* Quick search bar */}
+      <div className="border border-border rounded-lg p-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <Search className="h-4 w-4 text-[var(--w55)] ml-1 hidden sm:block" />
+        <Input
+          value={quickQuery}
+          onChange={(e) => setQuickQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runQuickSearch(); } }}
+          placeholder="Search by address, city, or ZIP — e.g. 10001 or Brooklyn, NY"
+          className="flex-1 border-0 shadow-none focus-visible:ring-0 text-base"
+        />
+        <Button onClick={runQuickSearch} disabled={runMutation.isPending}>
+          {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+          Search
+        </Button>
       </div>
 
       {/* Filters */}
