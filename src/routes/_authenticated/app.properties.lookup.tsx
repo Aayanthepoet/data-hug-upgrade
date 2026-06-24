@@ -140,7 +140,7 @@ function AddressLookup() {
         </div>
         <Button asChild variant="outline" size="sm">
           <Link to="/app/properties/lookup-history">
-            <History className="mr-2 h-4 w-4" />
+            <HistoryIcon className="mr-2 h-4 w-4" />
             History
           </Link>
         </Button>
