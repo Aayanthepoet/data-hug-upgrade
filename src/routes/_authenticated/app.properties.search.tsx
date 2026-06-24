@@ -70,6 +70,7 @@ function PropertySearch() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchName, setSearchName] = useState("");
   const [view, setView] = useState<"list" | "map">("list");
+  const [quickQuery, setQuickQuery] = useState("");
 
   const counties = getCountiesForState(state);
   const activeCounty = counties.find((c) => c.name === county);
