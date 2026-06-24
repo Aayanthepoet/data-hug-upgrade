@@ -157,8 +157,8 @@ export class MockProvider implements PropertyProvider {
     const limit = Math.min(filters.limit ?? 50, 200);
 
     const out: DistressedPropertyRecord[] = [];
-    let i = 0;
-    while (out.length < limit) {
+    const maxIter = Math.max(limit * 10, 500);
+    for (let i = 0; out.length < limit && i < maxIter; i++) {
       const city = filters.city ?? pick(cities, i);
       const county = countyMatch?.name
         ?? (filters.county ?? `${city} County`);
@@ -179,15 +179,13 @@ export class MockProvider implements PropertyProvider {
         rec.lng = +(center.lng + jitterLng).toFixed(6);
       }
 
-      if (filters.minEquity != null && (rec.equity ?? 0) < filters.minEquity) { i++; continue; }
-      if (filters.minDaysOnMarket != null && (rec.daysOnMarket ?? 0) < filters.minDaysOnMarket) { i++; continue; }
-      if (filters.minListPrice != null && (rec.listPrice ?? 0) < filters.minListPrice) { i++; continue; }
-      if (filters.maxListPrice != null && (rec.listPrice ?? Number.MAX_SAFE_INTEGER) > filters.maxListPrice) { i++; continue; }
-      if (filters.minBeds != null && (rec.beds ?? 0) < filters.minBeds) { i++; continue; }
+      if (filters.minEquity != null && (rec.equity ?? 0) < filters.minEquity) continue;
+      if (filters.minDaysOnMarket != null && (rec.daysOnMarket ?? 0) < filters.minDaysOnMarket) continue;
+      if (filters.minListPrice != null && (rec.listPrice ?? 0) < filters.minListPrice) continue;
+      if (filters.maxListPrice != null && (rec.listPrice ?? Number.MAX_SAFE_INTEGER) > filters.maxListPrice) continue;
+      if (filters.minBeds != null && (rec.beds ?? 0) < filters.minBeds) continue;
 
       out.push(rec);
-      i++;
-      if (i > limit * 10) break; // safety
     }
     return out;
   }
