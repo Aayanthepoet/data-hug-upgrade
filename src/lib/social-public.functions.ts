@@ -77,10 +77,8 @@ export const listPublicAgents = createServerFn({ method: "GET" })
   .handler(async () => {
     const sb = publicClient();
     const { data } = await sb
-      .from("profiles")
+      .from("public_profiles")
       .select("public_slug, full_name, public_headshot_url, public_brokerage")
-      .eq("public_enabled", true)
-      .not("public_slug", "is", null)
       .limit(500);
     return data ?? [];
   });
