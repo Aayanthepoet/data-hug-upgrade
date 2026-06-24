@@ -70,7 +70,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "PropAI — Intelligence Platform for Real Estate" },
       { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, and close more deals — all in one AI platform." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "PropAI by AI Network Agency" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "PropAI — Intelligence Platform for Real Estate" },
+      { name: "twitter:description", content: "AI-powered owner search, skip tracing, outreach, and property redesign." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
