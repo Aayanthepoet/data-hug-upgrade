@@ -160,8 +160,9 @@ function LeadsPage() {
           Couldn't load leads. You may not have admin access.
         </div>
       ) : isLoading ? (
-        <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
-          Loading…
+        <div className="border border-border rounded-lg p-10 flex items-center justify-center gap-3 text-sm text-[var(--w55)]">
+          <Loader2 className="h-5 w-5 animate-spin text-cyan" aria-hidden="true" />
+          <span>Loading leads…</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="border border-border rounded-lg p-10 text-center">
