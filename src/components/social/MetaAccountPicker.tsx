@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   listAvailableMetaAccounts,
   saveMetaAccountSelection,
+  getMetaOAuthUrl,
 } from "@/lib/social-oauth.functions";
 import { listMySocialAccounts } from "@/lib/social.functions";
 
@@ -29,6 +30,17 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
   const listFn = useServerFn(listAvailableMetaAccounts);
   const saveFn = useServerFn(saveMetaAccountSelection);
   const listAcctsFn = useServerFn(listMySocialAccounts);
+  const getUrlFn = useServerFn(getMetaOAuthUrl);
+
+  const connectMut = useMutation({
+    mutationFn: () => getUrlFn(),
+    onSuccess: (res) => {
+      window.location.href = res.url;
+    },
+    onError: (e: Error) => {
+      toast.error(`Could not generate OAuth URL: ${e.message}`);
+    },
+  });
 
   const [pageIds, setPageIds] = useState<Set<string>>(new Set());
   const [igIds, setIgIds] = useState<Set<string>>(new Set());
@@ -68,7 +80,7 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
         data: {
           pages: pages
             .filter((p) => pageIds.has(p.external_id))
-            .map((p) => ({ external_id: p.external_id, name: p.name, avatar_url: p.avatar_url })),
+            .map((p) => ({ external_id: p.external_id, name: p.name, avatar_url: p.avatar_url, access_token: (p as any).access_token })),
           instagram: pages
             .map((p) => p.linked_instagram)
             .filter((i): i is NonNullable<typeof i> => i !== null && igIds.has(i.external_id))
@@ -76,6 +88,7 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
               external_id: i.external_id,
               username: i.username,
               avatar_url: i.avatar_url,
+              access_token: (i as any).access_token,
             })),
         },
       }),
@@ -117,9 +130,36 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        {q.isLoading ? (
+         {q.isLoading ? (
           <div className="py-10 flex items-center justify-center text-[var(--w55)]">
             <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading accounts…
+          </div>
+        ) : q.data?.needs_connect ? (
+          <div className="py-8 text-center space-y-4">
+            <div className="max-w-md mx-auto p-4 bg-[var(--surface-1)] border border-border rounded-xl space-y-3">
+              <Facebook className="w-10 h-10 text-[#1877F2] mx-auto" />
+              <h3 className="font-semibold text-lg text-white">Log in with Facebook</h3>
+              <p className="text-sm text-[var(--w55)] leading-relaxed">
+                Connect your Meta account to fetch and choose from the Facebook Pages and Instagram Business accounts you manage.
+              </p>
+              <Button
+                onClick={() => connectMut.mutate()}
+                disabled={connectMut.isPending}
+                className="w-full bg-[#1877F2] hover:bg-[#166fe5] text-white py-5 font-semibold text-sm rounded-lg inline-flex items-center justify-center gap-2"
+              >
+                {connectMut.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Connecting…
+                  </>
+                ) : (
+                  <>
+                    <Facebook className="w-4 h-4 fill-white" />
+                    Connect via Facebook
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 max-h-[420px] overflow-y-auto py-2">
@@ -179,13 +219,15 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
           <Button onClick={() => onOpenChange(false)} className="btn-ghost px-4 py-2">
             Cancel
           </Button>
-          <Button
-            onClick={() => saveMut.mutate()}
-            disabled={saveMut.isPending || totalSelected === 0}
-            className="btn-primary px-4 py-2"
-          >
-            {saveMut.isPending ? "Saving…" : `Connect ${totalSelected} account${totalSelected === 1 ? "" : "s"}`}
-          </Button>
+          {!q.data?.needs_connect && (
+            <Button
+              onClick={() => saveMut.mutate()}
+              disabled={saveMut.isPending || totalSelected === 0}
+              className="btn-primary px-4 py-2"
+            >
+              {saveMut.isPending ? "Saving…" : `Connect ${totalSelected} account${totalSelected === 1 ? "" : "s"}`}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
