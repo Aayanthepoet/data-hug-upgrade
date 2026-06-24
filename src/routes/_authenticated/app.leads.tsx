@@ -94,7 +94,7 @@ function LeadsPage() {
       if (assignee === "unassigned" && l.assigned_to) return false;
       if (assignee !== "all" && assignee !== "unassigned" && l.assigned_to !== assignee) return false;
       if (!q) return true;
-      return [l.full_name, l.email, l.company, l.phone, l.message]
+      return [l.full_name, l.email, l.company, l.phone, l.message, l.source]
         .some((v) => v?.toLowerCase().includes(q));
     });
   }, [leads, search, status, source, assignee]);
