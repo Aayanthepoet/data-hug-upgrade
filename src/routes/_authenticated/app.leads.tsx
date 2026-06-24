@@ -101,7 +101,7 @@ function LeadsPage() {
             className="pl-9"
           />
         </div>
-        {search.trim() && /\d/.test(search) ? (
+        {search.trim() ? (
           <Link
             to="/app/properties/search"
             search={{ q: search.trim() }}
