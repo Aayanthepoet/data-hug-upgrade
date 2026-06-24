@@ -10,7 +10,7 @@ import {
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
-import { disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { disconnectSocialAccount, syncMetaAccounts } from "@/lib/social-oauth.functions";
 import { MetaAccountPicker } from "@/components/social/MetaAccountPicker";
 import { Button } from "@/components/ui/button";
 
