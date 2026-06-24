@@ -245,3 +245,126 @@ export const disconnectSocialAccount = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/**
+ * Background sync: refresh display_name, avatar_url, access_token, and expiry
+ * for all currently-connected Facebook Pages and Instagram Business accounts
+ * using the stored master User Access Token. Safe to call after login or on
+ * page mount; no-ops in simulated mode.
+ */
+export const syncMetaAccounts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const appId = process.env.META_APP_ID;
+    const appSecret = process.env.META_APP_SECRET;
+
+    if (!appId || !appSecret) {
+      return { ok: true, simulated: true, updated: 0 };
+    }
+
+    const { data: master } = await supabase
+      .from("social_accounts")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("platform", "facebook")
+      .like("external_account_id", "meta_master_%")
+      .maybeSingle();
+
+    if (!master?.access_token_enc) {
+      return { ok: true, needs_connect: true, updated: 0 };
+    }
+
+    const userToken = master.access_token_enc;
+
+    try {
+      const fields =
+        "id,name,access_token,picture{url},instagram_business_account{id,username,profile_picture_url}";
+      const res = await fetch(
+        `https://graph.facebook.com/v21.0/me/accounts?fields=${fields}&access_token=${userToken}`,
+      );
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 400) {
+          return { ok: true, needs_connect: true, updated: 0 };
+        }
+        throw new Error(`Facebook API error: ${await res.text()}`);
+      }
+      const body = (await res.json()) as {
+        data: Array<{
+          id: string;
+          name: string;
+          access_token: string;
+          picture?: { data?: { url?: string } };
+          instagram_business_account?: {
+            id: string;
+            username: string;
+            profile_picture_url?: string;
+          };
+        }>;
+      };
+
+      const { data: existing } = await supabase
+        .from("social_accounts")
+        .select("id, external_account_id, platform")
+        .eq("user_id", userId)
+        .in("platform", ["facebook", "instagram"])
+        .not("external_account_id", "like", "meta_master_%");
+
+      const connectedIds = new Set((existing ?? []).map((r) => r.external_account_id));
+      const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+      let updated = 0;
+
+      for (const p of body.data) {
+        if (connectedIds.has(p.id)) {
+          const { error } = await supabase
+            .from("social_accounts")
+            .update({
+              display_name: p.name,
+              avatar_url: p.picture?.data?.url ?? null,
+              access_token_enc: p.access_token,
+              expires_at: expires,
+              status: "active",
+            })
+            .eq("user_id", userId)
+            .eq("platform", "facebook")
+            .eq("external_account_id", p.id);
+          if (!error) updated++;
+        }
+        const ig = p.instagram_business_account;
+        if (ig && connectedIds.has(ig.id)) {
+          const { error } = await supabase
+            .from("social_accounts")
+            .update({
+              display_name: ig.username,
+              avatar_url: ig.profile_picture_url ?? null,
+              access_token_enc: p.access_token,
+              expires_at: expires,
+              status: "active",
+            })
+            .eq("user_id", userId)
+            .eq("platform", "instagram")
+            .eq("external_account_id", ig.id);
+          if (!error) updated++;
+        }
+      }
+
+      // Mark any connected accounts that Meta no longer returns as revoked.
+      const returnedIds = new Set<string>();
+      for (const p of body.data) {
+        returnedIds.add(p.id);
+        if (p.instagram_business_account) returnedIds.add(p.instagram_business_account.id);
+      }
+      const stale = (existing ?? []).filter((r) => !returnedIds.has(r.external_account_id));
+      if (stale.length) {
+        await supabase
+          .from("social_accounts")
+          .update({ status: "revoked" })
+          .in("id", stale.map((s) => s.id));
+      }
+
+      return { ok: true, updated, revoked: stale.length };
+    } catch (err: any) {
+      console.error("syncMetaAccounts failed:", err);
+      return { ok: false, error: err.message ?? "sync_failed", updated: 0 };
+    }
+  });
