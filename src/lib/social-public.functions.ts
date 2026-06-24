@@ -41,10 +41,9 @@ export const getPublicPost = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const { data: agent } = await sb
-      .from("profiles")
+      .from("public_profiles")
       .select("id, full_name, public_slug, public_headshot_url, public_bio, public_phone, public_email, public_brokerage, public_license")
       .eq("public_slug", data.agentSlug)
-      .eq("public_enabled", true)
       .maybeSingle();
     if (!agent) return null;
 
