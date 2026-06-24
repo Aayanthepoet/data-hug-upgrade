@@ -117,7 +117,7 @@ function LeadsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, email, company, message…"
+            placeholder="Search by name, email, source, company…"
             className="pl-9 pr-9"
           />
           {fetchingCount > 0 ? (
