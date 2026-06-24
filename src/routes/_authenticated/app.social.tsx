@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2, Building2 } from "lucide-react";
+import { Sparkles, Globe, ExternalLink, Trash2, Share2, Link2, Building2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import {
   listMyPosts,
   listMySocialAccounts,
@@ -63,22 +63,61 @@ function SocialHubPage() {
   }, []);
 
   // Background sync: refresh connected Meta Pages/IG accounts on mount (post-login).
-  useEffect(() => {
-    let cancelled = false;
-    syncMeta()
+  type SyncStatus = "idle" | "syncing" | "success" | "error";
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const runSync = () => {
+    setSyncStatus("syncing");
+    setSyncMessage(null);
+    return syncMeta()
       .then((res) => {
-        if (cancelled) return;
-        if (res?.updated && res.updated > 0) {
+        setLastSyncedAt(new Date());
+        if (res?.ok === false) {
+          setSyncStatus("error");
+          setSyncMessage(res.error ?? "Sync failed");
+          return;
+        }
+        if ((res as any)?.needs_connect) {
+          setSyncStatus("success");
+          setSyncMessage("Not connected to Meta yet");
+          return;
+        }
+        if ((res as any)?.simulated) {
+          setSyncStatus("success");
+          setSyncMessage("Simulated mode");
+          return;
+        }
+        const updated = (res as any)?.updated ?? 0;
+        const revoked = (res as any)?.revoked ?? 0;
+        setSyncStatus("success");
+        setSyncMessage(
+          updated === 0 && revoked === 0
+            ? "Up to date"
+            : `${updated} updated${revoked ? `, ${revoked} revoked` : ""}`,
+        );
+        if (updated > 0 || revoked > 0) {
           qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
         }
       })
-      .catch(() => {
-        /* silent — background task */
+      .catch((e: Error) => {
+        setSyncStatus("error");
+        setSyncMessage(e.message ?? "Sync failed");
+        setLastSyncedAt(new Date());
       });
-    return () => {
-      cancelled = true;
-    };
+  };
+
+  useEffect(() => {
+    runSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-render every 30s so "Last synced" stays accurate.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const actMut = useMutation({
@@ -128,8 +167,16 @@ function SocialHubPage() {
       )}
 
       <section className="mb-10">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Connected social accounts</h2>
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="font-semibold">Connected social accounts</h2>
+            <SyncStatusPill
+              status={syncStatus}
+              message={syncMessage}
+              lastSyncedAt={lastSyncedAt}
+              onRetry={runSync}
+            />
+          </div>
           <Button
             onClick={() => setPickerOpen(true)}
             className="btn-primary px-3 py-1.5 text-xs h-auto inline-flex items-center gap-1.5"
@@ -282,5 +329,73 @@ function SocialHubPage() {
         )}
       </section>
     </div>
+  );
+}
+
+function formatRelative(date: Date): string {
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 5) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleString();
+}
+
+function SyncStatusPill({
+  status,
+  message,
+  lastSyncedAt,
+  onRetry,
+}: {
+  status: "idle" | "syncing" | "success" | "error";
+  message: string | null;
+  lastSyncedAt: Date | null;
+  onRetry: () => void;
+}) {
+  const base = "inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full border";
+  if (status === "syncing") {
+    return (
+      <span className={`${base} bg-cyan/10 text-cyan border-cyan/30`} aria-live="polite">
+        <RefreshCw className="w-3 h-3 animate-spin" />
+        Syncing Meta accounts…
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className={`${base} bg-red-500/10 text-red-400 border-red-500/30`} aria-live="polite">
+        <AlertCircle className="w-3 h-3" />
+        Sync failed{message ? ` — ${message}` : ""}
+        <button onClick={onRetry} className="underline ml-1 hover:text-red-300">
+          Retry
+        </button>
+      </span>
+    );
+  }
+  if (status === "success" && lastSyncedAt) {
+    return (
+      <span
+        className={`${base} bg-green-500/10 text-green-400 border-green-500/30`}
+        aria-live="polite"
+        title={lastSyncedAt.toLocaleString()}
+      >
+        <CheckCircle2 className="w-3 h-3" />
+        Last synced {formatRelative(lastSyncedAt)}
+        {message ? ` · ${message}` : ""}
+        <button
+          onClick={onRetry}
+          className="ml-1 text-[var(--w55)] hover:text-green-300"
+          title="Sync now"
+        >
+          <RefreshCw className="w-3 h-3" />
+        </button>
+      </span>
+    );
+  }
+  return (
+    <span className={`${base} bg-[var(--surface-2)] text-[var(--w55)] border-border`}>
+      <RefreshCw className="w-3 h-3" />
+      Not synced yet
+    </span>
   );
 }
