@@ -255,7 +255,7 @@ function PropertySearch() {
         </div>
 
         <div className="flex flex-wrap items-end gap-2 pt-2">
-          <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>
+          <Button onClick={() => runMutation.mutate(undefined)} disabled={runMutation.isPending}>
             {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
             Search
           </Button>
