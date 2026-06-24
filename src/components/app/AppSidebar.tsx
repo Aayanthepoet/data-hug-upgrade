@@ -43,6 +43,7 @@ const items = [
   { title: "Leads", url: "/app/leads", icon: Inbox },
   { title: "Lead Scoring", url: "/app/scoring", icon: Flame },
   { title: "Properties", url: "/app/properties", icon: Building2 },
+  { title: "Address Lookup", url: "/app/properties/lookup", icon: Search },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
   { title: "Auctions", url: "/app/auctions", icon: Gavel },
   { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },
