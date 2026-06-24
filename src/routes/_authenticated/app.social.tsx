@@ -331,3 +331,71 @@ function SocialHubPage() {
     </div>
   );
 }
+
+function formatRelative(date: Date): string {
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 5) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleString();
+}
+
+function SyncStatusPill({
+  status,
+  message,
+  lastSyncedAt,
+  onRetry,
+}: {
+  status: "idle" | "syncing" | "success" | "error";
+  message: string | null;
+  lastSyncedAt: Date | null;
+  onRetry: () => void;
+}) {
+  const base = "inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full border";
+  if (status === "syncing") {
+    return (
+      <span className={`${base} bg-cyan/10 text-cyan border-cyan/30`} aria-live="polite">
+        <RefreshCw className="w-3 h-3 animate-spin" />
+        Syncing Meta accounts…
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className={`${base} bg-red-500/10 text-red-400 border-red-500/30`} aria-live="polite">
+        <AlertCircle className="w-3 h-3" />
+        Sync failed{message ? ` — ${message}` : ""}
+        <button onClick={onRetry} className="underline ml-1 hover:text-red-300">
+          Retry
+        </button>
+      </span>
+    );
+  }
+  if (status === "success" && lastSyncedAt) {
+    return (
+      <span
+        className={`${base} bg-green-500/10 text-green-400 border-green-500/30`}
+        aria-live="polite"
+        title={lastSyncedAt.toLocaleString()}
+      >
+        <CheckCircle2 className="w-3 h-3" />
+        Last synced {formatRelative(lastSyncedAt)}
+        {message ? ` · ${message}` : ""}
+        <button
+          onClick={onRetry}
+          className="ml-1 text-[var(--w55)] hover:text-green-300"
+          title="Sync now"
+        >
+          <RefreshCw className="w-3 h-3" />
+        </button>
+      </span>
+    );
+  }
+  return (
+    <span className={`${base} bg-[var(--surface-2)] text-[var(--w55)] border-border`}>
+      <RefreshCw className="w-3 h-3" />
+      Not synced yet
+    </span>
+  );
+}
