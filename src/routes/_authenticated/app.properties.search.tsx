@@ -74,8 +74,42 @@ function PropertySearch() {
   const [searchName, setSearchName] = useState("");
   const [view, setView] = useState<"list" | "map">("list");
   const [quickQuery, setQuickQuery] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
 
+  const US_STATES = new Set([...FEATURED_STATES, ...OTHER_STATES]);
 
+  /** Validate the structured filter fields (state/zip/city). Returns an error message or null. */
+  const validateFilters = (f: { state?: string; zip?: string; city?: string }): string | null => {
+    if (f.state && !US_STATES.has(f.state.toUpperCase())) {
+      return `"${f.state}" isn't a valid US state code. Use a 2-letter code like NY or TX.`;
+    }
+    if (f.zip && !/^\d{5}(-\d{4})?$/.test(f.zip.trim())) {
+      return `ZIP "${f.zip}" is invalid. Use a 5-digit ZIP (e.g. 10001) or ZIP+4.`;
+    }
+    if (f.city && !/^[A-Za-z][A-Za-z .'\-]{1,59}$/.test(f.city.trim())) {
+      return `City "${f.city}" looks invalid. Use letters, spaces, hyphens, or apostrophes only.`;
+    }
+    return null;
+  };
+
+  /** Validate a free-text quick-search query. Returns an error message or null. */
+  const validateQuickQuery = (q: string): string | null => {
+    if (!q) return null;
+    if (q.length > 120) return "Search is too long — keep it under 120 characters.";
+    if (!/^[A-Za-z0-9 ,.'\-#]+$/.test(q)) {
+      return "Search contains unsupported characters. Use letters, numbers, spaces, commas, periods, hyphens.";
+    }
+    if (!/[A-Za-z0-9]/.test(q)) return "Enter an address, city, or 5-digit ZIP.";
+    const zipMatch = q.match(/\b(\d{5})\b/);
+    const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
+    if (stateMatch && !US_STATES.has(stateMatch[1].toUpperCase())) {
+      return `"${stateMatch[1].toUpperCase()}" isn't a valid US state code.`;
+    }
+    if (!zipMatch && !stateMatch && q.replace(/[^A-Za-z]/g, "").length < 2) {
+      return "Enter a city, a 5-digit ZIP, or include a state like \"Brooklyn, NY\".";
+    }
+    return null;
+  };
 
   const { q: incomingQ } = Route.useSearch();
   useEffect(() => {
@@ -89,8 +123,16 @@ function PropertySearch() {
 
   const runQuickSearch = () => {
     const q = quickQuery.trim();
+    const quickErr = validateQuickQuery(q);
+    if (quickErr) { setValidationError(quickErr); return; }
     const base = filters();
-    if (!q) { runMutation.mutate(undefined); return; }
+    if (!q) {
+      const err = validateFilters(base);
+      if (err) { setValidationError(err); return; }
+      setValidationError(null);
+      runMutation.mutate(undefined);
+      return;
+    }
     const zipMatch = q.match(/\b(\d{5})\b/);
     const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
     let cityPart = q.replace(/\b\d{5}\b/g, "").replace(/,\s*[A-Za-z]{2}\b/, "").trim().replace(/,$/, "").trim();
@@ -101,12 +143,16 @@ function PropertySearch() {
       state: stateMatch ? stateMatch[1].toUpperCase() : base.state,
       county: undefined,
     };
+    const err = validateFilters(override);
+    if (err) { setValidationError(err); return; }
+    setValidationError(null);
     if (override.state) setState(override.state);
     setCity(override.city ?? "");
     setZip(override.zip ?? "");
     setCounty("");
     runMutation.mutate(override);
   };
+
 
   const counties = getCountiesForState(state);
   const activeCounty = counties.find((c) => c.name === county);
@@ -225,6 +271,23 @@ function PropertySearch() {
         </Button>
       </div>
 
+      {validationError && (
+        <div
+          role="alert"
+          className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm flex items-start gap-3"
+        >
+          <div className="flex-1">
+            <div className="font-medium text-amber-300">Check your search</div>
+            <div className="text-xs text-[var(--w55)] mt-1">{validationError}</div>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setValidationError(null)}>
+            Dismiss
+          </Button>
+        </div>
+      )}
+
+
+
       {/* Filters */}
       <div className="border border-border rounded-lg p-4 space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -308,10 +371,19 @@ function PropertySearch() {
         </div>
 
         <div className="flex flex-wrap items-end gap-2 pt-2">
-          <Button onClick={() => runMutation.mutate(undefined)} disabled={runMutation.isPending}>
+          <Button
+            onClick={() => {
+              const err = validateFilters(filters());
+              if (err) { setValidationError(err); return; }
+              setValidationError(null);
+              runMutation.mutate(undefined);
+            }}
+            disabled={runMutation.isPending}
+          >
             {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
             Search
           </Button>
+
           <div className="flex items-end gap-2 ml-auto">
             <div>
               <Label>Save this search</Label>
