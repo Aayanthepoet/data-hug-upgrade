@@ -75,7 +75,7 @@ function PropertySearch() {
   const [view, setView] = useState<"list" | "map">("list");
   const [quickQuery, setQuickQuery] = useState("");
 
-  const [quickQuery, setQuickQuery] = useState("");
+
 
   const { q: incomingQ } = Route.useSearch();
   useEffect(() => {
