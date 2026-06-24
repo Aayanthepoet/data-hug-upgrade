@@ -35,6 +35,7 @@ function SocialHubPage() {
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
   const disconnect = useServerFn(disconnectSocialAccount);
+  const syncMeta = useServerFn(syncMetaAccounts);
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
