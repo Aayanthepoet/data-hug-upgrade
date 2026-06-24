@@ -1458,11 +1458,17 @@ export type Database = {
           external_account_id: string
           id: string
           last_error: string | null
+          last_sync_error_code: string | null
+          last_sync_error_message: string | null
+          last_sync_status: string | null
+          last_synced_at: string | null
           metadata: Json
           platform: Database["public"]["Enums"]["social_platform"]
           refresh_token_enc: string | null
           scopes: string[]
           status: Database["public"]["Enums"]["social_account_status"]
+          sync_attempt_count: number
+          sync_retry_after: string | null
           updated_at: string
           user_id: string
         }
@@ -1475,11 +1481,17 @@ export type Database = {
           external_account_id: string
           id?: string
           last_error?: string | null
+          last_sync_error_code?: string | null
+          last_sync_error_message?: string | null
+          last_sync_status?: string | null
+          last_synced_at?: string | null
           metadata?: Json
           platform: Database["public"]["Enums"]["social_platform"]
           refresh_token_enc?: string | null
           scopes?: string[]
           status?: Database["public"]["Enums"]["social_account_status"]
+          sync_attempt_count?: number
+          sync_retry_after?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1492,11 +1504,17 @@ export type Database = {
           external_account_id?: string
           id?: string
           last_error?: string | null
+          last_sync_error_code?: string | null
+          last_sync_error_message?: string | null
+          last_sync_status?: string | null
+          last_synced_at?: string | null
           metadata?: Json
           platform?: Database["public"]["Enums"]["social_platform"]
           refresh_token_enc?: string | null
           scopes?: string[]
           status?: Database["public"]["Enums"]["social_account_status"]
+          sync_attempt_count?: number
+          sync_retry_after?: string | null
           updated_at?: string
           user_id?: string
         }
