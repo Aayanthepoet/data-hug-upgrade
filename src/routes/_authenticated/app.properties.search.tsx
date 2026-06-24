@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -28,6 +28,9 @@ const DistressMap = lazy(() =>
 );
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    q: typeof s.q === "string" ? s.q : undefined,
+  }),
   head: () => ({ meta: [{ title: "Find Distressed Properties — PropAI" }] }),
   component: PropertySearch,
 });
@@ -71,6 +74,18 @@ function PropertySearch() {
   const [searchName, setSearchName] = useState("");
   const [view, setView] = useState<"list" | "map">("list");
   const [quickQuery, setQuickQuery] = useState("");
+
+  const [quickQuery, setQuickQuery] = useState("");
+
+  const { q: incomingQ } = Route.useSearch();
+  useEffect(() => {
+    if (incomingQ && incomingQ.trim()) {
+      setQuickQuery(incomingQ);
+      // defer to allow state update
+      setTimeout(() => runQuickSearch(), 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingQ]);
 
   const runQuickSearch = () => {
     const q = quickQuery.trim();
