@@ -219,13 +219,15 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
           <Button onClick={() => onOpenChange(false)} className="btn-ghost px-4 py-2">
             Cancel
           </Button>
-          <Button
-            onClick={() => saveMut.mutate()}
-            disabled={saveMut.isPending || totalSelected === 0}
-            className="btn-primary px-4 py-2"
-          >
-            {saveMut.isPending ? "Saving…" : `Connect ${totalSelected} account${totalSelected === 1 ? "" : "s"}`}
-          </Button>
+          {!q.data?.needs_connect && (
+            <Button
+              onClick={() => saveMut.mutate()}
+              disabled={saveMut.isPending || totalSelected === 0}
+              className="btn-primary px-4 py-2"
+            >
+              {saveMut.isPending ? "Saving…" : `Connect ${totalSelected} account${totalSelected === 1 ? "" : "s"}`}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
