@@ -63,22 +63,61 @@ function SocialHubPage() {
   }, []);
 
   // Background sync: refresh connected Meta Pages/IG accounts on mount (post-login).
-  useEffect(() => {
-    let cancelled = false;
-    syncMeta()
+  type SyncStatus = "idle" | "syncing" | "success" | "error";
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const runSync = () => {
+    setSyncStatus("syncing");
+    setSyncMessage(null);
+    return syncMeta()
       .then((res) => {
-        if (cancelled) return;
-        if (res?.updated && res.updated > 0) {
+        setLastSyncedAt(new Date());
+        if (res?.ok === false) {
+          setSyncStatus("error");
+          setSyncMessage(res.error ?? "Sync failed");
+          return;
+        }
+        if ((res as any)?.needs_connect) {
+          setSyncStatus("success");
+          setSyncMessage("Not connected to Meta yet");
+          return;
+        }
+        if ((res as any)?.simulated) {
+          setSyncStatus("success");
+          setSyncMessage("Simulated mode");
+          return;
+        }
+        const updated = (res as any)?.updated ?? 0;
+        const revoked = (res as any)?.revoked ?? 0;
+        setSyncStatus("success");
+        setSyncMessage(
+          updated === 0 && revoked === 0
+            ? "Up to date"
+            : `${updated} updated${revoked ? `, ${revoked} revoked` : ""}`,
+        );
+        if (updated > 0 || revoked > 0) {
           qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
         }
       })
-      .catch(() => {
-        /* silent — background task */
+      .catch((e: Error) => {
+        setSyncStatus("error");
+        setSyncMessage(e.message ?? "Sync failed");
+        setLastSyncedAt(new Date());
       });
-    return () => {
-      cancelled = true;
-    };
+  };
+
+  useEffect(() => {
+    runSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-render every 30s so "Last synced" stays accurate.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const actMut = useMutation({
