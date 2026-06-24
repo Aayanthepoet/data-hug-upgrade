@@ -130,9 +130,36 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        {q.isLoading ? (
+         {q.isLoading ? (
           <div className="py-10 flex items-center justify-center text-[var(--w55)]">
             <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading accounts…
+          </div>
+        ) : q.data?.needs_connect ? (
+          <div className="py-8 text-center space-y-4">
+            <div className="max-w-md mx-auto p-4 bg-[var(--surface-1)] border border-border rounded-xl space-y-3">
+              <Facebook className="w-10 h-10 text-[#1877F2] mx-auto" />
+              <h3 className="font-semibold text-lg text-white">Log in with Facebook</h3>
+              <p className="text-sm text-[var(--w55)] leading-relaxed">
+                Connect your Meta account to fetch and choose from the Facebook Pages and Instagram Business accounts you manage.
+              </p>
+              <Button
+                onClick={() => connectMut.mutate()}
+                disabled={connectMut.isPending}
+                className="w-full bg-[#1877F2] hover:bg-[#166fe5] text-white py-5 font-semibold text-sm rounded-lg inline-flex items-center justify-center gap-2"
+              >
+                {connectMut.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Connecting…
+                  </>
+                ) : (
+                  <>
+                    <Facebook className="w-4 h-4 fill-white" />
+                    Connect via Facebook
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4 max-h-[420px] overflow-y-auto py-2">
