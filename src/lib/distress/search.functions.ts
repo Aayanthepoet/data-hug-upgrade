@@ -153,7 +153,10 @@ export const importDistressedProperties = createServerFn({ method: "POST" })
       }
     }
 
-    return { imported: inserted?.length ?? 0 };
+    return {
+      imported: inserted?.length ?? 0,
+      ids: (inserted ?? []).map((p) => p.id),
+    };
   });
 
 const saveSearchSchema = z.object({
