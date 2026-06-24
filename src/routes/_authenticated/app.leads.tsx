@@ -54,6 +54,22 @@ function LeadsPage() {
     },
   });
 
+  const queryClient = useQueryClient();
+  const assignMutation = useMutation({
+    mutationFn: async ({ leadId, assignedTo }: { leadId: string; assignedTo: string | null }) => {
+      const { error } = await supabase
+        .from("leads")
+        .update({ assigned_to: assignedTo })
+        .eq("id", leadId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Lead assignment updated");
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to update assignment"),
+  });
+
   const { data: members = [] } = useTeamMembers();
   const memberMap = useMemo(() => {
     const m = new Map<string, TeamMember>();
