@@ -11,11 +11,14 @@ const FROM_DOMAIN = 'notify.www.ainetworkagency.com'
 const TEMPLATE_NAME = 'new-lead-alert'
 
 const schema = z.object({
+  lead_id: z.string().uuid().optional(),
   full_name: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(255),
+  phone: z.string().trim().max(30).optional(),
   company: z.string().trim().max(120).optional(),
   message: z.string().trim().max(2000).optional(),
   source: z.string().trim().max(80).optional(),
+  sms_opt_in: z.boolean().optional(),
 })
 
 export const Route = createFileRoute('/api/public/lead-notify')({
@@ -40,12 +43,28 @@ export const Route = createFileRoute('/api/public/lead-notify')({
         }
         const data = parsed.data
 
+        const supabase = createClient(supabaseUrl, serviceKey)
+
+        // Stamp consent evidence from trusted server-side headers.
+        if (data.lead_id && data.sms_opt_in) {
+          const fwd = request.headers.get('x-forwarded-for') ?? ''
+          const ip =
+            fwd.split(',')[0]?.trim() ||
+            request.headers.get('cf-connecting-ip') ||
+            request.headers.get('x-real-ip') ||
+            null
+          const ua = request.headers.get('user-agent')?.slice(0, 500) ?? null
+          await supabase
+            .from('leads')
+            .update({ consent_ip: ip, consent_user_agent: ua })
+            .eq('id', data.lead_id)
+        }
+
         const template = TEMPLATES[TEMPLATE_NAME]
         if (!template || !template.to) {
           return Response.json({ error: 'Template not configured' }, { status: 500 })
         }
 
-        const supabase = createClient(supabaseUrl, serviceKey)
         const messageId = crypto.randomUUID()
         const templateData = {
           fullName: data.full_name,
