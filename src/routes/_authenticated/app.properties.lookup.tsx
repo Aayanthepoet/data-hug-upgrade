@@ -58,10 +58,19 @@ function AddressLookup() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const navigate = useNavigate();
   const importMut = useMutation({
     mutationFn: async (rec: NonNullable<typeof searchMut.data>["records"][number]) =>
       importFn({ data: { records: [rec] } }),
-    onSuccess: () => toast.success("Imported to your Properties"),
+    onSuccess: (res) => {
+      const id = res.ids?.[0];
+      if (id) {
+        toast.success("Imported — opening property");
+        navigate({ to: "/app/properties/$propertyId", params: { propertyId: id } });
+      } else {
+        toast.success("Imported to your Properties");
+      }
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
