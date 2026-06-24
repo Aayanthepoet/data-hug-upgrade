@@ -310,9 +310,43 @@ function PropertySearch() {
       </div>
 
       {/* Results */}
+      {runMutation.isPending && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="border border-cyan/30 bg-cyan/5 rounded-lg p-4 text-sm flex items-center gap-3"
+        >
+          <RefreshCw className="h-4 w-4 animate-spin text-cyan" />
+          <div>
+            <div className="font-medium">Searching properties…</div>
+            <div className="text-xs text-[var(--w55)]">
+              Querying distress sources{state ? ` in ${state}` : ""}
+              {city ? `, ${city}` : ""}{zip ? ` ${zip}` : ""}. This usually takes a few seconds.
+            </div>
+          </div>
+        </div>
+      )}
+
       {runMutation.isError && (
-        <div className="border border-destructive/40 bg-destructive/10 rounded-lg p-4 text-sm text-destructive">
-          {(runMutation.error as Error).message || "Property search failed. Please try again."}
+        <div
+          role="alert"
+          className="border border-destructive/40 bg-destructive/10 rounded-lg p-4 text-sm flex items-start gap-3"
+        >
+          <div className="flex-1">
+            <div className="font-medium text-destructive">We couldn't run that search</div>
+            <div className="text-xs text-[var(--w55)] mt-1">
+              {(runMutation.error as Error)?.message || "Something went wrong reaching the property data source."} Check your filters and try again, or widen the location.
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => runMutation.mutate(undefined)}
+            disabled={runMutation.isPending}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
         </div>
       )}
 
