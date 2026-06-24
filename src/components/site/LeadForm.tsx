@@ -6,8 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 const schema = z.object({
   full_name: z.string().trim().min(1, "Required").max(120),
   email: z.string().trim().email("Invalid email").max(255),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Enter a valid phone number")
+    .max(20)
+    .regex(/^[+()\-\s\d]+$/, "Enter a valid phone number"),
   company: z.string().trim().max(120).optional(),
   message: z.string().trim().max(2000).optional(),
+  sms_opt_in: z.literal("on", {
+    errorMap: () => ({ message: "You must agree to receive text messages to continue" }),
+  }),
 });
 
 export function LeadForm({ source = "landing" }: { source?: string }) {
@@ -20,15 +29,23 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
     const parsed = schema.safeParse({
       full_name: fd.get("full_name"),
       email: fd.get("email"),
+      phone: fd.get("phone"),
       company: fd.get("company") || undefined,
       message: fd.get("message") || undefined,
+      sms_opt_in: fd.get("sms_opt_in"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Check your inputs");
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("leads").insert({ ...parsed.data, source });
+    const { sms_opt_in, ...rest } = parsed.data;
+    const { error } = await supabase.from("leads").insert({
+      ...rest,
+      sms_opt_in: true,
+      sms_opt_in_at: new Date().toISOString(),
+      source,
+    });
     if (error) {
       setLoading(false);
       toast.error("Couldn't submit. Try again.");
@@ -38,7 +55,7 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
     fetch("/api/public/lead-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...parsed.data, source }),
+      body: JSON.stringify({ ...rest, sms_opt_in: true, source }),
     }).catch(() => {});
     setLoading(false);
     setDone(true);
@@ -61,8 +78,24 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
         <input name="full_name" required placeholder="Full name" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
         <input name="email" type="email" required placeholder="Work email" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
       </div>
+      <input name="phone" type="tel" required placeholder="Mobile phone (e.g. +1 555 123 4567)" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
       <input name="company" placeholder="Brokerage / company (optional)" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
       <textarea name="message" rows={3} placeholder="What are you hoping PropAI can do for you?" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan resize-none" />
+
+      <label className="flex gap-3 items-start text-[12px] leading-[1.55] text-[var(--w55)] cursor-pointer select-none">
+        <input
+          type="checkbox"
+          name="sms_opt_in"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--cyan)] cursor-pointer"
+        />
+        <span>
+          By checking this box, I agree to receive recurring text messages from <span className="text-white font-semibold">PropAI</span> (by AI Network Agency) at the phone number provided, including informational and promotional messages sent via automated technology. Consent is not a condition of purchase. Message &amp; data rates may apply. Message frequency varies. Reply <span className="font-mono text-white">STOP</span> to opt out or <span className="font-mono text-white">HELP</span> for help. See our{" "}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-cyan underline">Privacy Policy</a> and{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-cyan underline">Terms &amp; Conditions</a>.
+        </span>
+      </label>
+
       <button disabled={loading} className="btn-primary w-full disabled:opacity-60">
         {loading ? "Sending…" : "Request a demo →"}
       </button>
