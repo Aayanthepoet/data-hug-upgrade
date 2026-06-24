@@ -72,25 +72,32 @@ function SocialHubPage() {
     setSyncStatus("syncing");
     setSyncMessage(null);
     return syncMeta()
-      .then((res) => {
+      .then((res: any) => {
         setLastSyncedAt(new Date());
         if (res?.ok === false) {
+          // Token problems route the user back to reconnect.
+          if (res.needs_connect) {
+            setSyncStatus("error");
+            setSyncMessage(res.error_message ?? "Reconnect required");
+            qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+            return;
+          }
           setSyncStatus("error");
-          setSyncMessage(res.error ?? "Sync failed");
+          setSyncMessage(res.error_message ?? "Sync failed");
           return;
         }
-        if ((res as any)?.needs_connect) {
+        if (res?.needs_connect) {
           setSyncStatus("success");
           setSyncMessage("Not connected to Meta yet");
           return;
         }
-        if ((res as any)?.simulated) {
+        if (res?.simulated) {
           setSyncStatus("success");
           setSyncMessage("Simulated mode");
           return;
         }
-        const updated = (res as any)?.updated ?? 0;
-        const revoked = (res as any)?.revoked ?? 0;
+        const updated = res?.updated ?? 0;
+        const revoked = res?.revoked ?? 0;
         setSyncStatus("success");
         setSyncMessage(
           updated === 0 && revoked === 0
