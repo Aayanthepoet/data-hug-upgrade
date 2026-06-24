@@ -101,6 +101,15 @@ function LeadsPage() {
             className="pl-9"
           />
         </div>
+        {search.trim() && /\d/.test(search) ? (
+          <Link
+            to="/app/properties/search"
+            search={{ q: search.trim() }}
+            className="inline-flex items-center justify-center h-9 px-4 rounded-md bg-cyan text-black text-sm font-medium hover:opacity-90 whitespace-nowrap"
+          >
+            Search Properties
+          </Link>
+        ) : null}
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="md:w-40"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
