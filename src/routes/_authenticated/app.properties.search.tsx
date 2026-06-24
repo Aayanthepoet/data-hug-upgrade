@@ -88,8 +88,20 @@ function PropertySearch() {
     limit: 50,
   });
 
+  const applyFilters = (f: DistressFilters) => {
+    setState(f.state ?? "NY");
+    setCounty(f.county ?? "");
+    setCity(f.city ?? "");
+    setZip(f.zip ?? "");
+    setTypes(f.distressTypes ?? []);
+    setMinEquity(f.minEquity?.toString() ?? "");
+    setMinDom(f.minDaysOnMarket?.toString() ?? "");
+    setMinPrice(f.minListPrice?.toString() ?? "");
+    setMaxPrice(f.maxListPrice?.toString() ?? "");
+  };
+
   const runMutation = useMutation({
-    mutationFn: () => search({ data: filters() }),
+    mutationFn: (override?: DistressFilters) => search({ data: override ?? filters() }),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -260,6 +272,18 @@ function PropertySearch() {
       </div>
 
       {/* Results */}
+      {runMutation.isError && (
+        <div className="border border-destructive/40 bg-destructive/10 rounded-lg p-4 text-sm text-destructive">
+          {(runMutation.error as Error).message || "Property search failed. Please try again."}
+        </div>
+      )}
+
+      {runMutation.isSuccess && results.length === 0 && (
+        <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
+          No properties matched those filters. Try widening the location, price, equity, or distress-type filters.
+        </div>
+      )}
+
       {results.length > 0 && (
         <div className="border border-border rounded-lg">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -412,16 +436,8 @@ function PropertySearch() {
                   variant="outline"
                   onClick={() => {
                     const f = s.filters as DistressFilters;
-                    setState(f.state ?? "NY");
-                    setCounty(f.county ?? "");
-                    setCity(f.city ?? "");
-                    setZip(f.zip ?? "");
-                    setTypes(f.distressTypes ?? []);
-                    setMinEquity(f.minEquity?.toString() ?? "");
-                    setMinDom(f.minDaysOnMarket?.toString() ?? "");
-                    setMinPrice(f.minListPrice?.toString() ?? "");
-                    setMaxPrice(f.maxListPrice?.toString() ?? "");
-                    runMutation.mutate();
+                    applyFilters(f);
+                    runMutation.mutate(f);
                   }}
                 >
                   <Search className="h-4 w-4 mr-2" />Run
