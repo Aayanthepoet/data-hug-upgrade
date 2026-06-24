@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
-import { Search, Download, MapPin, Loader2, History } from "lucide-react";
+import { Search, Download, MapPin, Loader2, History as HistoryIcon } from "lucide-react";
 
 const searchSchema = z.object({
   line1: fallback(z.string(), "").default(""),
