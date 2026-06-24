@@ -43,7 +43,8 @@ export const getPropertyDetail = createServerFn({ method: "POST" })
       .select(
         `id, address, city, state, zip, county, source_provider, source_record_id,
          estimated_value, equity, lead_score, distress_type, list_price, days_on_market,
-         tax_owed, lien_amount, beds, baths, sqft, year_built, property_type`,
+         tax_owed, lien_amount, beds, baths, sqft, year_built, property_type,
+         is_vacant, is_absentee, is_preforeclosure, auction_date, notes`,
       )
       .eq("id", data.propertyId)
       .eq("user_id", context.userId)
