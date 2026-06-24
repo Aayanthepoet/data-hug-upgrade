@@ -11,10 +11,15 @@ import type {
 import { isNYC, NYCOpenDataProvider } from "./nyc-provider.server";
 import { isPhilly, PhillyCartoProvider } from "./philly-provider.server";
 import { MockProvider } from "./mock-provider.server";
+import { AttomProvider } from "./attom-provider.server";
 
 export function selectProvider(filters: DistressSearchFilters): PropertyProvider {
   if (isNYC(filters)) return new NYCOpenDataProvider();
   if (isPhilly(filters)) return new PhillyCartoProvider();
+  const attomKey = process.env.ATTOM_API_KEY;
+  if (attomKey && (filters.zip || (filters.city && filters.state))) {
+    return new AttomProvider(attomKey);
+  }
   return new MockProvider();
 }
 
