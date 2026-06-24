@@ -147,6 +147,19 @@ function LeadsPage() {
         <div className="border border-border rounded-lg p-10 text-center">
           <Inbox className="mx-auto h-8 w-8 text-[var(--w45)]" />
           <p className="mt-3 text-sm text-[var(--w55)]">No leads match your filters.</p>
+          {search.trim() && /\d/.test(search) ? (
+            <p className="mt-4 text-sm text-[var(--w55)]">
+              Looking for a property address? Try{" "}
+              <Link
+                to="/app/properties/search"
+                search={{ q: search.trim() }}
+                className="text-cyan hover:underline"
+              >
+                Find Distressed Properties
+              </Link>
+              .
+            </p>
+          ) : null}
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-x-auto">
