@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery, useIsFetching } from "@tanstack/react-query";
+import { useQuery, useIsFetching, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,6 +52,22 @@ function LeadsPage() {
       if (error) throw error;
       return data as Lead[];
     },
+  });
+
+  const queryClient = useQueryClient();
+  const assignMutation = useMutation({
+    mutationFn: async ({ leadId, assignedTo }: { leadId: string; assignedTo: string | null }) => {
+      const { error } = await supabase
+        .from("leads")
+        .update({ assigned_to: assignedTo })
+        .eq("id", leadId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Lead assignment updated");
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to update assignment"),
   });
 
   const { data: members = [] } = useTeamMembers();
@@ -219,11 +236,26 @@ function LeadsPage() {
                     <Badge variant="secondary">{l.status || "new"}</Badge>
                   </td>
                   <td className="px-4 py-3">
-                    {l.assigned_to ? (
-                      memberLabel(memberMap.get(l.assigned_to))
-                    ) : (
-                      <span className="text-[var(--w55)]">Unassigned</span>
-                    )}
+                    <Select
+                      value={l.assigned_to ?? "unassigned"}
+                      onValueChange={(value) =>
+                        assignMutation.mutate({
+                          leadId: l.id,
+                          assignedTo: value === "unassigned" ? null : value,
+                        })
+                      }
+                      disabled={assignMutation.isPending}
+                    >
+                      <SelectTrigger className="h-8 w-48">
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {members.map((m) => (
+                          <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </td>
                   <td className="px-4 py-3 text-[var(--w55)] whitespace-nowrap">
                     {new Date(l.created_at).toLocaleString()}
