@@ -236,11 +236,26 @@ function LeadsPage() {
                     <Badge variant="secondary">{l.status || "new"}</Badge>
                   </td>
                   <td className="px-4 py-3">
-                    {l.assigned_to ? (
-                      memberLabel(memberMap.get(l.assigned_to))
-                    ) : (
-                      <span className="text-[var(--w55)]">Unassigned</span>
-                    )}
+                    <Select
+                      value={l.assigned_to ?? "unassigned"}
+                      onValueChange={(value) =>
+                        assignMutation.mutate({
+                          leadId: l.id,
+                          assignedTo: value === "unassigned" ? null : value,
+                        })
+                      }
+                      disabled={assignMutation.isPending}
+                    >
+                      <SelectTrigger className="h-8 w-48">
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {members.map((m) => (
+                          <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </td>
                   <td className="px-4 py-3 text-[var(--w55)] whitespace-nowrap">
                     {new Date(l.created_at).toLocaleString()}
