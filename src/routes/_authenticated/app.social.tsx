@@ -167,8 +167,16 @@ function SocialHubPage() {
       )}
 
       <section className="mb-10">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Connected social accounts</h2>
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="font-semibold">Connected social accounts</h2>
+            <SyncStatusPill
+              status={syncStatus}
+              message={syncMessage}
+              lastSyncedAt={lastSyncedAt}
+              onRetry={runSync}
+            />
+          </div>
           <Button
             onClick={() => setPickerOpen(true)}
             className="btn-primary px-3 py-1.5 text-xs h-auto inline-flex items-center gap-1.5"
