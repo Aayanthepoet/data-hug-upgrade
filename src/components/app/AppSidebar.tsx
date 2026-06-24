@@ -33,6 +33,7 @@ import {
   LogOut,
   Settings,
   Share2,
+  History as HistoryIcon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,7 @@ const items = [
   { title: "Lead Scoring", url: "/app/scoring", icon: Flame },
   { title: "Properties", url: "/app/properties", icon: Building2 },
   { title: "Address Lookup", url: "/app/properties/lookup", icon: Search },
+  { title: "Lookup History", url: "/app/properties/lookup-history", icon: HistoryIcon },
   { title: "Find Distressed", url: "/app/properties/search", icon: Search },
   { title: "Auctions", url: "/app/auctions", icon: Gavel },
   { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },

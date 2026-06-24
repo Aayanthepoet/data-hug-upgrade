@@ -62,6 +62,7 @@ import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
 import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
+import { Route as AuthenticatedAppPropertiesLookupHistoryRouteImport } from './routes/_authenticated/app.properties.lookup-history'
 import { Route as AuthenticatedAppPropertiesLookupRouteImport } from './routes/_authenticated/app.properties.lookup'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
@@ -358,6 +359,12 @@ const AuthenticatedAppPropertiesSearchRoute =
     path: '/search',
     getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
+const AuthenticatedAppPropertiesLookupHistoryRoute =
+  AuthenticatedAppPropertiesLookupHistoryRouteImport.update({
+    id: '/lookup-history',
+    path: '/lookup-history',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
+  } as any)
 const AuthenticatedAppPropertiesLookupRoute =
   AuthenticatedAppPropertiesLookupRouteImport.update({
     id: '/lookup',
@@ -462,6 +469,7 @@ export interface FileRoutesByFullPath {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
+  '/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -525,6 +533,7 @@ export interface FileRoutesByTo {
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
+  '/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -591,6 +600,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
   '/_authenticated/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
+  '/_authenticated/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/_authenticated/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -657,6 +667,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/lookup'
+    | '/app/properties/lookup-history'
     | '/app/properties/search'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
@@ -720,6 +731,7 @@ export interface FileRouteTypes {
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
     | '/app/properties/lookup'
+    | '/app/properties/lookup-history'
     | '/app/properties/search'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
@@ -785,6 +797,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
     | '/_authenticated/app/properties/lookup'
+    | '/_authenticated/app/properties/lookup-history'
     | '/_authenticated/app/properties/search'
     | '/_authenticated/app/settings/public-profile'
     | '/_authenticated/app/social/business-portfolio'
@@ -1210,6 +1223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
       parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
+    '/_authenticated/app/properties/lookup-history': {
+      id: '/_authenticated/app/properties/lookup-history'
+      path: '/lookup-history'
+      fullPath: '/app/properties/lookup-history'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
+    }
     '/_authenticated/app/properties/lookup': {
       id: '/_authenticated/app/properties/lookup'
       path: '/lookup'
@@ -1327,6 +1347,7 @@ const AuthenticatedAppLeadsRouteWithChildren =
 interface AuthenticatedAppPropertiesRouteChildren {
   AuthenticatedAppPropertiesPropertyIdRoute: typeof AuthenticatedAppPropertiesPropertyIdRoute
   AuthenticatedAppPropertiesLookupRoute: typeof AuthenticatedAppPropertiesLookupRoute
+  AuthenticatedAppPropertiesLookupHistoryRoute: typeof AuthenticatedAppPropertiesLookupHistoryRoute
   AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
 }
 
@@ -1336,6 +1357,8 @@ const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteCh
       AuthenticatedAppPropertiesPropertyIdRoute,
     AuthenticatedAppPropertiesLookupRoute:
       AuthenticatedAppPropertiesLookupRoute,
+    AuthenticatedAppPropertiesLookupHistoryRoute:
+      AuthenticatedAppPropertiesLookupHistoryRoute,
     AuthenticatedAppPropertiesSearchRoute:
       AuthenticatedAppPropertiesSearchRoute,
   }

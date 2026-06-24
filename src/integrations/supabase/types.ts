@@ -914,6 +914,45 @@ export type Database = {
         }
         Relationships: []
       }
+      lookup_history: {
+        Row: {
+          city: string | null
+          created_at: string
+          id: string
+          line1: string
+          match_count: number
+          provider: string | null
+          state: string | null
+          used_fallback: boolean
+          user_id: string
+          zip: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          id?: string
+          line1: string
+          match_count?: number
+          provider?: string | null
+          state?: string | null
+          used_fallback?: boolean
+          user_id: string
+          zip?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          id?: string
+          line1?: string
+          match_count?: number
+          provider?: string | null
+          state?: string | null
+          used_fallback?: boolean
+          user_id?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
       media_assets: {
         Row: {
           asset_type: string
