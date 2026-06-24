@@ -61,7 +61,7 @@ function LookupHistoryPage() {
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <History className="h-6 w-6" /> Lookup History
+            <HistoryIcon className="h-6 w-6" /> Lookup History
           </h1>
           <p className="text-sm text-muted-foreground">
             Your last 100 address lookups. Click re-run to repeat any search.
