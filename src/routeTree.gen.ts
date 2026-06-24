@@ -62,6 +62,7 @@ import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
 import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
+import { Route as AuthenticatedAppPropertiesLookupRouteImport } from './routes/_authenticated/app.properties.lookup'
 import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
 import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
 import { Route as AuthenticatedAppContractsContractIdRouteImport } from './routes/_authenticated/app.contracts.$contractId'
@@ -357,6 +358,12 @@ const AuthenticatedAppPropertiesSearchRoute =
     path: '/search',
     getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
+const AuthenticatedAppPropertiesLookupRoute =
+  AuthenticatedAppPropertiesLookupRouteImport.update({
+    id: '/lookup',
+    path: '/lookup',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
+  } as any)
 const AuthenticatedAppPropertiesPropertyIdRoute =
   AuthenticatedAppPropertiesPropertyIdRouteImport.update({
     id: '/$propertyId',
@@ -454,6 +461,7 @@ export interface FileRoutesByFullPath {
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
+  '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -516,6 +524,7 @@ export interface FileRoutesByTo {
   '/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
+  '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -581,6 +590,7 @@ export interface FileRoutesById {
   '/_authenticated/app/contracts/$contractId': typeof AuthenticatedAppContractsContractIdRoute
   '/_authenticated/app/leads/$leadId': typeof AuthenticatedAppLeadsLeadIdRoute
   '/_authenticated/app/properties/$propertyId': typeof AuthenticatedAppPropertiesPropertyIdRoute
+  '/_authenticated/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
   '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/_authenticated/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
@@ -646,6 +656,7 @@ export interface FileRouteTypes {
     | '/app/contracts/$contractId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
+    | '/app/properties/lookup'
     | '/app/properties/search'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
@@ -708,6 +719,7 @@ export interface FileRouteTypes {
     | '/app/contracts/$contractId'
     | '/app/leads/$leadId'
     | '/app/properties/$propertyId'
+    | '/app/properties/lookup'
     | '/app/properties/search'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
@@ -772,6 +784,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/contracts/$contractId'
     | '/_authenticated/app/leads/$leadId'
     | '/_authenticated/app/properties/$propertyId'
+    | '/_authenticated/app/properties/lookup'
     | '/_authenticated/app/properties/search'
     | '/_authenticated/app/settings/public-profile'
     | '/_authenticated/app/social/business-portfolio'
@@ -1197,6 +1210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
       parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
+    '/_authenticated/app/properties/lookup': {
+      id: '/_authenticated/app/properties/lookup'
+      path: '/lookup'
+      fullPath: '/app/properties/lookup'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
+    }
     '/_authenticated/app/properties/$propertyId': {
       id: '/_authenticated/app/properties/$propertyId'
       path: '/$propertyId'
@@ -1306,6 +1326,7 @@ const AuthenticatedAppLeadsRouteWithChildren =
 
 interface AuthenticatedAppPropertiesRouteChildren {
   AuthenticatedAppPropertiesPropertyIdRoute: typeof AuthenticatedAppPropertiesPropertyIdRoute
+  AuthenticatedAppPropertiesLookupRoute: typeof AuthenticatedAppPropertiesLookupRoute
   AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
 }
 
@@ -1313,6 +1334,8 @@ const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteCh
   {
     AuthenticatedAppPropertiesPropertyIdRoute:
       AuthenticatedAppPropertiesPropertyIdRoute,
+    AuthenticatedAppPropertiesLookupRoute:
+      AuthenticatedAppPropertiesLookupRoute,
     AuthenticatedAppPropertiesSearchRoute:
       AuthenticatedAppPropertiesSearchRoute,
   }
