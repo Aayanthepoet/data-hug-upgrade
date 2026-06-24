@@ -1,11 +1,17 @@
 import { Link } from "@tanstack/react-router";
+import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border mt-32">
       <div className="container-x py-16 grid grid-cols-2 md:grid-cols-4 gap-10 text-sm">
         <div className="col-span-2">
-          <div className="font-bold text-lg">Prop<span className="text-cyan">AI</span></div>
+          <div className="flex items-center gap-3 font-bold text-lg mb-4">
+            <img src={logoAsset.url} alt="AI Network Agency Logo" className="h-8 w-auto rounded bg-white p-1" />
+            <span className="border-l border-border pl-3 text-sm font-medium tracking-normal text-[var(--w65)]">
+              Prop<span className="text-cyan">AI</span>
+            </span>
+          </div>
           <p className="mt-3 text-[var(--w45)] max-w-xs leading-relaxed">
             The complete intelligence platform for real estate professionals. Built by AI Network Agency.
           </p>

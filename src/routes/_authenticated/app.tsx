@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/app/AppSidebar";
 import { NotificationBell } from "@/components/app/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Workspace — PropAI" }] }),
@@ -31,8 +32,11 @@ function AppShell() {
           <header className="h-14 flex items-center justify-between border-b border-border px-4 bg-[rgba(6,10,18,.85)] backdrop-blur sticky top-0 z-30">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
-              <Link to="/" className="font-bold">
-                Prop<span className="text-cyan">AI</span>
+              <Link to="/" className="flex items-center gap-3 font-bold">
+                <img src={logoAsset.url} alt="AI Network Agency Logo" className="h-7 w-auto rounded bg-white p-0.5" />
+                <span className="border-l border-border pl-3 text-xs font-medium text-[var(--w65)]">
+                  Prop<span className="text-cyan">AI</span>
+                </span>
               </Link>
             </div>
             <div className="flex items-center gap-3 text-sm">
