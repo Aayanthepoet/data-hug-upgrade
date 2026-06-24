@@ -41,6 +41,7 @@ When the user asks for a plan, checklist, next steps, "what should I do", or the
 EMPTY RESULTS ≠ PERMISSION ERRORS:
 - Tools return data scoped to the signed-in user via RLS. An empty array (e.g. count: 0, properties: []) means the user simply has no records yet — NOT that you lack permission.
 - Never tell the user you have a "permission error", "authorization issue", or "can't access" their data unless a tool response actually contains an \`error\` field. If you see \`error\`, quote it verbatim.
+- Lead tools include an \`access_status\` field. If it is \`admin\` and \`count\` is 0, say there are no website lead submissions yet. Do not mention permissions.
 - If the workspace is empty, say so plainly and suggest concrete next steps (e.g. "add a property", "import a lead list", "wait for the first website lead").`;
 
 export const Route = createFileRoute("/api/chat")({
@@ -82,6 +83,12 @@ export const Route = createFileRoute("/api/chat")({
         const userId = userData.user.id;
         const incoming = body.messages as UIMessage[];
         const lastUserMsg = [...incoming].reverse().find((m) => m.role === "user");
+
+        const getAdminStatus = async () => {
+          const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+          if (error) return { isAdmin: false, error: error.message };
+          return { isAdmin: Boolean(data), error: null };
+        };
 
 
         const gateway = createLovableAiGatewayProvider(lovableKey);
@@ -127,24 +134,30 @@ export const Route = createFileRoute("/api/chat")({
             },
           }),
           list_recent_leads: tool({
-            description: "List the most recent inbound leads from the public contact form (admin-only). Returns empty if the user is not an admin.",
+            description: "List the most recent inbound leads from the public contact form. access_status=admin with count=0 means no submissions exist yet, not a permission problem.",
             inputSchema: z.object({ limit: z.number().min(1).max(50).default(20) }),
             execute: async ({ limit }) => {
+              const adminStatus = await getAdminStatus();
+              if (adminStatus.error) return { error: adminStatus.error };
+              if (!adminStatus.isAdmin) return { access_status: "not_admin" as const, count: 0, leads: [] };
               const { data, error } = await supabase
                 .from("leads").select("id, full_name, email, company, phone, message, status, created_at")
                 .order("created_at", { ascending: false }).limit(limit);
               if (error) return { error: error.message };
-              return { count: data?.length ?? 0, leads: data ?? [] };
+              return { access_status: "admin" as const, count: data?.length ?? 0, leads: data ?? [] };
             },
           }),
           search_leads: tool({
-            description: "Search inbound leads from the public contact form by name/email/company text or filter by status. Admin-only.",
+            description: "Search inbound leads from the public contact form by name/email/company text or filter by status. access_status=admin with count=0 means no matches/submissions exist yet.",
             inputSchema: z.object({
               query: z.string().optional().describe("Free-text match against full_name, email, company"),
               status: z.string().optional().describe("Filter by status (e.g. new, contacted, qualified, archived)"),
               limit: z.number().min(1).max(50).default(20),
             }),
             execute: async ({ query, status, limit }) => {
+              const adminStatus = await getAdminStatus();
+              if (adminStatus.error) return { error: adminStatus.error };
+              if (!adminStatus.isAdmin) return { access_status: "not_admin" as const, count: 0, leads: [] };
               let q = supabase
                 .from("leads")
                 .select("id, full_name, email, company, phone, message, status, source, created_at")
@@ -157,13 +170,16 @@ export const Route = createFileRoute("/api/chat")({
               }
               const { data, error } = await q;
               if (error) return { error: error.message };
-              return { count: data?.length ?? 0, leads: data ?? [] };
+              return { access_status: "admin" as const, count: data?.length ?? 0, leads: data ?? [] };
             },
           }),
           get_lead: tool({
             description: "Get full details for one inbound lead including its notes, email send history, and assignment history. Use when the user asks about a specific lead by name or ID.",
             inputSchema: z.object({ lead_id: z.string().uuid() }),
             execute: async ({ lead_id }) => {
+              const adminStatus = await getAdminStatus();
+              if (adminStatus.error) return { error: adminStatus.error };
+              if (!adminStatus.isAdmin) return { access_status: "not_admin" as const, error: "Admin role required to view website leads." };
               const { data: lead, error } = await supabase
                 .from("leads")
                 .select("id, full_name, email, company, phone, message, source, status, assigned_to, created_at")
@@ -253,6 +269,7 @@ export const Route = createFileRoute("/api/chat")({
                 supabase.from("contracts").select("status"),
                 supabase.from("leads").select("id", { count: "exact", head: true }),
               ]);
+              const adminStatus = await getAdminStatus();
               const contractsByStatus: Record<string, number> = {};
               for (const row of contractsRes.data ?? []) {
                 const s = (row as { status: string | null }).status ?? "unknown";
@@ -263,6 +280,7 @@ export const Route = createFileRoute("/api/chat")({
                 properties_distressed: distressRes.count ?? 0,
                 contracts_total: (contractsRes.data ?? []).length,
                 contracts_by_status: contractsByStatus,
+                leads_access_status: adminStatus.error ? "unknown" : adminStatus.isAdmin ? "admin" : "not_admin",
                 leads_total: leadsRes.count ?? 0,
               };
             },
