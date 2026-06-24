@@ -10,7 +10,7 @@ import {
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
-import { disconnectSocialAccount } from "@/lib/social-oauth.functions";
+import { disconnectSocialAccount, syncMetaAccounts } from "@/lib/social-oauth.functions";
 import { MetaAccountPicker } from "@/components/social/MetaAccountPicker";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +35,7 @@ function SocialHubPage() {
   const getProfile = useServerFn(getMyPublicProfile);
   const updateStatus = useServerFn(updatePostStatus);
   const disconnect = useServerFn(disconnectSocialAccount);
+  const syncMeta = useServerFn(syncMetaAccounts);
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -59,6 +60,25 @@ function SocialHubPage() {
       window.history.replaceState({}, "", "/app/social");
       setPickerOpen(true);
     }
+  }, []);
+
+  // Background sync: refresh connected Meta Pages/IG accounts on mount (post-login).
+  useEffect(() => {
+    let cancelled = false;
+    syncMeta()
+      .then((res) => {
+        if (cancelled) return;
+        if (res?.updated && res.updated > 0) {
+          qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+        }
+      })
+      .catch(() => {
+        /* silent — background task */
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const actMut = useMutation({
