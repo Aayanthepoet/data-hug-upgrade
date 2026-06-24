@@ -173,6 +173,22 @@ function PropertySearch() {
         </p>
       </div>
 
+      {/* Quick search bar */}
+      <div className="border border-border rounded-lg p-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <Search className="h-4 w-4 text-[var(--w55)] ml-1 hidden sm:block" />
+        <Input
+          value={quickQuery}
+          onChange={(e) => setQuickQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runQuickSearch(); } }}
+          placeholder="Search by address, city, or ZIP — e.g. 10001 or Brooklyn, NY"
+          className="flex-1 border-0 shadow-none focus-visible:ring-0 text-base"
+        />
+        <Button onClick={runQuickSearch} disabled={runMutation.isPending}>
+          {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+          Search
+        </Button>
+      </div>
+
       {/* Filters */}
       <div className="border border-border rounded-lg p-4 space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
