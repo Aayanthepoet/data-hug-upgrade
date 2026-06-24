@@ -62,6 +62,25 @@ function SocialHubPage() {
     }
   }, []);
 
+  // Background sync: refresh connected Meta Pages/IG accounts on mount (post-login).
+  useEffect(() => {
+    let cancelled = false;
+    syncMeta()
+      .then((res) => {
+        if (cancelled) return;
+        if (res?.updated && res.updated > 0) {
+          qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+        }
+      })
+      .catch(() => {
+        /* silent — background task */
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const actMut = useMutation({
     mutationFn: (vars: { post_id: string; action: "publish" | "unpublish" | "delete" }) =>
       updateStatus({ data: vars }),
