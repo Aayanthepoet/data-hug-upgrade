@@ -33,6 +33,7 @@ import {
   LogOut,
   Settings,
   Share2,
+  History as HistoryIcon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
