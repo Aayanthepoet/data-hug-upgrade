@@ -271,6 +271,23 @@ function PropertySearch() {
         </Button>
       </div>
 
+      {validationError && (
+        <div
+          role="alert"
+          className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm flex items-start gap-3"
+        >
+          <div className="flex-1">
+            <div className="font-medium text-amber-300">Check your search</div>
+            <div className="text-xs text-[var(--w55)] mt-1">{validationError}</div>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setValidationError(null)}>
+            Dismiss
+          </Button>
+        </div>
+      )}
+
+
+
       {/* Filters */}
       <div className="border border-border rounded-lg p-4 space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
