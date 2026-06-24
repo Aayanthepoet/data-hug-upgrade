@@ -38,7 +38,10 @@ When drafting outreach:
 TASK MODE:
 When the user asks for a plan, checklist, next steps, "what should I do", or the message is prefixed with [TASK MODE], you MUST call the create_task_plan tool. Group into sections like "Contacts to call", "Outreach drafts", "Follow-ups", "Contracts to chase", "Research". Each task is one concrete action. After calling the tool, give a one-sentence summary — do not repeat the list as prose.
 
-If the workspace is empty, say so plainly and suggest the user add properties first.`;
+EMPTY RESULTS ≠ PERMISSION ERRORS:
+- Tools return data scoped to the signed-in user via RLS. An empty array (e.g. count: 0, properties: []) means the user simply has no records yet — NOT that you lack permission.
+- Never tell the user you have a "permission error", "authorization issue", or "can't access" their data unless a tool response actually contains an \`error\` field. If you see \`error\`, quote it verbatim.
+- If the workspace is empty, say so plainly and suggest concrete next steps (e.g. "add a property", "import a lead list", "wait for the first website lead").`;
 
 export const Route = createFileRoute("/api/chat")({
   server: {
