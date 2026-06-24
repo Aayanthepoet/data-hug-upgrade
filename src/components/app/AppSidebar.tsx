@@ -34,11 +34,13 @@ import {
   Settings,
   Share2,
   History as HistoryIcon,
+  Home,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 const items = [
+  { title: "Landing Page", url: "/", icon: Home, exact: true },
   { title: "Overview", url: "/app", icon: LayoutDashboard, exact: true },
   { title: "PropAI Agent", url: "/app/agent", icon: Bot },
   { title: "Leads", url: "/app/leads", icon: Inbox },

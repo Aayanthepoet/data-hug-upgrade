@@ -6,6 +6,7 @@ import { NotificationBell } from "@/components/app/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
+import { Home } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Workspace — PropAI" }] }),
@@ -42,6 +43,10 @@ function AppShell() {
             <div className="flex items-center gap-3 text-sm">
               <NotificationBell />
               <span className="text-[var(--w55)] hidden sm:inline">{user?.email}</span>
+              <Link to="/" className="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5 border border-border/40 rounded hover:bg-white/5 transition">
+                <Home className="h-3.5 w-3.5" />
+                <span>Go to Website</span>
+              </Link>
               <button onClick={signOut} className="btn-ghost text-xs px-4 py-2">
                 Sign out
               </button>
