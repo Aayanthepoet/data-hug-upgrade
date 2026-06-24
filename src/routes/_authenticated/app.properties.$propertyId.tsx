@@ -133,6 +133,22 @@ function PropertyDetailPage() {
         <Stat label="Days on market" value={p.days_on_market ?? "—"} />
       </section>
 
+      <DistressSignals
+        isVacant={p.is_vacant}
+        isAbsentee={p.is_absentee}
+        isPreforeclosure={p.is_preforeclosure}
+        auctionDate={p.auction_date}
+        lienAmount={p.lien_amount ? Number(p.lien_amount) : null}
+        taxOwed={p.tax_owed ? Number(p.tax_owed) : null}
+        daysOnMarket={p.days_on_market}
+      />
+
+      <AiLeadScoreSection
+        propertyId={propertyId}
+        leadScore={p.lead_score ?? null}
+        notes={p.notes ?? null}
+      />
+
       <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
 
       <VisionGallerySection propertyId={propertyId} />
