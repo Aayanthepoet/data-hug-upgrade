@@ -9,7 +9,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { History, Search, Trash2, MapPin, Loader2 } from "lucide-react";
+import { History as HistoryIcon, Search, Trash2, MapPin, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/properties/lookup-history")({
   head: () => ({
