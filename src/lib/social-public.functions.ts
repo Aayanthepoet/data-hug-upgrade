@@ -17,10 +17,9 @@ export const getPublicAgent = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const { data: agent } = await sb
-      .from("profiles")
+      .from("public_profiles")
       .select("id, full_name, public_slug, public_headshot_url, public_bio, public_phone, public_email, public_brokerage, public_license, public_service_areas")
       .eq("public_slug", data.slug)
-      .eq("public_enabled", true)
       .maybeSingle();
     if (!agent) return null;
 
@@ -42,10 +41,9 @@ export const getPublicPost = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const sb = publicClient();
     const { data: agent } = await sb
-      .from("profiles")
+      .from("public_profiles")
       .select("id, full_name, public_slug, public_headshot_url, public_bio, public_phone, public_email, public_brokerage, public_license")
       .eq("public_slug", data.agentSlug)
-      .eq("public_enabled", true)
       .maybeSingle();
     if (!agent) return null;
 
@@ -79,10 +77,8 @@ export const listPublicAgents = createServerFn({ method: "GET" })
   .handler(async () => {
     const sb = publicClient();
     const { data } = await sb
-      .from("profiles")
+      .from("public_profiles")
       .select("public_slug, full_name, public_headshot_url, public_brokerage")
-      .eq("public_enabled", true)
-      .not("public_slug", "is", null)
       .limit(500);
     return data ?? [];
   });
@@ -90,16 +86,24 @@ export const listPublicAgents = createServerFn({ method: "GET" })
 export const listPublishedPostsForSitemap = createServerFn({ method: "GET" })
   .handler(async () => {
     const sb = publicClient();
-    const { data } = await sb
+    const { data: agents } = await sb
+      .from("public_profiles")
+      .select("id, public_slug");
+    const slugById = new Map((agents ?? []).map((a) => [a.id as string, a.public_slug as string]));
+    if (slugById.size === 0) return [];
+
+    const { data: posts } = await sb
       .from("social_posts")
-      .select("landing_slug, published_at, user_id, profiles!inner(public_slug, public_enabled)")
+      .select("landing_slug, published_at, user_id")
       .eq("status", "published")
-      .eq("profiles.public_enabled", true)
+      .in("user_id", Array.from(slugById.keys()))
       .order("published_at", { ascending: false })
       .limit(2000);
-    return (data ?? []).map((r) => ({
-      postSlug: r.landing_slug,
-      agentSlug: (r.profiles as unknown as { public_slug: string }).public_slug,
-      published_at: r.published_at,
-    }));
+    return (posts ?? [])
+      .map((r) => {
+        const agentSlug = slugById.get(r.user_id as string);
+        if (!agentSlug) return null;
+        return { postSlug: r.landing_slug, agentSlug, published_at: r.published_at };
+      })
+      .filter((x): x is { postSlug: string; agentSlug: string; published_at: string } => x !== null);
   });

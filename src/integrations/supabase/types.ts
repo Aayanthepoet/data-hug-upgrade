@@ -1918,7 +1918,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          full_name: string | null
+          id: string | null
+          public_bio: string | null
+          public_brokerage: string | null
+          public_email: string | null
+          public_enabled: boolean | null
+          public_headshot_url: string | null
+          public_license: string | null
+          public_phone: string | null
+          public_service_areas: string[] | null
+          public_slug: string | null
+        }
+        Insert: {
+          full_name?: string | null
+          id?: string | null
+          public_bio?: string | null
+          public_brokerage?: string | null
+          public_email?: string | null
+          public_enabled?: boolean | null
+          public_headshot_url?: string | null
+          public_license?: string | null
+          public_phone?: string | null
+          public_service_areas?: string[] | null
+          public_slug?: string | null
+        }
+        Update: {
+          full_name?: string | null
+          id?: string | null
+          public_bio?: string | null
+          public_brokerage?: string | null
+          public_email?: string | null
+          public_enabled?: boolean | null
+          public_headshot_url?: string | null
+          public_license?: string | null
+          public_phone?: string | null
+          public_service_areas?: string[] | null
+          public_slug?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       close_auction_if_expired: {
