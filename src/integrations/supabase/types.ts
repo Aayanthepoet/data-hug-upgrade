@@ -870,6 +870,8 @@ export type Database = {
           id: string
           message: string | null
           phone: string | null
+          sms_opt_in: boolean
+          sms_opt_in_at: string | null
           source: string | null
           status: string
         }
@@ -882,6 +884,8 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          sms_opt_in?: boolean
+          sms_opt_in_at?: string | null
           source?: string | null
           status?: string
         }
@@ -894,6 +898,8 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          sms_opt_in?: boolean
+          sms_opt_in_at?: string | null
           source?: string | null
           status?: string
         }
