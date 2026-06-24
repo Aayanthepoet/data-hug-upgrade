@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import {
   listAvailableMetaAccounts,
   saveMetaAccountSelection,
+  getMetaOAuthUrl,
 } from "@/lib/social-oauth.functions";
 import { listMySocialAccounts } from "@/lib/social.functions";
 
