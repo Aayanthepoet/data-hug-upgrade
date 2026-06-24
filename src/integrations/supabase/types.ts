@@ -864,12 +864,15 @@ export type Database = {
         Row: {
           assigned_to: string | null
           company: string | null
+          consent_ip: unknown
+          consent_user_agent: string | null
           created_at: string
           email: string
           full_name: string
           id: string
           message: string | null
           phone: string | null
+          phone_e164: string | null
           sms_opt_in: boolean
           sms_opt_in_at: string | null
           source: string | null
@@ -878,12 +881,15 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           company?: string | null
+          consent_ip?: unknown
+          consent_user_agent?: string | null
           created_at?: string
           email: string
           full_name: string
           id?: string
           message?: string | null
           phone?: string | null
+          phone_e164?: string | null
           sms_opt_in?: boolean
           sms_opt_in_at?: string | null
           source?: string | null
@@ -892,12 +898,15 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           company?: string | null
+          consent_ip?: unknown
+          consent_user_agent?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
           message?: string | null
           phone?: string | null
+          phone_e164?: string | null
           sms_opt_in?: boolean
           sms_opt_in_at?: string | null
           source?: string | null

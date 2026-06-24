@@ -40,22 +40,27 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
     }
     setLoading(true);
     const { sms_opt_in, ...rest } = parsed.data;
-    const { error } = await supabase.from("leads").insert({
-      ...rest,
-      sms_opt_in: true,
-      sms_opt_in_at: new Date().toISOString(),
-      source,
-    });
-    if (error) {
+    const { data: inserted, error } = await supabase
+      .from("leads")
+      .insert({
+        ...rest,
+        sms_opt_in: true,
+        sms_opt_in_at: new Date().toISOString(),
+        source,
+      })
+      .select("id")
+      .single();
+    if (error || !inserted) {
       setLoading(false);
       toast.error("Couldn't submit. Try again.");
       return;
     }
-    // Fire-and-forget notification email to the team. Never block UX on this.
+    // Fire-and-forget: server records IP/user-agent for consent audit and
+    // sends the team notification email. Never block UX on this.
     fetch("/api/public/lead-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...rest, sms_opt_in: true, source }),
+      body: JSON.stringify({ ...rest, lead_id: inserted.id, sms_opt_in: true, source }),
     }).catch(() => {});
     setLoading(false);
     setDone(true);
