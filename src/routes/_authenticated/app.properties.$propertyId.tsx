@@ -10,6 +10,8 @@ import { createAuction } from "@/lib/auctions/auctions.functions";
 import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/comps/comps.functions";
 import { listRenders, deleteRender, linkRenderToProperty } from "@/lib/vision/vision.functions";
 import { ContractsSection } from "@/components/app/ContractsSection";
+import { scoreProperty } from "@/lib/engines/scoring.functions";
+import { Flame, Home, AlertTriangle } from "lucide-react";
 
 import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -132,6 +134,22 @@ function PropertyDetailPage() {
         <Stat label="Year built" value={p.year_built ?? "—"} />
         <Stat label="Days on market" value={p.days_on_market ?? "—"} />
       </section>
+
+      <DistressSignals
+        isVacant={p.is_vacant}
+        isAbsentee={p.is_absentee}
+        isPreforeclosure={p.is_preforeclosure}
+        auctionDate={p.auction_date}
+        lienAmount={p.lien_amount ? Number(p.lien_amount) : null}
+        taxOwed={p.tax_owed ? Number(p.tax_owed) : null}
+        daysOnMarket={p.days_on_market}
+      />
+
+      <AiLeadScoreSection
+        propertyId={propertyId}
+        leadScore={p.lead_score ?? null}
+        notes={p.notes ?? null}
+      />
 
       <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
 
@@ -858,6 +876,139 @@ function VisionGallerySection({ propertyId }: { propertyId: string }) {
           ))}
         </div>
       )}
+    </section>
+  );
+}
+
+function DistressSignals({
+  isVacant, isAbsentee, isPreforeclosure, auctionDate, lienAmount, taxOwed, daysOnMarket,
+}: {
+  isVacant: boolean; isAbsentee: boolean; isPreforeclosure: boolean;
+  auctionDate: string | null; lienAmount: number | null; taxOwed: number | null;
+  daysOnMarket: number | null;
+}) {
+  const signals: { label: string; tone: "red" | "amber" | "slate"; detail?: string }[] = [];
+  if (isPreforeclosure) signals.push({ label: "Pre-foreclosure / NOD", tone: "red" });
+  if (auctionDate) signals.push({ label: "Auction scheduled", tone: "red", detail: auctionDate });
+  if (isVacant) signals.push({ label: "Vacant", tone: "amber" });
+  if (isAbsentee) signals.push({ label: "Absentee owner", tone: "amber" });
+  if (taxOwed && taxOwed > 0) signals.push({ label: "Tax delinquent", tone: "amber", detail: `$${taxOwed.toLocaleString()}` });
+  if (lienAmount && lienAmount > 0) signals.push({ label: "Lien", tone: "amber", detail: `$${lienAmount.toLocaleString()}` });
+  if (daysOnMarket && daysOnMarket > 120) signals.push({ label: "Stale listing", tone: "slate", detail: `${daysOnMarket} days` });
+
+  return (
+    <section className="border border-border rounded-lg">
+      <header className="flex items-center gap-2 p-4 border-b border-border">
+        <AlertTriangle className="h-4 w-4 text-amber-400" />
+        <h2 className="font-medium">Distress signals</h2>
+        <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">{signals.length} active</span>
+      </header>
+      <div className="p-4">
+        {signals.length === 0 ? (
+          <p className="text-sm text-[var(--w55)]">No distress signals flagged on this record.</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {signals.map((s) => {
+              const cls =
+                s.tone === "red"   ? "bg-red-500/15 text-red-300 border-red-500/30" :
+                s.tone === "amber" ? "bg-amber-500/15 text-amber-300 border-amber-500/30" :
+                                     "bg-white/5 text-[var(--w55)] border-border";
+              return (
+                <li key={s.label} className={`inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs border ${cls}`}>
+                  <span className="font-medium">{s.label}</span>
+                  {s.detail && <span className="opacity-80">· {s.detail}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function parseScoreNotes(notes: string | null): { rationale: string | null; signals: string[]; tier: string | null } {
+  if (!notes) return { rationale: null, signals: [], tier: null };
+  const m = notes.match(/Lead Score\s+\d+\s+\(([^)]+)\):\s*([^\n]+)(?:\nSignals:\s*(.+))?/);
+  if (!m) return { rationale: null, signals: [], tier: null };
+  return {
+    tier: m[1] ?? null,
+    rationale: m[2]?.trim() ?? null,
+    signals: (m[3] ?? "").split(";").map((s) => s.trim()).filter(Boolean),
+  };
+}
+
+function AiLeadScoreSection({
+  propertyId, leadScore, notes,
+}: { propertyId: string; leadScore: number | null; notes: string | null }) {
+  const scoreFn = useServerFn(scoreProperty);
+  const router = useRouter();
+  const mut = useMutation({
+    mutationFn: () => scoreFn({ data: { property_id: propertyId } }),
+    onSuccess: () => router.invalidate(),
+  });
+  const live = mut.data ?? null;
+  const parsed = parseScoreNotes(notes);
+  const score = live?.score ?? leadScore ?? null;
+  const tier = live?.tier ?? parsed.tier;
+  const rationale = live?.rationale ?? parsed.rationale;
+  const signals = live?.signals ?? parsed.signals;
+
+  const tierClass =
+    tier === "on_fire" ? "bg-red-500/15 text-red-300 border-red-500/30" :
+    tier === "hot"     ? "bg-orange-500/15 text-orange-300 border-orange-500/30" :
+    tier === "warm"    ? "bg-amber-500/15 text-amber-300 border-amber-500/30" :
+    tier === "cold"    ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" :
+                         "bg-white/5 text-[var(--w55)] border-border";
+
+  return (
+    <section className="border border-border rounded-lg">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Flame className="h-4 w-4 text-orange-400" />
+          <h2 className="font-medium">AI lead scoring</h2>
+          {tier && (
+            <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider border ${tierClass}`}>
+              {tier.replace("_", " ")}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => mut.mutate()}
+          disabled={mut.isPending}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 text-cyan ${mut.isPending ? "animate-spin" : ""}`} />
+          {mut.isPending ? "Scoring…" : score == null ? "Run AI score" : "Re-score"}
+        </button>
+      </header>
+      <div className="p-4 space-y-4">
+        <div className="flex items-baseline gap-3">
+          <span className="text-4xl font-bold tabular-nums">{score ?? "—"}</span>
+          <span className="text-sm text-[var(--w55)]">/ 100 motivation</span>
+        </div>
+        {rationale && <p className="text-sm">{rationale}</p>}
+        {signals.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-[var(--w55)] mb-1">Key signals</p>
+            <ul className="flex flex-wrap gap-2">
+              {signals.map((s, i) => (
+                <li key={i} className="inline-flex items-center rounded px-2 py-1 text-xs bg-white/5 border border-border">
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {score == null && !mut.isPending && (
+          <p className="text-sm text-[var(--w55)]">
+            <Home className="inline h-3.5 w-3.5 mr-1 text-cyan" />
+            Run the AI scorer to evaluate seller motivation from equity, distress, vacancy,
+            absentee ownership, tax/lien data, and time on market.
+          </p>
+        )}
+        {mut.isError && <p className="text-xs text-red-400">{(mut.error as Error).message}</p>}
+      </div>
     </section>
   );
 }
