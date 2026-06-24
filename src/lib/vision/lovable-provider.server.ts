@@ -31,10 +31,12 @@ export function createLovableVisionProvider(apiKey: string): VisionProvider {
         quality: "low",
         size: RESOLUTION_SIZES[input.resolution],
       };
-      if (input.sourceImageUrl) {
-        // gpt-image-2 accepts an input image via `image` for edits.
-        body.image = input.sourceImageUrl;
-      }
+      // Note: the /v1/images/generations endpoint does not accept an input
+      // image parameter. Image-to-image edits require a separate edits
+      // endpoint not currently exposed through the gateway, so we render
+      // purely from the prompt here and rely on the descriptor + caller
+      // prompt to convey the room context.
+
 
       const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
         method: "POST",
