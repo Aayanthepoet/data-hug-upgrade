@@ -283,12 +283,47 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       const res = await fetch(
         `https://graph.facebook.com/v21.0/me/accounts?fields=${fields}&access_token=${userToken}`,
       );
+
       if (!res.ok) {
-        if (res.status === 401 || res.status === 400) {
-          return { ok: true, needs_connect: true, updated: 0 };
+        // Parse the Meta error envelope to categorize the failure.
+        let metaErr: { code?: number; error_subcode?: number; message?: string; type?: string } = {};
+        let rawText = "";
+        try {
+          rawText = await res.text();
+          metaErr = JSON.parse(rawText).error ?? {};
+        } catch {
+          /* non-JSON */
         }
-        throw new Error(`Facebook API error: ${await res.text()}`);
+
+        const classified = classifyMetaError(res.status, metaErr, res.headers);
+
+        // For auth-related failures, mark the master record as revoked so the
+        // UI prompts the user to reconnect instead of looping the sync.
+        if (classified.code === "token_expired" || classified.code === "token_invalid") {
+          await supabase
+            .from("social_accounts")
+            .update({ status: "revoked" })
+            .eq("user_id", userId)
+            .eq("id", master.id);
+          return {
+            ok: false,
+            needs_connect: true,
+            error_code: classified.code,
+            error_message: classified.message,
+            updated: 0,
+          };
+        }
+
+        console.error("syncMetaAccounts Meta error:", { status: res.status, metaErr });
+        return {
+          ok: false,
+          error_code: classified.code,
+          error_message: classified.message,
+          retry_after_seconds: classified.retryAfter,
+          updated: 0,
+        };
       }
+
       const body = (await res.json()) as {
         data: Array<{
           id: string;
@@ -303,6 +338,16 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
         }>;
       };
 
+      // Server-side validation of the Graph response shape.
+      if (!body || !Array.isArray(body.data)) {
+        return {
+          ok: false,
+          error_code: "invalid_response" as const,
+          error_message: "Meta returned an unexpected response.",
+          updated: 0,
+        };
+      }
+
       const { data: existing } = await supabase
         .from("social_accounts")
         .select("id, external_account_id, platform")
@@ -315,6 +360,8 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       let updated = 0;
 
       for (const p of body.data) {
+        // Skip malformed page rows defensively.
+        if (!p?.id || !p?.access_token) continue;
         if (connectedIds.has(p.id)) {
           const { error } = await supabase
             .from("social_accounts")
@@ -331,7 +378,7 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
           if (!error) updated++;
         }
         const ig = p.instagram_business_account;
-        if (ig && connectedIds.has(ig.id)) {
+        if (ig?.id && connectedIds.has(ig.id)) {
           const { error } = await supabase
             .from("social_accounts")
             .update({
@@ -351,8 +398,8 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       // Mark any connected accounts that Meta no longer returns as revoked.
       const returnedIds = new Set<string>();
       for (const p of body.data) {
-        returnedIds.add(p.id);
-        if (p.instagram_business_account) returnedIds.add(p.instagram_business_account.id);
+        if (p?.id) returnedIds.add(p.id);
+        if (p?.instagram_business_account?.id) returnedIds.add(p.instagram_business_account.id);
       }
       const stale = (existing ?? []).filter((r) => !returnedIds.has(r.external_account_id));
       if (stale.length) {
@@ -365,6 +412,76 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       return { ok: true, updated, revoked: stale.length };
     } catch (err: any) {
       console.error("syncMetaAccounts failed:", err);
-      return { ok: false, error: err.message ?? "sync_failed", updated: 0 };
+      return {
+        ok: false,
+        error_code: "network_error" as const,
+        error_message: "Could not reach Meta. Check your connection and try again.",
+        updated: 0,
+      };
     }
   });
+
+/**
+ * Categorize a Meta Graph API error into a stable code the UI can render.
+ * Reference: https://developers.facebook.com/docs/graph-api/guides/error-handling/
+ */
+function classifyMetaError(
+  status: number,
+  err: { code?: number; error_subcode?: number; message?: string; type?: string },
+  headers: Headers,
+): {
+  code:
+    | "token_expired"
+    | "token_invalid"
+    | "permission_missing"
+    | "rate_limited"
+    | "server_error"
+    | "unknown";
+  message: string;
+  retryAfter?: number;
+} {
+  const code = err.code;
+  const sub = err.error_subcode;
+
+  // OAuthException token problems
+  if (code === 190) {
+    // 463 = expired access token; 467 = invalid; 460 = password changed;
+    // 458 = app not installed; 459 = user checkpointed
+    if (sub === 463) {
+      return { code: "token_expired", message: "Your Meta access token expired. Please reconnect Facebook." };
+    }
+    if (sub === 460 || sub === 458 || sub === 459 || sub === 467) {
+      return { code: "token_invalid", message: "Your Meta connection is no longer valid. Please reconnect Facebook." };
+    }
+    return { code: "token_invalid", message: "Meta rejected the access token. Please reconnect Facebook." };
+  }
+
+  // Permission errors (10 = permission denied, 200–299 = permission scopes)
+  if (code === 10 || code === 200 || (typeof code === "number" && code >= 200 && code < 300)) {
+    return {
+      code: "permission_missing",
+      message:
+        "Missing required Meta permission. Reconnect and grant pages_show_list, pages_manage_posts, and instagram_basic.",
+    };
+  }
+
+  // Rate limits: 4 = app-level, 17 = user-level, 32 = page-level, 613 = custom rate limit
+  if (code === 4 || code === 17 || code === 32 || code === 613 || status === 429) {
+    const retryHdr = headers.get("retry-after");
+    const retryAfter = retryHdr ? Number(retryHdr) : 60;
+    return {
+      code: "rate_limited",
+      message: `Meta rate limit reached. Try again in ${Math.max(1, Math.round(retryAfter / 60))} min.`,
+      retryAfter: Number.isFinite(retryAfter) ? retryAfter : 60,
+    };
+  }
+
+  if (status >= 500) {
+    return { code: "server_error", message: "Meta is having trouble. Try again shortly." };
+  }
+
+  return {
+    code: "unknown",
+    message: err.message ? `Meta error: ${err.message}` : `Meta error (HTTP ${status}).`,
+  };
+}
