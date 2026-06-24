@@ -30,6 +30,17 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
   const listFn = useServerFn(listAvailableMetaAccounts);
   const saveFn = useServerFn(saveMetaAccountSelection);
   const listAcctsFn = useServerFn(listMySocialAccounts);
+  const getUrlFn = useServerFn(getMetaOAuthUrl);
+
+  const connectMut = useMutation({
+    mutationFn: () => getUrlFn(),
+    onSuccess: (res) => {
+      window.location.href = res.url;
+    },
+    onError: (e: Error) => {
+      toast.error(`Could not generate OAuth URL: ${e.message}`);
+    },
+  });
 
   const [pageIds, setPageIds] = useState<Set<string>>(new Set());
   const [igIds, setIgIds] = useState<Set<string>>(new Set());
