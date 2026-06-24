@@ -72,6 +72,27 @@ function PropertySearch() {
   const [view, setView] = useState<"list" | "map">("list");
   const [quickQuery, setQuickQuery] = useState("");
 
+  const runQuickSearch = () => {
+    const q = quickQuery.trim();
+    const base = filters();
+    if (!q) { runMutation.mutate(undefined); return; }
+    const zipMatch = q.match(/\b(\d{5})\b/);
+    const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
+    let cityPart = q.replace(/\b\d{5}\b/g, "").replace(/,\s*[A-Za-z]{2}\b/, "").trim().replace(/,$/, "").trim();
+    const override: DistressFilters = {
+      ...base,
+      zip: zipMatch ? zipMatch[1] : undefined,
+      city: cityPart || undefined,
+      state: stateMatch ? stateMatch[1].toUpperCase() : base.state,
+      county: undefined,
+    };
+    if (override.state) setState(override.state);
+    setCity(override.city ?? "");
+    setZip(override.zip ?? "");
+    setCounty("");
+    runMutation.mutate(override);
+  };
+
   const counties = getCountiesForState(state);
   const activeCounty = counties.find((c) => c.name === county);
   const zipSuggestions = activeCounty?.zips ?? [];
