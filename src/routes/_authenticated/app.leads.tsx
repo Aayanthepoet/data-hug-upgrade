@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useIsFetching } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Inbox } from "lucide-react";
+import { Search, Inbox, Loader2 } from "lucide-react";
 import { useTeamMembers, memberLabel, type TeamMember } from "@/hooks/use-team-members";
 
 export const Route = createFileRoute("/_authenticated/app/leads")({
@@ -37,6 +37,9 @@ function LeadsPage() {
   const [status, setStatus] = useState<string>("all");
   const [source, setSource] = useState<string>("all");
   const [assignee, setAssignee] = useState<string>("all");
+
+  const isNavigating = useRouterState({ select: (s) => s.isLoading || s.isTransitioning });
+  const fetchingCount = useIsFetching();
 
   const { data: leads = [], isLoading, error } = useQuery({
     queryKey: ["leads"],
@@ -98,16 +101,24 @@ function LeadsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, company, message…"
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {fetchingCount > 0 ? (
+            <Loader2
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--w55)] animate-spin"
+              aria-label="Loading"
+            />
+          ) : null}
         </div>
         {search.trim() ? (
           <Link
             to="/app/properties/search"
             search={{ q: search.trim() }}
-            className="inline-flex items-center justify-center h-9 px-4 rounded-md bg-cyan text-black text-sm font-medium hover:opacity-90 whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-cyan text-black text-sm font-medium hover:opacity-90 whitespace-nowrap disabled:opacity-60"
+            aria-busy={isNavigating}
           >
-            Search Properties
+            {isNavigating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {isNavigating ? "Searching…" : "Search Properties"}
           </Link>
         ) : null}
         <Select value={status} onValueChange={setStatus}>
@@ -149,8 +160,9 @@ function LeadsPage() {
           Couldn't load leads. You may not have admin access.
         </div>
       ) : isLoading ? (
-        <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
-          Loading…
+        <div className="border border-border rounded-lg p-10 flex items-center justify-center gap-3 text-sm text-[var(--w55)]">
+          <Loader2 className="h-5 w-5 animate-spin text-cyan" aria-hidden="true" />
+          <span>Loading leads…</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="border border-border rounded-lg p-10 text-center">
