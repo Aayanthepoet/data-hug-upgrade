@@ -24,7 +24,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, MapPin, DollarSign, Home } from "lucide-react";
+import { Plus, Search, MapPin, DollarSign, Home, X, SlidersHorizontal } from "lucide-react";
+
+type DistressFilter = "all" | "preforeclosure" | "reo" | "auction" | "tax_lien" | "tax_delinquent" | "fsbo_stale" | "vacant" | "absentee";
+type ScoreFilter = "all" | "hot" | "warm" | "cold";
+type PriceFilter = "all" | "u250" | "250_500" | "500_1m" | "o1m";
+
+const DISTRESS_CHIPS: { value: DistressFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "preforeclosure", label: "Pre-foreclosure" },
+  { value: "reo", label: "REO" },
+  { value: "auction", label: "Auction" },
+  { value: "tax_lien", label: "Tax Lien" },
+  { value: "vacant", label: "Vacant" },
+  { value: "absentee", label: "Absentee" },
+];
+const SCORE_CHIPS: { value: ScoreFilter; label: string }[] = [
+  { value: "all", label: "Any score" },
+  { value: "hot", label: "Hot 80+" },
+  { value: "warm", label: "Warm 50-79" },
+  { value: "cold", label: "Cold <50" },
+];
+const PRICE_CHIPS: { value: PriceFilter; label: string }[] = [
+  { value: "all", label: "Any price" },
+  { value: "u250", label: "< $250k" },
+  { value: "250_500", label: "$250k–500k" },
+  { value: "500_1m", label: "$500k–1M" },
+  { value: "o1m", label: "$1M+" },
+];
 
 export const Route = createFileRoute("/_authenticated/app/properties")({
   head: () => ({ meta: [{ title: "Properties — PropAI" }] }),
