@@ -48,7 +48,7 @@ function AppShell() {
                 className="ml-2 hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 hover:border-cyan transition"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                <span>Back to Landing Page</span>
+                <span>{t("common.backToLanding")}</span>
               </Link>
               <Link
                 to="/"
