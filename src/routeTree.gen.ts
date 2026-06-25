@@ -27,6 +27,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
+import { Route as ApiPublicAttomHealthRouteImport } from './routes/api/public/attom-health'
 import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
 import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
@@ -162,6 +163,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
 const ApiPublicLeadNotifyRoute = ApiPublicLeadNotifyRouteImport.update({
   id: '/api/public/lead-notify',
   path: '/api/public/lead-notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAttomHealthRoute = ApiPublicAttomHealthRouteImport.update({
+  id: '/api/public/attom-health',
+  path: '/api/public/attom-health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
@@ -466,6 +472,7 @@ export interface FileRoutesByFullPath {
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -531,6 +538,7 @@ export interface FileRoutesByTo {
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -599,6 +607,7 @@ export interface FileRoutesById {
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
+  '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -667,6 +676,7 @@ export interface FileRouteTypes {
     | '/app/vision'
     | '/app/watchlist'
     | '/api/engines/tts'
+    | '/api/public/attom-health'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app/'
@@ -732,6 +742,7 @@ export interface FileRouteTypes {
     | '/app/vision'
     | '/app/watchlist'
     | '/api/engines/tts'
+    | '/api/public/attom-health'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/app'
@@ -799,6 +810,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/vision'
     | '/_authenticated/app/watchlist'
     | '/api/engines/tts'
+    | '/api/public/attom-health'
     | '/api/public/lead-notify'
     | '/lovable/email/suppression'
     | '/_authenticated/app/'
@@ -847,6 +859,7 @@ export interface RootRouteChildren {
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ApiEnginesTtsRoute: typeof ApiEnginesTtsRoute
+  ApiPublicAttomHealthRoute: typeof ApiPublicAttomHealthRoute
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
@@ -989,6 +1002,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/lead-notify'
       fullPath: '/api/public/lead-notify'
       preLoaderRoute: typeof ApiPublicLeadNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/attom-health': {
+      id: '/api/public/attom-health'
+      path: '/api/public/attom-health'
+      fullPath: '/api/public/attom-health'
+      preLoaderRoute: typeof ApiPublicAttomHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/engines/tts': {
@@ -1545,6 +1565,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTranscribeRoute: ApiTranscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ApiEnginesTtsRoute: ApiEnginesTtsRoute,
+  ApiPublicAttomHealthRoute: ApiPublicAttomHealthRoute,
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
