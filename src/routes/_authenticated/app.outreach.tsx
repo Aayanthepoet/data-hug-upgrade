@@ -437,10 +437,11 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           </button>
           <button
             type="submit"
-            disabled={mut.isPending}
-            className="px-4 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50"
+            disabled={mut.isPending || isDnc}
+            title={isDnc ? "Recipient is flagged Do Not Contact" : undefined}
+            className="px-4 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {mut.isPending ? "Sending…" : "Send"}
+            {mut.isPending ? "Sending…" : isDnc ? "Blocked (DNC)" : "Send"}
           </button>
         </div>
       </form>
