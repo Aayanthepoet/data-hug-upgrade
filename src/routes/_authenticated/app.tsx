@@ -59,10 +59,11 @@ function AppShell() {
               </Link>
             </div>
             <div className="flex items-center gap-3 text-sm">
+              <LanguageSwitcher compact />
               <NotificationBell />
               <span className="text-[var(--w55)] hidden md:inline">{user?.email}</span>
               <button onClick={signOut} className="btn-ghost text-xs px-4 py-2">
-                Sign out
+                {t("common.signOut")}
               </button>
             </div>
           </header>
