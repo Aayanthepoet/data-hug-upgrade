@@ -61,6 +61,7 @@ import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
 import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
 import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
+import { Route as AuthenticatedAppSettingsIntegrationsRouteImport } from './routes/_authenticated/app.settings.integrations'
 import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
 import { Route as AuthenticatedAppPropertiesLookupHistoryRouteImport } from './routes/_authenticated/app.properties.lookup-history'
 import { Route as AuthenticatedAppPropertiesLookupRouteImport } from './routes/_authenticated/app.properties.lookup'
@@ -353,6 +354,12 @@ const AuthenticatedAppSettingsPublicProfileRoute =
     path: '/public-profile',
     getParentRoute: () => AuthenticatedAppSettingsRoute,
   } as any)
+const AuthenticatedAppSettingsIntegrationsRoute =
+  AuthenticatedAppSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedAppSettingsRoute,
+  } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
     id: '/search',
@@ -471,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/settings/integrations': typeof AuthenticatedAppSettingsIntegrationsRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
@@ -535,6 +543,7 @@ export interface FileRoutesByTo {
   '/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/app/settings/integrations': typeof AuthenticatedAppSettingsIntegrationsRoute
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
@@ -602,6 +611,7 @@ export interface FileRoutesById {
   '/_authenticated/app/properties/lookup': typeof AuthenticatedAppPropertiesLookupRoute
   '/_authenticated/app/properties/lookup-history': typeof AuthenticatedAppPropertiesLookupHistoryRoute
   '/_authenticated/app/properties/search': typeof AuthenticatedAppPropertiesSearchRoute
+  '/_authenticated/app/settings/integrations': typeof AuthenticatedAppSettingsIntegrationsRoute
   '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/_authenticated/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
@@ -669,6 +679,7 @@ export interface FileRouteTypes {
     | '/app/properties/lookup'
     | '/app/properties/lookup-history'
     | '/app/properties/search'
+    | '/app/settings/integrations'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
     | '/app/social/compose'
@@ -733,6 +744,7 @@ export interface FileRouteTypes {
     | '/app/properties/lookup'
     | '/app/properties/lookup-history'
     | '/app/properties/search'
+    | '/app/settings/integrations'
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
     | '/app/social/compose'
@@ -799,6 +811,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/properties/lookup'
     | '/_authenticated/app/properties/lookup-history'
     | '/_authenticated/app/properties/search'
+    | '/_authenticated/app/settings/integrations'
     | '/_authenticated/app/settings/public-profile'
     | '/_authenticated/app/social/business-portfolio'
     | '/_authenticated/app/social/compose'
@@ -1216,6 +1229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSettingsPublicProfileRouteImport
       parentRoute: typeof AuthenticatedAppSettingsRoute
     }
+    '/_authenticated/app/settings/integrations': {
+      id: '/_authenticated/app/settings/integrations'
+      path: '/integrations'
+      fullPath: '/app/settings/integrations'
+      preLoaderRoute: typeof AuthenticatedAppSettingsIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAppSettingsRoute
+    }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
       path: '/search'
@@ -1369,11 +1389,14 @@ const AuthenticatedAppPropertiesRouteWithChildren =
   )
 
 interface AuthenticatedAppSettingsRouteChildren {
+  AuthenticatedAppSettingsIntegrationsRoute: typeof AuthenticatedAppSettingsIntegrationsRoute
   AuthenticatedAppSettingsPublicProfileRoute: typeof AuthenticatedAppSettingsPublicProfileRoute
 }
 
 const AuthenticatedAppSettingsRouteChildren: AuthenticatedAppSettingsRouteChildren =
   {
+    AuthenticatedAppSettingsIntegrationsRoute:
+      AuthenticatedAppSettingsIntegrationsRoute,
     AuthenticatedAppSettingsPublicProfileRoute:
       AuthenticatedAppSettingsPublicProfileRoute,
   }
