@@ -171,6 +171,7 @@ function Stat({ label, value, accent }: { label: string; value: React.ReactNode;
 function SendMessageDialog({ onSent }: { onSent: () => void }) {
   const sendFn = useServerFn(sendOutreach);
   const reachableFn = useServerFn(listReachableOwners);
+  const dncFn = useServerFn(listDncContactValues);
   const [open, setOpen] = useState(false);
   const [channel, setChannel] = useState<Channel>("sms");
   const [to, setTo] = useState("");
@@ -185,6 +186,19 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
     queryFn: () => reachableFn(),
     enabled: open,
   });
+
+  const { data: dnc } = useQuery({
+    queryKey: ["dnc-values"],
+    queryFn: () => dncFn(),
+    enabled: open,
+  });
+
+  const isDnc = (() => {
+    if (channel === "mail" || !to.trim() || !dnc) return false;
+    const v = to.trim().toLowerCase();
+    if (channel === "sms") return dnc.phones.includes(v.replace(/[^0-9+]/g, ""));
+    return dnc.emails.includes(v);
+  })();
 
   const ownerList = owners ?? [];
   const selectedOwner = ownerId ? ownerList.find((o) => o.owner_id === ownerId) ?? null : null;
