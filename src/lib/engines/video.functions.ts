@@ -30,7 +30,7 @@ export const generateListingVideoScript = createServerFn({ method: "POST" })
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
     const gateway = createLovableAiGatewayProvider(key);
     const { object } = await generateObject({
-      model: gateway("google/gemini-2.5-flash"),
+      model: gateway("google/gemini-3-flash-preview"),
       schema: Script,
       system: `You are the PropAI Voice & Video Engine. Write a ${data.length_seconds}-second walkthrough script for a ${data.style} audience. Scene seconds should sum to approximately ${data.length_seconds}.`,
       prompt: `Property: ${data.address}\nHighlights: ${data.highlights ?? "(none provided)"}\n\nProduce a structured script with 3-6 scenes.`,
