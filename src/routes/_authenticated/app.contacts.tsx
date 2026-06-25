@@ -20,7 +20,22 @@ type PendingKind = "ai" | "skip" | "both";
 function ContactsPage() {
   const resolve = useServerFn(resolveOwnerContacts);
   const skipTrace = useServerFn(runSkipTrace);
+  const toggleDnc = useServerFn(setContactDoNotContact);
   const [pending, setPending] = useState<{ id: string; kind: PendingKind } | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  async function onToggleDnc(contactId: string, next: boolean) {
+    setTogglingId(contactId);
+    try {
+      await toggleDnc({ data: { contact_id: contactId, do_not_contact: next } });
+      toast.success(next ? "Marked Do Not Contact" : "Re-enabled for outreach");
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   const { data: owners, refetch } = useQuery({
     queryKey: ["owners-with-contacts"],
