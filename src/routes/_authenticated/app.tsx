@@ -19,6 +19,8 @@ function AppShell() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
+
 
   async function signOut() {
     await qc.cancelQueries();
