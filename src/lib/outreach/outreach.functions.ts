@@ -24,7 +24,49 @@ export const sendOutreach = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    // 0. Compliance gate — SMS sends to a suppressed phone number are
+    // 0a. DNC guard — block sends to any contact row marked do_not_contact,
+    //     whether selected by contact_id or matched on raw to_value. Logged
+    //     to outreach_messages with status='blocked' for the audit trail.
+    const normalizedTo = data.to.trim().toLowerCase();
+    let dncHit: { id: string; value: string } | null = null;
+    if (data.contact_id) {
+      const { data: c, error: cErr } = await supabase
+        .from("contacts")
+        .select("id, value, do_not_contact")
+        .eq("id", data.contact_id)
+        .maybeSingle();
+      if (cErr) throw new Error(cErr.message);
+      if (c?.do_not_contact) dncHit = { id: c.id, value: c.value };
+    }
+    if (!dncHit && (data.channel === "sms" || data.channel === "email")) {
+      const { data: matches } = await supabase
+        .from("contacts")
+        .select("id, value")
+        .eq("contact_type", data.channel === "sms" ? "phone" : "email")
+        .eq("do_not_contact", true)
+        .ilike("value", normalizedTo);
+      if (matches && matches.length > 0) dncHit = { id: matches[0].id, value: matches[0].value };
+    }
+    if (dncHit) {
+      await supabase.from("outreach_messages").insert({
+        user_id: userId,
+        owner_id: data.owner_id ?? null,
+        contact_id: data.contact_id ?? dncHit.id,
+        campaign_id: data.campaign_id ?? null,
+        channel: data.channel,
+        direction: "outbound",
+        to_value: data.to,
+        subject: data.subject ?? null,
+        body: data.body,
+        status: "blocked",
+        error: "Contact is flagged Do Not Contact",
+      });
+      throw new Error(
+        `Blocked: ${dncHit.value} is flagged Do Not Contact. Remove the DNC flag in Contacts to message them again.`,
+      );
+    }
+
+    // 0b. Compliance gate — SMS sends to a suppressed phone number are
     //    blocked, logged, and never hit the provider. This is the hard
     //    enforcement of carrier-required STOP/UNSUBSCRIBE handling.
     if (data.channel === "sms") {
@@ -51,6 +93,7 @@ export const sendOutreach = createServerFn({ method: "POST" })
         );
       }
     }
+
 
     // 1. Insert a queued row so we always have an audit record even if the
     //    provider call throws.
@@ -204,3 +247,28 @@ export const listReachableOwners = createServerFn({ method: "GET" })
       };
     });
   });
+
+// Lightweight registry of contact values flagged Do Not Contact. Used by the
+// Send dialog to disable the send/export action the moment the recipient
+// matches a DNC entry — server still re-checks before dispatch.
+export const listDncContactValues = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("contacts")
+      .select("contact_type, value")
+      .eq("do_not_contact", true)
+      .in("contact_type", ["phone", "email"])
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    const phones = new Set<string>();
+    const emails = new Set<string>();
+    for (const r of data ?? []) {
+      const v = (r.value ?? "").trim().toLowerCase();
+      if (!v) continue;
+      if (r.contact_type === "phone") phones.add(v.replace(/[^0-9+]/g, ""));
+      else if (r.contact_type === "email") emails.add(v);
+    }
+    return { phones: Array.from(phones), emails: Array.from(emails) };
+  });
+

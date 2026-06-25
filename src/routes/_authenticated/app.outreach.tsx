@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Send, Mail, MessageSquare, MapPin, Reply, AlertCircle, CheckCircle2, Clock } from "lucide-react";
-import { listOutreach, sendOutreach, recordReply, listReachableOwners } from "@/lib/outreach/outreach.functions";
+import { listOutreach, sendOutreach, recordReply, listReachableOwners, listDncContactValues } from "@/lib/outreach/outreach.functions";
 import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
 import { Link } from "@tanstack/react-router";
 
@@ -171,6 +171,7 @@ function Stat({ label, value, accent }: { label: string; value: React.ReactNode;
 function SendMessageDialog({ onSent }: { onSent: () => void }) {
   const sendFn = useServerFn(sendOutreach);
   const reachableFn = useServerFn(listReachableOwners);
+  const dncFn = useServerFn(listDncContactValues);
   const [open, setOpen] = useState(false);
   const [channel, setChannel] = useState<Channel>("sms");
   const [to, setTo] = useState("");
@@ -185,6 +186,19 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
     queryFn: () => reachableFn(),
     enabled: open,
   });
+
+  const { data: dnc } = useQuery({
+    queryKey: ["dnc-values"],
+    queryFn: () => dncFn(),
+    enabled: open,
+  });
+
+  const isDnc = (() => {
+    if (channel === "mail" || !to.trim() || !dnc) return false;
+    const v = to.trim().toLowerCase();
+    if (channel === "sms") return dnc.phones.includes(v.replace(/[^0-9+]/g, ""));
+    return dnc.emails.includes(v);
+  })();
 
   const ownerList = owners ?? [];
   const selectedOwner = ownerId ? ownerList.find((o) => o.owner_id === ownerId) ?? null : null;
@@ -236,11 +250,22 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           e.preventDefault();
           setErr(null);
           if (!to.trim() || !body.trim()) { setErr("Recipient and body are required."); return; }
+          if (isDnc) { setErr("This recipient is flagged Do Not Contact. Remove the DNC flag in Contacts before sending."); return; }
           mut.mutate();
         }}
         className="bg-[#0a0f17] border border-border rounded-lg w-full max-w-lg p-5 space-y-4"
       >
         <h2 className="text-lg font-semibold">New outreach message</h2>
+
+        {isDnc && (
+          <div className="flex items-start gap-2 border border-red-500/40 bg-red-500/10 text-red-200 text-xs rounded p-3">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <div>
+              <div className="font-semibold">Do Not Contact</div>
+              <div className="opacity-80">This {channel === "sms" ? "number" : "email"} is on your DNC list. Sending and exporting are disabled. Re-enable via Contacts → Allow.</div>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2">
           {(["sms", "email", "mail"] as const).map((c) => {
@@ -412,10 +437,11 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           </button>
           <button
             type="submit"
-            disabled={mut.isPending}
-            className="px-4 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50"
+            disabled={mut.isPending || isDnc}
+            title={isDnc ? "Recipient is flagged Do Not Contact" : undefined}
+            className="px-4 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {mut.isPending ? "Sending…" : "Send"}
+            {mut.isPending ? "Sending…" : isDnc ? "Blocked (DNC)" : "Send"}
           </button>
         </div>
       </form>
