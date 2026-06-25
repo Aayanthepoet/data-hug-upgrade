@@ -247,3 +247,28 @@ export const listReachableOwners = createServerFn({ method: "GET" })
       };
     });
   });
+
+// Lightweight registry of contact values flagged Do Not Contact. Used by the
+// Send dialog to disable the send/export action the moment the recipient
+// matches a DNC entry — server still re-checks before dispatch.
+export const listDncContactValues = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("contacts")
+      .select("contact_type, value")
+      .eq("do_not_contact", true)
+      .in("contact_type", ["phone", "email"])
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    const phones = new Set<string>();
+    const emails = new Set<string>();
+    for (const r of data ?? []) {
+      const v = (r.value ?? "").trim().toLowerCase();
+      if (!v) continue;
+      if (r.contact_type === "phone") phones.add(v.replace(/[^0-9+]/g, ""));
+      else if (r.contact_type === "email") emails.add(v);
+    }
+    return { phones: Array.from(phones), emails: Array.from(emails) };
+  });
+
