@@ -27,7 +27,7 @@ function ContactsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("owners")
-        .select("id, full_name, entity_type, mailing_address, property_id, skip_trace_status, skip_trace_last_run_at, contacts(id, contact_type, value, confidence, notes)")
+        .select("id, full_name, entity_type, mailing_address, property_id, skip_trace_status, skip_trace_last_run_at, contacts(id, contact_type, value, confidence, notes, do_not_contact)")
         .order("created_at", { ascending: false }).limit(50);
       if (error) throw error;
       return data;
