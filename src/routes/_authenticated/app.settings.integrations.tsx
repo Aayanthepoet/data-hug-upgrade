@@ -81,33 +81,35 @@ function IntegrationsPage() {
         )}
 
         {data?.isAdmin && (
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={() => {
-                // Triggers the Lovable secret form in chat
-                window.dispatchEvent(
-                  new CustomEvent("lovable:request-secret", { detail: { names: ["ATTOM_API_KEY"] } }),
-                );
-                window.open(
-                  "https://api.developer.attomdata.com/signup",
-                  "_blank",
-                  "noopener,noreferrer",
-                );
-                // Fallback prompt to the user
-                alert(
-                  data?.configured
-                    ? "To rotate your ATTOM API key, ask the assistant: \"Update my ATTOM_API_KEY secret.\""
-                    : "To add your ATTOM API key, ask the assistant: \"Add my ATTOM_API_KEY secret\" — you'll get a secure form to paste it.",
-                );
-              }}
-            >
-              {data?.configured ? "Rotate API Key" : "Add ATTOM API Key"}
-            </Button>
-            {data?.configured && (
-              <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-                Test connection
+          <div className="rounded-lg border border-cyan-900/40 bg-cyan-950/10 p-4 space-y-2 text-sm">
+            <p className="font-medium text-cyan-200">
+              {data?.configured ? "Rotate your API key" : "Ready to add your key?"}
+            </p>
+            <p className="text-[var(--w55)]">
+              For security, API keys are stored as encrypted backend secrets — not in browser
+              storage. Send this message in the Lovable chat to open a secure form:
+            </p>
+            <code className="block rounded bg-background/60 border border-border/60 px-3 py-2 text-xs text-cyan-300">
+              {data?.configured
+                ? "Update my ATTOM_API_KEY secret"
+                : "Add my ATTOM_API_KEY secret"}
+            </code>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button asChild variant="outline" size="sm">
+                <a
+                  href="https://api.developer.attomdata.com/signup"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Get an ATTOM key <ExternalLink className="h-3 w-3 ml-1.5" />
+                </a>
               </Button>
-            )}
+              {data?.configured && (
+                <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+                  Test connection
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </section>
