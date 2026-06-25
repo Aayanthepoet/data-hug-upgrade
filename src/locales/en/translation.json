@@ -1,0 +1,118 @@
+{
+  "common": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "startTrial": "Start free trial",
+    "startTrialLong": "Start Free 14-Day Trial",
+    "openDashboard": "Open dashboard",
+    "explorePlatform": "Explore Platform →",
+    "seeAllFeatures": "See all features →",
+    "backToLanding": "Back to Landing Page",
+    "backToLandingShort": "Back",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "language": "Language"
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "howItWorks": "How it works",
+    "contact": "Contact"
+  },
+  "footer": {
+    "tagline": "The complete intelligence platform for real estate professionals. Built by AI Network Agency.",
+    "platform": "Platform",
+    "company": "Company",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "rights": "All rights reserved."
+  },
+  "landing": {
+    "eyebrow": "AI Network Agency · PropAI Platform",
+    "heroTitle1": "The Complete",
+    "heroTitle2": "Intelligence",
+    "heroTitle3": "Platform for Real Estate",
+    "heroBody": "PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, and close more deals — all inside one platform built by AI Network Agency.",
+    "ratingLine": "<b>2,400+ agents</b> across 47 states",
+    "dealsLine": "<b>18,000+</b> deals facilitated",
+    "stats": {
+      "activeAgents": "Active agents",
+      "dealsFacilitated": "Deals facilitated",
+      "skipTraceAccuracy": "Skip-trace accuracy",
+      "avgOpenRate": "Avg outreach open rate"
+    },
+    "modulesEyebrow": "Platform Modules",
+    "modulesTitle1": "Seven AI engines.",
+    "modulesTitle2": "One platform.",
+    "modulesBody": "The same capabilities institutional investors pay $50,000+/yr for — bundled, integrated, and purpose-built for real estate professionals.",
+    "workflowEyebrow": "End-to-End Process",
+    "workflowTitle1": "Unknown owner to",
+    "workflowTitle2": "closed deal",
+    "workflowTitle3": "— one platform",
+    "contactEyebrow": "Get started",
+    "contactTitle1": "Ready to see PropAI",
+    "contactTitle2": "in your market?",
+    "contactBody": "Tell us about your brokerage. We'll set up a personalized walkthrough and run a real owner search in your target ZIP — live, on the call.",
+    "contactBullet1": "14-day free trial, no credit card",
+    "contactBullet2": "Full platform access during trial",
+    "contactBullet3": "Personal onboarding specialist"
+  },
+  "modules": {
+    "01": { "title": "AI Owner Search", "desc": "Query nationwide property records in seconds. Find owners by address, ZIP, equity, distress signal, or absentee status.", "powered": "PropAI Search Intelligence" },
+    "02": { "title": "Contact Resolver", "desc": "Skip-trace phone, email, and social profiles for 94% of US property owners. Verified, deliverable, fast.", "powered": "PropAI Contact Resolver" },
+    "03": { "title": "AI Lead Scoring", "desc": "Motivation score 0–100 from equity position, days in distress, ownership history, and situation type.", "powered": "PropAI Language Engine" },
+    "04": { "title": "Outreach Engine", "desc": "Personalized seller letters in your voice. 68% open rate vs 22% industry standard. Launch in one click.", "powered": "PropAI Outreach Engine" },
+    "05": { "title": "Vision Studio", "desc": "Photorealistic AI property redesigns in 6 styles, under 60 seconds. HD and 4K output included.", "powered": "PropAI Vision Studio" },
+    "06": { "title": "Video AI Generator", "desc": "Professional tour videos with AI voiceover and brand kit auto-applied — optimized for YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+  },
+  "workflow": {
+    "1": { "t": "Find the Owner", "d": "PropAI's Search Intelligence queries nationwide property records.", "tag": "Search Intelligence" },
+    "2": { "t": "Skip-Trace Contact Info", "d": "Contact Resolver traces phone, email, social from 94% of US owners.", "tag": "Contact Resolver" },
+    "3": { "t": "Score the Lead", "d": "Language Engine scores motivation 0–100 from equity, distress, history.", "tag": "Language Engine" },
+    "4": { "t": "Send AI-Personalized Outreach", "d": "Outreach Engine writes a letter specific to this owner's situation.", "tag": "Outreach Engine" },
+    "5": { "t": "Present with AI Visuals", "d": "Vision Studio renders redesigns. Video Studio creates the tour video.", "tag": "Vision + Video Studio" },
+    "6": { "t": "Close the Deal", "d": "PropAI Agent coaches negotiation and tracks every touchpoint.", "tag": "PropAI Agent" }
+  },
+  "sidebar": {
+    "workspace": "Workspace",
+    "landingPage": "Landing Page",
+    "overview": "Overview",
+    "propaiAgent": "PropAI Agent",
+    "leads": "Leads",
+    "leadScoring": "Lead Scoring",
+    "properties": "Properties",
+    "addressLookup": "Address Lookup",
+    "lookupHistory": "Lookup History",
+    "findDistressed": "Find Distressed",
+    "auctions": "Auctions",
+    "watchlist": "Watchlist",
+    "owners": "Owners",
+    "contactsResolver": "Contacts (Resolver)",
+    "leadLists": "Lead Lists",
+    "campaignsLanguage": "Campaigns (Language)",
+    "outreach": "Outreach",
+    "visionStudio": "Vision Studio",
+    "videosVoice": "Videos (Voice+Video)",
+    "socialAmplifier": "Social Amplifier",
+    "auditLog": "Audit Log",
+    "smsOptOuts": "SMS Opt-outs",
+    "settings": "Settings"
+  },
+  "overview": {
+    "eyebrow": "Welcome back",
+    "titleA": "Your",
+    "titleB": "workspace",
+    "signedInAs": "Signed in as <b>{{email}}</b>. Pick a module to start adding data — everything is private to your account.",
+    "records": "records",
+    "chat": "Chat →",
+    "agentDesc": "Summarize leads, draft outreach"
+  },
+  "empty": {
+    "nothingYet": "Nothing here yet",
+    "description": "This module is wired to your database. Add your first record or wait for the AI module rollout in the next phase."
+  }
+}
