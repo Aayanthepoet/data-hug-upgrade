@@ -6,7 +6,7 @@ import { NotificationBell } from "@/components/app/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
-import { Home } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Workspace — PropAI" }] }),
@@ -39,14 +39,24 @@ function AppShell() {
                   Prop<span className="text-cyan">AI</span>
                 </span>
               </Link>
+              <Link
+                to="/"
+                className="ml-2 hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 hover:border-cyan transition"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>Back to Landing Page</span>
+              </Link>
+              <Link
+                to="/"
+                aria-label="Back to landing page"
+                className="ml-2 sm:hidden flex items-center justify-center h-8 w-8 rounded-md border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 transition"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <NotificationBell />
-              <span className="text-[var(--w55)] hidden sm:inline">{user?.email}</span>
-              <Link to="/" className="btn-ghost text-xs px-3 py-1.5 flex items-center gap-1.5 border border-border/40 rounded hover:bg-white/5 transition">
-                <Home className="h-3.5 w-3.5" />
-                <span>Go to Website</span>
-              </Link>
+              <span className="text-[var(--w55)] hidden md:inline">{user?.email}</span>
               <button onClick={signOut} className="btn-ghost text-xs px-4 py-2">
                 Sign out
               </button>
