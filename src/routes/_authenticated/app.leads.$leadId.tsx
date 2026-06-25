@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ function LeadDetailPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
 
+  const { t } = useTranslation();
   const leadQuery = useQuery({
     queryKey: ["lead", leadId],
     queryFn: async () => {
@@ -128,7 +130,7 @@ function LeadDetailPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead", leadId] });
       qc.invalidateQueries({ queryKey: ["leads"] });
-      toast.success("Status updated");
+      toast.success(t("leads.detail.toastStatusUpdated"));
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -144,7 +146,7 @@ function LeadDetailPage() {
       qc.invalidateQueries({ queryKey: ["lead", leadId] });
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["lead-assignments", leadId] });
-      toast.success("Assignment updated");
+      toast.success(t("leads.detail.toastAssignUpdated"));
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -152,7 +154,7 @@ function LeadDetailPage() {
   const [body, setBody] = useState("");
   const addNote = useMutation({
     mutationFn: async () => {
-      if (!body.trim()) throw new Error("Note can't be empty");
+      if (!body.trim()) throw new Error(t("leads.detail.toastNoteEmpty"));
       const { error } = await supabase.from("lead_notes").insert({
         lead_id: leadId,
         author_id: user?.id,
@@ -163,7 +165,7 @@ function LeadDetailPage() {
     onSuccess: () => {
       setBody("");
       qc.invalidateQueries({ queryKey: ["lead-notes", leadId] });
-      toast.success("Note added");
+      toast.success(t("leads.detail.toastNoteAdded"));
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -178,26 +180,26 @@ function LeadDetailPage() {
   });
 
   if (leadQuery.isLoading) {
-    return <div className="text-sm text-[var(--w55)]">Loading…</div>;
+    return <div className="text-sm text-[var(--w55)]">{t("leads.detail.loading")}</div>;
   }
   if (leadQuery.error) {
-    return <div className="text-sm text-red-400">Couldn't load lead.</div>;
+    return <div className="text-sm text-red-400">{t("leads.detail.loadError")}</div>;
   }
   const lead = leadQuery.data;
   if (!lead) {
     return (
       <div className="space-y-4">
         <Link to="/app/leads" className="text-sm text-cyan hover:underline inline-flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to leads
+          <ArrowLeft className="h-4 w-4" /> {t("leads.detail.back")}
         </Link>
-        <p className="text-sm text-[var(--w55)]">Lead not found.</p>
+        <p className="text-sm text-[var(--w55)]">{t("leads.detail.notFound")}</p>
       </div>
     );
   }
 
   function handleExportCsv() {
     const memberName = (id: string | null) =>
-      id ? memberLabel(members.find((m) => m.id === id)) : "Unassigned";
+      id ? memberLabel(members.find((m) => m.id === id)) : t("leads.detail.unassigned");
     const lines: string[][] = [];
     lines.push(["Section", "Field", "Value"]);
     lines.push(["Lead", "ID", lead!.id]);
@@ -225,7 +227,7 @@ function LeadDetailPage() {
 
   function buildPdfDoc() {
     const memberName = (id: string | null) =>
-      id ? memberLabel(members.find((m) => m.id === id)) : "Unassigned";
+      id ? memberLabel(members.find((m) => m.id === id)) : t("leads.detail.unassigned");
 
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -372,12 +374,12 @@ function LeadDetailPage() {
 
   async function handleSendEmail() {
     if (selectedIds.length === 0) {
-      toast.error("Pick at least one recipient");
+      toast.error(t("leads.detail.toastPickRecipient"));
       return;
     }
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast.error("You must be signed in");
+      toast.error(t("leads.detail.toastMustSignIn"));
       return;
     }
     setSending(true);
@@ -452,8 +454,8 @@ function LeadDetailPage() {
 
       const failed = results.filter((r) => r.status === "rejected").length;
       const ok = results.length - failed;
-      if (ok > 0) toast.success(`Emailed PDF to ${ok} recipient${ok === 1 ? "" : "s"}`);
-      if (failed > 0) toast.error(`${failed} email${failed === 1 ? "" : "s"} failed to send`);
+      if (ok > 0) toast.success(t("leads.detail.toastEmailed", { count: ok }));
+      if (failed > 0) toast.error(t("leads.detail.toastFailed", { count: failed }));
 
       if (failed === 0) {
         setEmailOpen(false);
@@ -461,7 +463,7 @@ function LeadDetailPage() {
         setEmailNote("");
       }
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to send email");
+      toast.error(e.message ?? t("leads.detail.toastSendError"));
     } finally {
       setSending(false);
     }
@@ -472,42 +474,42 @@ function LeadDetailPage() {
     <div className="space-y-8 max-w-3xl">
       <div>
         <Link to="/app/leads" className="text-sm text-cyan hover:underline inline-flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to leads
+          <ArrowLeft className="h-4 w-4" /> {t("leads.detail.back")}
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3 mt-3">
           <div>
-            <h1 className="text-3xl font-bold">{lead.full_name || "Unnamed lead"}</h1>
+            <h1 className="text-3xl font-bold">{lead.full_name || t("leads.detail.unnamed")}</h1>
             <p className="text-sm text-[var(--w55)] mt-1">
-              Submitted {new Date(lead.created_at).toLocaleString()}
-              {lead.source ? ` · via ${lead.source}` : ""}
+              {t("leads.detail.submittedAt", { when: new Date(lead.created_at).toLocaleString() })}
+              {lead.source ? t("leads.detail.viaSource", { source: lead.source }) : ""}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={handleExportCsv} className="gap-2">
-              <Download className="h-4 w-4" /> Export CSV
+              <Download className="h-4 w-4" /> {t("leads.detail.exportCsv")}
             </Button>
             <Button variant="outline" onClick={handleExportPdf} className="gap-2">
-              <FileText className="h-4 w-4" /> Download PDF
+              <FileText className="h-4 w-4" /> {t("leads.detail.downloadPdf")}
             </Button>
             <Button variant="outline" onClick={() => setEmailOpen(true)} className="gap-2">
-              <Mail className="h-4 w-4" /> Email PDF
+              <Mail className="h-4 w-4" /> {t("leads.detail.emailPdf")}
             </Button>
 
             <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Email lead PDF</DialogTitle>
+                  <DialogTitle>{t("leads.detail.dialogTitle")}</DialogTitle>
                   <DialogDescription>
-                    Pick the team members to send the generated PDF to. They'll get a private download link valid for 7 days.
+                    {t("leads.detail.dialogDescription")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3">
                   <div className="text-xs uppercase tracking-wider text-[var(--w55)]">
-                    Recipients
+                    {t("leads.detail.recipients")}
                   </div>
                   {recipientCandidates.length === 0 ? (
                     <p className="text-sm text-[var(--w55)]">
-                      No teammates with an email address found.
+                      {t("leads.detail.noTeammates")}
                     </p>
                   ) : (
                     <div className="max-h-64 overflow-y-auto space-y-2 rounded-md border border-border p-3">
@@ -535,12 +537,12 @@ function LeadDetailPage() {
                   )}
                   <div className="space-y-1">
                     <Label htmlFor="email-note" className="text-xs uppercase tracking-wider text-[var(--w55)]">
-                      Optional note
+                      {t("leads.detail.optionalNote")}
                     </Label>
                     <Textarea
                       id="email-note"
                       rows={3}
-                      placeholder="Add a quick message for your teammates…"
+                      placeholder={t("leads.detail.notePlaceholder")}
                       value={emailNote}
                       onChange={(e) => setEmailNote(e.target.value)}
                     />
@@ -548,7 +550,7 @@ function LeadDetailPage() {
                 </div>
                 <DialogFooter>
                   <Button variant="ghost" onClick={() => setEmailOpen(false)} disabled={sending}>
-                    Cancel
+                    {t("leads.detail.cancel")}
                   </Button>
                   <Button
                     onClick={handleSendEmail}
@@ -556,7 +558,7 @@ function LeadDetailPage() {
                     className="gap-2"
                   >
                     <Mail className="h-4 w-4" />
-                    {sending ? "Sending…" : `Send to ${selectedIds.length || ""}`.trim()}
+                    {sending ? t("leads.detail.sending") : t("leads.detail.sendTo", { count: selectedIds.length })}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -567,19 +569,19 @@ function LeadDetailPage() {
 
       <section className="border border-border rounded-lg p-6 space-y-4">
         <div className="grid sm:grid-cols-2 gap-4 text-sm">
-          <Field label="Email" value={lead.email ? <a href={`mailto:${lead.email}`} className="text-cyan hover:underline">{lead.email}</a> : "—"} />
-          <Field label="Phone" value={lead.phone ? <a href={`tel:${lead.phone}`} className="text-cyan hover:underline">{lead.phone}</a> : "—"} />
-          <Field label="Company" value={lead.company || "—"} />
-          <Field label="Source" value={lead.source || "—"} />
+          <Field label={t("leads.detail.fieldEmail")} value={lead.email ? <a href={`mailto:${lead.email}`} className="text-cyan hover:underline">{lead.email}</a> : "—"} />
+          <Field label={t("leads.detail.fieldPhone")} value={lead.phone ? <a href={`tel:${lead.phone}`} className="text-cyan hover:underline">{lead.phone}</a> : "—"} />
+          <Field label={t("leads.detail.fieldCompany")} value={lead.company || "—"} />
+          <Field label={t("leads.detail.fieldSource")} value={lead.source || "—"} />
         </div>
         <div>
-          <div className="text-xs uppercase tracking-wider text-[var(--w55)] mb-1">Message</div>
+          <div className="text-xs uppercase tracking-wider text-[var(--w55)] mb-1">{t("leads.detail.message")}</div>
           <div className="text-sm whitespace-pre-wrap rounded-md bg-[rgba(255,255,255,.03)] p-3 border border-border">
-            {lead.message || <span className="text-[var(--w55)]">No message provided.</span>}
+            {lead.message || <span className="text-[var(--w55)]">{t("leads.detail.noMessage")}</span>}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <div className="text-xs uppercase tracking-wider text-[var(--w55)]">Status</div>
+          <div className="text-xs uppercase tracking-wider text-[var(--w55)]">{t("leads.detail.status")}</div>
           <Select
             value={lead.status || "new"}
             onValueChange={(v) => updateStatus.mutate(v)}
@@ -590,14 +592,14 @@ function LeadDetailPage() {
             </SelectContent>
           </Select>
 
-          <div className="text-xs uppercase tracking-wider text-[var(--w55)] ml-2">Assignee</div>
+          <div className="text-xs uppercase tracking-wider text-[var(--w55)] ml-2">{t("leads.detail.assignee")}</div>
           <Select
             value={lead.assigned_to ?? "unassigned"}
             onValueChange={(v) => updateAssignee.mutate(v === "unassigned" ? null : v)}
           >
             <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
+              <SelectItem value="unassigned">{t("leads.detail.unassigned")}</SelectItem>
               {members.map((m) => (
                 <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
               ))}
@@ -607,7 +609,7 @@ function LeadDetailPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Follow-up notes</h2>
+        <h2 className="text-xl font-semibold">{t("leads.detail.notesHeading")}</h2>
         <form
           onSubmit={(e) => { e.preventDefault(); addNote.mutate(); }}
           className="space-y-2"
@@ -615,20 +617,20 @@ function LeadDetailPage() {
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Add a note about this lead…"
+            placeholder={t("leads.detail.notesPlaceholder")}
             rows={3}
           />
           <div className="flex justify-end">
             <Button type="submit" disabled={addNote.isPending || !body.trim()}>
-              {addNote.isPending ? "Saving…" : "Add note"}
+              {addNote.isPending ? t("leads.detail.savingNote") : t("leads.detail.addNote")}
             </Button>
           </div>
         </form>
 
         {notesQuery.isLoading ? (
-          <p className="text-sm text-[var(--w55)]">Loading notes…</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.notesLoading")}</p>
         ) : (notesQuery.data?.length ?? 0) === 0 ? (
-          <p className="text-sm text-[var(--w55)]">No notes yet.</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.notesEmpty")}</p>
         ) : (
           <ul className="space-y-3">
             {notesQuery.data!.map((n) => (
@@ -640,7 +642,7 @@ function LeadDetailPage() {
                   <button
                     onClick={() => deleteNote.mutate(n.id)}
                     className="text-[var(--w55)] hover:text-red-400"
-                    aria-label="Delete note"
+                    aria-label={t("leads.detail.deleteNoteAria")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -653,11 +655,11 @@ function LeadDetailPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Assignment history</h2>
+        <h2 className="text-xl font-semibold">{t("leads.detail.historyHeading")}</h2>
         {historyQuery.isLoading ? (
-          <p className="text-sm text-[var(--w55)]">Loading history…</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.historyLoading")}</p>
         ) : (historyQuery.data?.length ?? 0) === 0 ? (
-          <p className="text-sm text-[var(--w55)]">No assignment changes yet.</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.historyEmpty")}</p>
         ) : (
           <ol className="border border-border rounded-md divide-y divide-border">
             {historyQuery.data!.map((h) => {
@@ -666,13 +668,13 @@ function LeadDetailPage() {
               return (
                 <li key={h.id} className="px-4 py-3 text-sm flex flex-wrap items-baseline justify-between gap-2">
                   <div>
-                    Assigned to{" "}
+                    {t("leads.detail.assignedTo")}{" "}
                     <span className="font-medium">
-                      {h.assigned_to ? memberLabel(assignee) : "Unassigned"}
+                      {h.assigned_to ? memberLabel(assignee) : t("leads.detail.unassigned")}
                     </span>
-                    {" "}by{" "}
+                    {" "}{t("leads.detail.by")}{" "}
                     <span className="font-medium">
-                      {h.assigned_by ? memberLabel(by) : "system"}
+                      {h.assigned_by ? memberLabel(by) : t("leads.detail.system")}
                     </span>
                   </div>
                   <div className="text-xs text-[var(--w55)] whitespace-nowrap">
@@ -686,11 +688,11 @@ function LeadDetailPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Email delivery</h2>
+        <h2 className="text-xl font-semibold">{t("leads.detail.emailHeading")}</h2>
         {emailsQuery.isLoading ? (
-          <p className="text-sm text-[var(--w55)]">Loading delivery status…</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.emailLoading")}</p>
         ) : (emailsQuery.data?.length ?? 0) === 0 ? (
-          <p className="text-sm text-[var(--w55)]">No PDF emails sent yet.</p>
+          <p className="text-sm text-[var(--w55)]">{t("leads.detail.emailEmpty")}</p>
         ) : (
           <ul className="border border-border rounded-md divide-y divide-border">
             {emailsQuery.data!.map((e) => {
@@ -727,7 +729,7 @@ function LeadDetailPage() {
                             : "border-amber-500/40 text-amber-300 bg-amber-500/10")
                       }
                     >
-                      {isFailed ? "Failed" : e.status === "sent" ? "Sent" : "Queued"}
+                      {isFailed ? t("leads.detail.statusFailed") : e.status === "sent" ? t("leads.detail.statusSent") : t("leads.detail.statusQueued")}
                     </span>
                     <span className="text-xs text-[var(--w55)] whitespace-nowrap">
                       {new Date(e.created_at).toLocaleString()}

@@ -62,20 +62,68 @@
     "contactBullet3": "Espesyalis pèsonèl pou ede w kòmanse"
   },
   "modules": {
-    "01": { "title": "AI Owner Search", "desc": "Chèche dosye pwopriyete nan tout peyi a nan kèk segond. Jwenn mèt pwopriyete pa adrès, ZIP, equity, siyal distress oswa absentee.", "powered": "PropAI Search Intelligence" },
-    "02": { "title": "Contact Resolver", "desc": "Skip tracing telefòn, imèl ak rezo sosyal pou 94% mèt pwopriyete nan Etazini. Verifye, fyab, rapid.", "powered": "PropAI Contact Resolver" },
-    "03": { "title": "AI Lead Scoring", "desc": "Nòt motivasyon 0–100 selon equity, konbyen jou nan distress, istwa mèt pwopriyete ak kalite sitiyasyon.", "powered": "PropAI Language Engine" },
-    "04": { "title": "Outreach Engine", "desc": "Lèt pèsonalize pou vandè nan vwa pa w. Open rate 68% kont 22% pou rès endistri a. Voye yo ak yon klik.", "powered": "PropAI Outreach Engine" },
-    "05": { "title": "Vision Studio", "desc": "Redizay AI fotorealis pou pwopriyete nan 6 estil, anba 60 segond. HD ak 4K enkli.", "powered": "PropAI Vision Studio" },
-    "06": { "title": "AI Video Generator", "desc": "Videyo tour pwofesyonèl ak vwa AI ak kit mak ou otomatik — optimize pou YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+    "01": {
+      "title": "AI Owner Search",
+      "desc": "Chèche dosye pwopriyete nan tout peyi a nan kèk segond. Jwenn mèt pwopriyete pa adrès, ZIP, equity, siyal distress oswa absentee.",
+      "powered": "PropAI Search Intelligence"
+    },
+    "02": {
+      "title": "Contact Resolver",
+      "desc": "Skip tracing telefòn, imèl ak rezo sosyal pou 94% mèt pwopriyete nan Etazini. Verifye, fyab, rapid.",
+      "powered": "PropAI Contact Resolver"
+    },
+    "03": {
+      "title": "AI Lead Scoring",
+      "desc": "Nòt motivasyon 0–100 selon equity, konbyen jou nan distress, istwa mèt pwopriyete ak kalite sitiyasyon.",
+      "powered": "PropAI Language Engine"
+    },
+    "04": {
+      "title": "Outreach Engine",
+      "desc": "Lèt pèsonalize pou vandè nan vwa pa w. Open rate 68% kont 22% pou rès endistri a. Voye yo ak yon klik.",
+      "powered": "PropAI Outreach Engine"
+    },
+    "05": {
+      "title": "Vision Studio",
+      "desc": "Redizay AI fotorealis pou pwopriyete nan 6 estil, anba 60 segond. HD ak 4K enkli.",
+      "powered": "PropAI Vision Studio"
+    },
+    "06": {
+      "title": "AI Video Generator",
+      "desc": "Videyo tour pwofesyonèl ak vwa AI ak kit mak ou otomatik — optimize pou YouTube, Reels, TikTok.",
+      "powered": "PropAI Video Studio"
+    }
   },
   "workflow": {
-    "1": { "t": "Jwenn mèt pwopriyete a", "d": "PropAI Search Intelligence chèche nan dosye pwopriyete tout peyi a.", "tag": "Search Intelligence" },
-    "2": { "t": "Skip Tracing kontak", "d": "Contact Resolver jwenn telefòn, imèl, rezo sosyal pou 94% mèt pwopriyete Etazini.", "tag": "Contact Resolver" },
-    "3": { "t": "Bay lead la yon nòt", "d": "Language Engine bay motivasyon yon nòt 0–100 dapre equity, distress, istwa.", "tag": "Language Engine" },
-    "4": { "t": "Voye yon outreach AI pèsonalize", "d": "Outreach Engine ekri yon lèt espesifik pou sitiyasyon mèt pwopriyete a.", "tag": "Outreach Engine" },
-    "5": { "t": "Prezante ak vizyèl AI", "d": "Vision Studio fè redizay yo. Video Studio kreye videyo tour la.", "tag": "Vision + Video Studio" },
-    "6": { "t": "Fèmen afè a", "d": "PropAI Agent ede w nan negosyasyon epi swiv chak kontak.", "tag": "PropAI Agent" }
+    "1": {
+      "t": "Jwenn mèt pwopriyete a",
+      "d": "PropAI Search Intelligence chèche nan dosye pwopriyete tout peyi a.",
+      "tag": "Search Intelligence"
+    },
+    "2": {
+      "t": "Skip Tracing kontak",
+      "d": "Contact Resolver jwenn telefòn, imèl, rezo sosyal pou 94% mèt pwopriyete Etazini.",
+      "tag": "Contact Resolver"
+    },
+    "3": {
+      "t": "Bay lead la yon nòt",
+      "d": "Language Engine bay motivasyon yon nòt 0–100 dapre equity, distress, istwa.",
+      "tag": "Language Engine"
+    },
+    "4": {
+      "t": "Voye yon outreach AI pèsonalize",
+      "d": "Outreach Engine ekri yon lèt espesifik pou sitiyasyon mèt pwopriyete a.",
+      "tag": "Outreach Engine"
+    },
+    "5": {
+      "t": "Prezante ak vizyèl AI",
+      "d": "Vision Studio fè redizay yo. Video Studio kreye videyo tour la.",
+      "tag": "Vision + Video Studio"
+    },
+    "6": {
+      "t": "Fèmen afè a",
+      "d": "PropAI Agent ede w nan negosyasyon epi swiv chak kontak.",
+      "tag": "PropAI Agent"
+    }
   },
   "sidebar": {
     "workspace": "Espas travay",
@@ -114,5 +162,103 @@
   "empty": {
     "nothingYet": "Pa gen anyen la a poko",
     "description": "Modil sa a konekte ak baz done w la. Ajoute premye antre w la oswa tann lansman modil AI nan pwochèn faz la."
+  },
+  "leads": {
+    "title": "Leads — PropAI",
+    "eyebrow": "Leads",
+    "headingA": "Leads ki",
+    "headingB": "soumèt",
+    "subtitle": "Gade, chèche, filtre ak asiyen chak lead ou resevwa sou sit ou.",
+    "searchPlaceholder": "Chèche pa non, imèl, sous, konpayi…",
+    "searchAria": "Chajman",
+    "searchProperties": "Chèche pwopriyete",
+    "searching": "Ap chèche…",
+    "statusPlaceholder": "Eta",
+    "sourcePlaceholder": "Sous",
+    "assigneePlaceholder": "Moun ki responsab",
+    "allStatuses": "Tout eta",
+    "allSources": "Tout sous",
+    "allAssignees": "Tout moun",
+    "unassigned": "Pa asiyen",
+    "countOf": "{{filtered}} sou {{total}} leads",
+    "loadError": "Nou pa ka chaje leads yo. Ou ka pa gen aksè admin.",
+    "loadingLeads": "Ap chaje leads…",
+    "noMatch": "Pa gen lead ki matche ak filtè w yo.",
+    "tryProperty": "Ou ap chèche yon adrès pwopriyete? Eseye",
+    "findDistressed": "Jwenn pwopriyete an distress",
+    "col": {
+      "name": "Non",
+      "email": "Imèl",
+      "company": "Konpayi",
+      "source": "Sous",
+      "status": "Eta",
+      "assignee": "Responsab",
+      "submitted": "Soumèt"
+    },
+    "toast": {
+      "assignUpdated": "Asiyasyon lead la mete ajou",
+      "assignFailed": "Nou pa ka mete asiyasyon an ajou"
+    },
+    "detail": {
+      "title": "Lead — PropAI",
+      "back": "Retounen nan leads",
+      "loading": "Chajman…",
+      "loadError": "Nou pa ka chaje lead la.",
+      "notFound": "Nou pa jwenn lead la.",
+      "unnamed": "Lead san non",
+      "submittedAt": "Soumèt {{when}}",
+      "viaSource": " · pa {{source}}",
+      "exportCsv": "Ekspòte CSV",
+      "downloadPdf": "Telechaje PDF",
+      "emailPdf": "Voye PDF pa imèl",
+      "dialogTitle": "Voye PDF lead la pa imèl",
+      "dialogDescription": "Chwazi manm ekip la pou voye PDF la. Y ap jwenn yon lyen prive ki bon pou 7 jou.",
+      "recipients": "Moun k ap resevwa",
+      "noTeammates": "Pa gen manm ekip ki gen yon adrès imèl.",
+      "optionalNote": "Nòt opsyonèl",
+      "notePlaceholder": "Ajoute yon ti mesaj pou ekip ou…",
+      "cancel": "Anile",
+      "sending": "Ap voye…",
+      "sendTo": "Voye bay {{count}}",
+      "fieldEmail": "Imèl",
+      "fieldPhone": "Telefòn",
+      "fieldCompany": "Konpayi",
+      "fieldSource": "Sous",
+      "message": "Mesaj",
+      "noMessage": "Pa gen mesaj.",
+      "status": "Eta",
+      "assignee": "Responsab",
+      "unassigned": "Pa asiyen",
+      "notesHeading": "Nòt swivi",
+      "notesPlaceholder": "Ajoute yon nòt sou lead sa a…",
+      "savingNote": "Ap sove…",
+      "addNote": "Ajoute nòt",
+      "notesLoading": "Ap chaje nòt yo…",
+      "notesEmpty": "Pa gen nòt poko.",
+      "deleteNoteAria": "Efase nòt",
+      "historyHeading": "Istwa asiyasyon",
+      "historyLoading": "Ap chaje istwa…",
+      "historyEmpty": "Poko gen chanjman asiyasyon.",
+      "assignedTo": "Asiyen bay",
+      "by": "pa",
+      "system": "sistèm",
+      "emailHeading": "Livrezon imèl",
+      "emailLoading": "Ap chaje eta livrezon…",
+      "emailEmpty": "Poko voye okenn PDF pa imèl.",
+      "statusSent": "Voye",
+      "statusQueued": "Nan liy",
+      "statusFailed": "Echwe",
+      "toastStatusUpdated": "Eta mete ajou",
+      "toastAssignUpdated": "Asiyasyon mete ajou",
+      "toastNoteEmpty": "Nòt la pa ka vid",
+      "toastNoteAdded": "Nòt ajoute",
+      "toastPickRecipient": "Chwazi omwen yon moun pou resevwa",
+      "toastMustSignIn": "Ou dwe konekte",
+      "toastEmailed_one": "PDF voye bay {{count}} moun",
+      "toastEmailed_other": "PDF voye bay {{count}} moun",
+      "toastFailed_one": "{{count}} imèl pa voye",
+      "toastFailed_other": "{{count}} imèl pa voye",
+      "toastSendError": "Nou pa ka voye imèl la"
+    }
   }
 }

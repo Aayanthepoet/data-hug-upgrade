@@ -62,20 +62,68 @@
     "contactBullet3": "专属上手指导专员"
   },
   "modules": {
-    "01": { "title": "AI 业主搜索", "desc": "数秒内查询全美房产记录。可按地址、邮编、净值、distress 信号或非自住身份查找业主。", "powered": "PropAI Search Intelligence" },
-    "02": { "title": "联系方式解析", "desc": "为 94% 的美国房产业主提供电话、邮箱和社交账号的 skip tracing,验证准确、可达性高。", "powered": "PropAI Contact Resolver" },
-    "03": { "title": "AI Lead Scoring", "desc": "根据房产净值、distress 持续天数、产权历史和情况类型,给出 0–100 的意向评分。", "powered": "PropAI Language Engine" },
-    "04": { "title": "触达引擎", "desc": "用您的口吻为卖家定制信函。打开率 68%,远高于行业平均 22%。一键发送。", "powered": "PropAI Outreach Engine" },
-    "05": { "title": "Vision Studio", "desc": "60 秒内生成 6 种风格的逼真房源 AI 重设计,支持 HD 和 4K 输出。", "powered": "PropAI Vision Studio" },
-    "06": { "title": "AI 视频生成器", "desc": "专业级看房视频,自动配 AI 配音和品牌包装 —— 已针对 YouTube、Reels、TikTok 优化。", "powered": "PropAI Video Studio" }
+    "01": {
+      "title": "AI 业主搜索",
+      "desc": "数秒内查询全美房产记录。可按地址、邮编、净值、distress 信号或非自住身份查找业主。",
+      "powered": "PropAI Search Intelligence"
+    },
+    "02": {
+      "title": "联系方式解析",
+      "desc": "为 94% 的美国房产业主提供电话、邮箱和社交账号的 skip tracing,验证准确、可达性高。",
+      "powered": "PropAI Contact Resolver"
+    },
+    "03": {
+      "title": "AI Lead Scoring",
+      "desc": "根据房产净值、distress 持续天数、产权历史和情况类型,给出 0–100 的意向评分。",
+      "powered": "PropAI Language Engine"
+    },
+    "04": {
+      "title": "触达引擎",
+      "desc": "用您的口吻为卖家定制信函。打开率 68%,远高于行业平均 22%。一键发送。",
+      "powered": "PropAI Outreach Engine"
+    },
+    "05": {
+      "title": "Vision Studio",
+      "desc": "60 秒内生成 6 种风格的逼真房源 AI 重设计,支持 HD 和 4K 输出。",
+      "powered": "PropAI Vision Studio"
+    },
+    "06": {
+      "title": "AI 视频生成器",
+      "desc": "专业级看房视频,自动配 AI 配音和品牌包装 —— 已针对 YouTube、Reels、TikTok 优化。",
+      "powered": "PropAI Video Studio"
+    }
   },
   "workflow": {
-    "1": { "t": "找到业主", "d": "PropAI Search Intelligence 查询全美房产记录。", "tag": "Search Intelligence" },
-    "2": { "t": "Skip Tracing 联系方式", "d": "Contact Resolver 从 94% 的美国业主中获取电话、邮箱和社交账号。", "tag": "Contact Resolver" },
-    "3": { "t": "对 Lead 评分", "d": "Language Engine 根据净值、distress 和历史给出 0–100 的意向评分。", "tag": "Language Engine" },
-    "4": { "t": "发送 AI 个性化触达", "d": "Outreach Engine 针对每位业主的具体情况撰写专属信函。", "tag": "Outreach Engine" },
-    "5": { "t": "用 AI 视觉效果展示", "d": "Vision Studio 渲染设计,Video Studio 生成看房视频。", "tag": "Vision + Video Studio" },
-    "6": { "t": "促成成交", "d": "PropAI Agent 辅导谈判,并追踪每一次互动。", "tag": "PropAI Agent" }
+    "1": {
+      "t": "找到业主",
+      "d": "PropAI Search Intelligence 查询全美房产记录。",
+      "tag": "Search Intelligence"
+    },
+    "2": {
+      "t": "Skip Tracing 联系方式",
+      "d": "Contact Resolver 从 94% 的美国业主中获取电话、邮箱和社交账号。",
+      "tag": "Contact Resolver"
+    },
+    "3": {
+      "t": "对 Lead 评分",
+      "d": "Language Engine 根据净值、distress 和历史给出 0–100 的意向评分。",
+      "tag": "Language Engine"
+    },
+    "4": {
+      "t": "发送 AI 个性化触达",
+      "d": "Outreach Engine 针对每位业主的具体情况撰写专属信函。",
+      "tag": "Outreach Engine"
+    },
+    "5": {
+      "t": "用 AI 视觉效果展示",
+      "d": "Vision Studio 渲染设计,Video Studio 生成看房视频。",
+      "tag": "Vision + Video Studio"
+    },
+    "6": {
+      "t": "促成成交",
+      "d": "PropAI Agent 辅导谈判,并追踪每一次互动。",
+      "tag": "PropAI Agent"
+    }
   },
   "sidebar": {
     "workspace": "工作区",
@@ -114,5 +162,103 @@
   "empty": {
     "nothingYet": "暂无内容",
     "description": "该模块已连接到您的数据库。请添加第一条记录,或等待下一阶段的 AI 模块上线。"
+  },
+  "leads": {
+    "title": "Leads — PropAI",
+    "eyebrow": "Leads",
+    "headingA": "已提交的",
+    "headingB": "leads",
+    "subtitle": "浏览、搜索、筛选并分配从您网站捕获的每一条 lead。",
+    "searchPlaceholder": "按姓名、邮箱、来源、公司搜索…",
+    "searchAria": "加载中",
+    "searchProperties": "搜索房源",
+    "searching": "搜索中…",
+    "statusPlaceholder": "状态",
+    "sourcePlaceholder": "来源",
+    "assigneePlaceholder": "负责人",
+    "allStatuses": "全部状态",
+    "allSources": "全部来源",
+    "allAssignees": "全部负责人",
+    "unassigned": "未分配",
+    "countOf": "{{total}} 条中显示 {{filtered}} 条",
+    "loadError": "无法加载 leads。您可能没有管理员权限。",
+    "loadingLeads": "正在加载 leads…",
+    "noMatch": "没有符合筛选条件的 lead。",
+    "tryProperty": "在找某个房产地址?请试试",
+    "findDistressed": "查找 distress 房产",
+    "col": {
+      "name": "姓名",
+      "email": "邮箱",
+      "company": "公司",
+      "source": "来源",
+      "status": "状态",
+      "assignee": "负责人",
+      "submitted": "提交时间"
+    },
+    "toast": {
+      "assignUpdated": "Lead 分配已更新",
+      "assignFailed": "更新分配失败"
+    },
+    "detail": {
+      "title": "Lead — PropAI",
+      "back": "返回 leads",
+      "loading": "加载中…",
+      "loadError": "无法加载该 lead。",
+      "notFound": "未找到该 lead。",
+      "unnamed": "未命名 lead",
+      "submittedAt": "提交于 {{when}}",
+      "viaSource": " · 来源:{{source}}",
+      "exportCsv": "导出 CSV",
+      "downloadPdf": "下载 PDF",
+      "emailPdf": "邮件发送 PDF",
+      "dialogTitle": "邮件发送 lead PDF",
+      "dialogDescription": "选择要发送 PDF 的团队成员。他们会收到一个有效期 7 天的私密下载链接。",
+      "recipients": "收件人",
+      "noTeammates": "未找到有邮箱地址的团队成员。",
+      "optionalNote": "可选备注",
+      "notePlaceholder": "给同事添加一条简短说明…",
+      "cancel": "取消",
+      "sending": "发送中…",
+      "sendTo": "发送给 {{count}} 人",
+      "fieldEmail": "邮箱",
+      "fieldPhone": "电话",
+      "fieldCompany": "公司",
+      "fieldSource": "来源",
+      "message": "留言",
+      "noMessage": "未填写留言。",
+      "status": "状态",
+      "assignee": "负责人",
+      "unassigned": "未分配",
+      "notesHeading": "跟进备注",
+      "notesPlaceholder": "为该 lead 添加一条备注…",
+      "savingNote": "保存中…",
+      "addNote": "添加备注",
+      "notesLoading": "正在加载备注…",
+      "notesEmpty": "暂无备注。",
+      "deleteNoteAria": "删除备注",
+      "historyHeading": "分配历史",
+      "historyLoading": "正在加载历史…",
+      "historyEmpty": "暂无分配变更。",
+      "assignedTo": "分配给",
+      "by": "操作人",
+      "system": "系统",
+      "emailHeading": "邮件投递",
+      "emailLoading": "正在加载投递状态…",
+      "emailEmpty": "尚未发送过 PDF 邮件。",
+      "statusSent": "已发送",
+      "statusQueued": "排队中",
+      "statusFailed": "失败",
+      "toastStatusUpdated": "状态已更新",
+      "toastAssignUpdated": "分配已更新",
+      "toastNoteEmpty": "备注不能为空",
+      "toastNoteAdded": "备注已添加",
+      "toastPickRecipient": "请至少选择一位收件人",
+      "toastMustSignIn": "您必须先登录",
+      "toastEmailed_one": "PDF 已发送给 {{count}} 位收件人",
+      "toastEmailed_other": "PDF 已发送给 {{count}} 位收件人",
+      "toastFailed_one": "{{count}} 封邮件发送失败",
+      "toastFailed_other": "{{count}} 封邮件发送失败",
+      "toastSendError": "邮件发送失败"
+    }
   }
 }

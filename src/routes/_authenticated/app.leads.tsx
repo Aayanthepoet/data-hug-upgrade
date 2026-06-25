@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useIsFetching, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ type Lead = {
 };
 
 function LeadsPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [source, setSource] = useState<string>("all");
@@ -64,10 +66,10 @@ function LeadsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Lead assignment updated");
+      toast.success(t("leads.toast.assignUpdated"));
       queryClient.invalidateQueries({ queryKey: ["leads"] });
     },
-    onError: (e: Error) => toast.error(e.message || "Failed to update assignment"),
+    onError: (e: Error) => toast.error(e.message || t("leads.toast.assignFailed")),
   });
 
   const { data: members = [] } = useTeamMembers();
@@ -102,12 +104,12 @@ function LeadsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-wider text-[var(--w55)]">Leads</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--w55)]">{t("leads.eyebrow")}</p>
         <h1 className="text-3xl font-bold mt-1">
-          Submitted <span className="h-italic">leads</span>
+          {t("leads.headingA")} <span className="h-italic">{t("leads.headingB")}</span>
         </h1>
         <p className="text-sm text-[var(--w55)] mt-2">
-          Browse, search, filter and assign every lead captured from your site.
+          {t("leads.subtitle")}
         </p>
       </div>
 
@@ -117,13 +119,13 @@ function LeadsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, source, company…"
+            placeholder={t("leads.searchPlaceholder")}
             className="pl-9 pr-9"
           />
           {fetchingCount > 0 ? (
             <Loader2
               className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--w55)] animate-spin"
-              aria-label="Loading"
+              aria-label={t("leads.searchAria")}
             />
           ) : null}
         </div>
@@ -135,32 +137,32 @@ function LeadsPage() {
             aria-busy={isNavigating}
           >
             {isNavigating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {isNavigating ? "Searching…" : "Search Properties"}
+            {isNavigating ? t("leads.searching") : t("leads.searchProperties")}
           </Link>
         ) : null}
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="md:w-40"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="md:w-40"><SelectValue placeholder={t("leads.statusPlaceholder")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="all">{t("leads.allStatuses")}</SelectItem>
             {statuses.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={source} onValueChange={setSource}>
-          <SelectTrigger className="md:w-40"><SelectValue placeholder="Source" /></SelectTrigger>
+          <SelectTrigger className="md:w-40"><SelectValue placeholder={t("leads.sourcePlaceholder")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All sources</SelectItem>
+            <SelectItem value="all">{t("leads.allSources")}</SelectItem>
             {sources.map((s) => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={assignee} onValueChange={setAssignee}>
-          <SelectTrigger className="md:w-48"><SelectValue placeholder="Assignee" /></SelectTrigger>
+          <SelectTrigger className="md:w-48"><SelectValue placeholder={t("leads.assigneePlaceholder")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All assignees</SelectItem>
-            <SelectItem value="unassigned">Unassigned</SelectItem>
+            <SelectItem value="all">{t("leads.allAssignees")}</SelectItem>
+            <SelectItem value="unassigned">{t("leads.unassigned")}</SelectItem>
             {members.map((m) => (
               <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
             ))}
@@ -169,31 +171,31 @@ function LeadsPage() {
       </div>
 
       <div className="text-xs text-[var(--w55)]">
-        {filtered.length} of {leads.length} leads
+        {t("leads.countOf", { filtered: filtered.length, total: leads.length })}
       </div>
 
       {error ? (
         <div className="border border-border rounded-lg p-6 text-sm text-red-400">
-          Couldn't load leads. You may not have admin access.
+          {t("leads.loadError")}
         </div>
       ) : isLoading ? (
         <div className="border border-border rounded-lg p-10 flex items-center justify-center gap-3 text-sm text-[var(--w55)]">
           <Loader2 className="h-5 w-5 animate-spin text-cyan" aria-hidden="true" />
-          <span>Loading leads…</span>
+          <span>{t("leads.loadingLeads")}</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="border border-border rounded-lg p-10 text-center">
           <Inbox className="mx-auto h-8 w-8 text-[var(--w45)]" />
-          <p className="mt-3 text-sm text-[var(--w55)]">No leads match your filters.</p>
+          <p className="mt-3 text-sm text-[var(--w55)]">{t("leads.noMatch")}</p>
           {search.trim() && /\d/.test(search) ? (
             <p className="mt-4 text-sm text-[var(--w55)]">
-              Looking for a property address? Try{" "}
+              {t("leads.tryProperty")}{" "}
               <Link
                 to="/app/properties/search"
                 search={{ q: search.trim() }}
                 className="text-cyan hover:underline"
               >
-                Find Distressed Properties
+                {t("leads.findDistressed")}
               </Link>
               .
             </p>
@@ -204,13 +206,13 @@ function LeadsPage() {
           <table className="w-full text-sm">
             <thead className="bg-[rgba(255,255,255,.03)] text-left text-xs uppercase tracking-wider text-[var(--w55)]">
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Company</th>
-                <th className="px-4 py-3">Source</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Assignee</th>
-                <th className="px-4 py-3">Submitted</th>
+                <th className="px-4 py-3">{t("leads.col.name")}</th>
+                <th className="px-4 py-3">{t("leads.col.email")}</th>
+                <th className="px-4 py-3">{t("leads.col.company")}</th>
+                <th className="px-4 py-3">{t("leads.col.source")}</th>
+                <th className="px-4 py-3">{t("leads.col.status")}</th>
+                <th className="px-4 py-3">{t("leads.col.assignee")}</th>
+                <th className="px-4 py-3">{t("leads.col.submitted")}</th>
               </tr>
             </thead>
             <tbody>
@@ -247,10 +249,10 @@ function LeadsPage() {
                       disabled={assignMutation.isPending}
                     >
                       <SelectTrigger className="h-8 w-48">
-                        <SelectValue placeholder="Unassigned" />
+                        <SelectValue placeholder={t("leads.unassigned")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">{t("leads.unassigned")}</SelectItem>
                         {members.map((m) => (
                           <SelectItem key={m.id} value={m.id}>{memberLabel(m)}</SelectItem>
                         ))}
