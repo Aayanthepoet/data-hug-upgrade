@@ -75,17 +75,71 @@ function PropertiesPage() {
   const [isAbsentee, setIsAbsentee] = useState(false);
   const [distressType, setDistressType] = useState<string>("none");
 
-  const { data, isLoading } = useQuery({
+  // Filter state
+  const [searchText, setSearchText] = useState("");
+  const [locationText, setLocationText] = useState("");
+  const [distressFilter, setDistressFilter] = useState<DistressFilter>("all");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
+
+  const { data: allData, isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("id, address, city, state, zip, estimated_value, lead_score, is_preforeclosure, is_vacant, is_absentee")
+        .select("id, address, city, state, zip, estimated_value, lead_score, distress_type, is_preforeclosure, is_vacant, is_absentee")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
+  const data = (allData ?? []).filter((p) => {
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      const hay = `${p.address ?? ""} ${p.city ?? ""} ${p.state ?? ""} ${p.zip ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (locationText.trim()) {
+      const q = locationText.toLowerCase();
+      const hay = `${p.city ?? ""} ${p.state ?? ""} ${p.zip ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (distressFilter !== "all") {
+      if (distressFilter === "vacant" && !p.is_vacant && p.distress_type !== "vacant") return false;
+      if (distressFilter === "absentee" && !p.is_absentee && p.distress_type !== "absentee") return false;
+      if (distressFilter === "preforeclosure" && !p.is_preforeclosure && p.distress_type !== "preforeclosure") return false;
+      if (!["vacant","absentee","preforeclosure"].includes(distressFilter) && p.distress_type !== distressFilter) return false;
+    }
+    if (scoreFilter !== "all") {
+      const s = p.lead_score ?? -1;
+      if (scoreFilter === "hot" && s < 80) return false;
+      if (scoreFilter === "warm" && (s < 50 || s >= 80)) return false;
+      if (scoreFilter === "cold" && s >= 50) return false;
+    }
+    if (priceFilter !== "all") {
+      const v = Number(p.estimated_value ?? 0);
+      if (priceFilter === "u250" && !(v > 0 && v < 250000)) return false;
+      if (priceFilter === "250_500" && !(v >= 250000 && v < 500000)) return false;
+      if (priceFilter === "500_1m" && !(v >= 500000 && v < 1000000)) return false;
+      if (priceFilter === "o1m" && v < 1000000) return false;
+    }
+    return true;
+  });
+
+  const activeFilterCount =
+    (distressFilter !== "all" ? 1 : 0) +
+    (scoreFilter !== "all" ? 1 : 0) +
+    (priceFilter !== "all" ? 1 : 0) +
+    (locationText.trim() ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setLocationText("");
+    setDistressFilter("all");
+    setScoreFilter("all");
+    setPriceFilter("all");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
