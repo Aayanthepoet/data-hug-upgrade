@@ -29,14 +29,13 @@ export const getMarketIntel = createServerFn({ method: "POST" })
     // Fetch ONLY public location info — no owner names, no skip-trace data.
     const { data: prop, error: propErr } = await supabase
       .from("properties")
-      .select("id, address, city, state, zip, neighborhood, county")
+      .select("id, address, city, state, zip, county")
       .eq("id", data.propertyId)
       .maybeSingle();
     if (propErr) throw new Error(propErr.message);
     if (!prop) throw new Error("Property not found");
 
     const locationLabel = [
-      prop.neighborhood,
       prop.city,
       prop.state,
       prop.zip,
