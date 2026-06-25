@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -29,11 +29,12 @@ export const generateListingVideoScript = createServerFn({ method: "POST" })
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
     const gateway = createLovableAiGatewayProvider(key);
-    const { object } = await generateObject({
+    const { experimental_output } = await generateText({
       model: gateway("google/gemini-3-flash-preview"),
-      schema: Script,
-      system: `You are the PropAI Voice & Video Engine. Write a ${data.length_seconds}-second walkthrough script for a ${data.style} audience. Scene seconds should sum to approximately ${data.length_seconds}.`,
+      experimental_output: Output.object({ schema: Script }),
+      system: `You are the PropAI Voice & Video Engine. Write a ${data.length_seconds}-second walkthrough script for a ${data.style} audience. Scene seconds should sum to approximately ${data.length_seconds}. Return JSON matching the schema exactly: an object with fields title (string), hook (string), scenes (array of 3-6 objects with seconds:number, voiceover:string, visual_direction:string), and cta (string).`,
       prompt: `Property: ${data.address}\nHighlights: ${data.highlights ?? "(none provided)"}\n\nProduce a structured script with 3-6 scenes.`,
     });
-    return object;
+    return experimental_output;
   });
+
