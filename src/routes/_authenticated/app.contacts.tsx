@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveOwnerContacts } from "@/lib/engines/contacts.functions";
-import { runSkipTrace } from "@/lib/skiptrace/skiptrace.functions";
+import { runSkipTrace, setContactDoNotContact } from "@/lib/skiptrace/skiptrace.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SkipTraceBadge } from "@/components/app/SkipTraceBadge";
@@ -20,14 +20,29 @@ type PendingKind = "ai" | "skip" | "both";
 function ContactsPage() {
   const resolve = useServerFn(resolveOwnerContacts);
   const skipTrace = useServerFn(runSkipTrace);
+  const toggleDnc = useServerFn(setContactDoNotContact);
   const [pending, setPending] = useState<{ id: string; kind: PendingKind } | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  async function onToggleDnc(contactId: string, next: boolean) {
+    setTogglingId(contactId);
+    try {
+      await toggleDnc({ data: { contact_id: contactId, do_not_contact: next } });
+      toast.success(next ? "Marked Do Not Contact" : "Re-enabled for outreach");
+      await refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   const { data: owners, refetch } = useQuery({
     queryKey: ["owners-with-contacts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("owners")
-        .select("id, full_name, entity_type, mailing_address, property_id, skip_trace_status, skip_trace_last_run_at, contacts(id, contact_type, value, confidence, notes)")
+        .select("id, full_name, entity_type, mailing_address, property_id, skip_trace_status, skip_trace_last_run_at, contacts(id, contact_type, value, confidence, notes, do_not_contact)")
         .order("created_at", { ascending: false }).limit(50);
       if (error) throw error;
       return data;
@@ -116,13 +131,28 @@ function ContactsPage() {
                 <div className="mt-3 grid sm:grid-cols-2 gap-2">
                   {o.contacts.map((c) => {
                     const isSkip = typeof c.notes === "string" && c.notes.startsWith("Skip trace");
+                    const dnc = Boolean(c.do_not_contact);
+                    const isToggling = togglingId === c.id;
                     return (
-                      <div key={c.id} className="text-xs flex items-center gap-2 border border-border rounded p-2">
+                      <div
+                        key={c.id}
+                        className={`text-xs flex items-center gap-2 border border-border rounded p-2 ${dnc ? "opacity-60 bg-red-500/5" : ""}`}
+                      >
                         <Badge variant="outline">{c.contact_type}</Badge>
-                        <span className="font-mono truncate">{c.value}</span>
+                        <span className={`font-mono truncate ${dnc ? "line-through" : ""}`}>{c.value}</span>
                         <span className="ml-auto flex items-center gap-1.5">
                           <Badge variant="secondary" className="text-[10px]">{isSkip ? "skip-trace" : "AI"}</Badge>
                           <span className="text-[var(--w55)]">{c.confidence ?? 0}%</span>
+                          <Button
+                            size="sm"
+                            variant={dnc ? "destructive" : "ghost"}
+                            className="h-6 px-2 text-[10px]"
+                            disabled={isToggling}
+                            onClick={() => onToggleDnc(c.id, !dnc)}
+                            title={dnc ? "Allow outreach again" : "Exclude from outreach & exports"}
+                          >
+                            {isToggling ? "…" : dnc ? "DNC" : "Allow"}
+                          </Button>
                         </span>
                       </div>
                     );

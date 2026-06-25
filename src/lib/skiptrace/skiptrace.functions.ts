@@ -121,3 +121,17 @@ export const listOwnerContacts = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+export const setContactDoNotContact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ contact_id: z.string().uuid(), do_not_contact: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("contacts")
+      .update({ do_not_contact: data.do_not_contact } as never)
+      .eq("id", data.contact_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
