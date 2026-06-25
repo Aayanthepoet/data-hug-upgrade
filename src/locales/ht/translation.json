@@ -1,0 +1,118 @@
+{
+  "common": {
+    "signIn": "Konekte",
+    "signOut": "Dekonekte",
+    "startTrial": "Eseye gratis",
+    "startTrialLong": "Eseye gratis 14 jou",
+    "openDashboard": "Ouvri dashboard la",
+    "explorePlatform": "Gade platfòm nan →",
+    "seeAllFeatures": "Wè tout fonksyon yo →",
+    "backToLanding": "Retounen sou paj prensipal la",
+    "backToLandingShort": "Retounen",
+    "loading": "Chajman…",
+    "save": "Sere",
+    "cancel": "Anile",
+    "delete": "Efase",
+    "edit": "Modifye",
+    "search": "Chèche",
+    "language": "Lang"
+  },
+  "nav": {
+    "features": "Fonksyon",
+    "pricing": "Pri",
+    "howItWorks": "Kijan li mache",
+    "contact": "Kontak"
+  },
+  "footer": {
+    "tagline": "Platfòm entèlijans konplè a pou pwofesyonèl imobilye. AI Network Agency bati l.",
+    "platform": "Platfòm",
+    "company": "Konpayi",
+    "privacy": "Règleman sou vi prive",
+    "terms": "Tèm ak Kondisyon",
+    "rights": "Tout dwa rezève."
+  },
+  "landing": {
+    "eyebrow": "AI Network Agency · Platfòm PropAI",
+    "heroTitle1": "Platfòm",
+    "heroTitle2": "entèlijans",
+    "heroTitle3": "konplè pou imobilye",
+    "heroBody": "PropAI fè biwo imobilye w la tounen yon machin afè ki mache ak AI. Jwenn vandè kache, otomatize outreach, redizaye pwopriyete, fèmen plis afè — tout sa nan yon sèl platfòm AI Network Agency bati.",
+    "ratingLine": "<b>Plis pase 2,400 ajan</b> nan 47 eta",
+    "dealsLine": "<b>Plis pase 18,000</b> afè fasilite",
+    "stats": {
+      "activeAgents": "Ajan aktif",
+      "dealsFacilitated": "Afè fasilite",
+      "skipTraceAccuracy": "Presizyon skip tracing",
+      "avgOpenRate": "Mwayèn open rate outreach"
+    },
+    "modulesEyebrow": "Modil platfòm nan",
+    "modulesTitle1": "Sèt motè AI.",
+    "modulesTitle2": "Yon sèl platfòm.",
+    "modulesBody": "Menm zouti envestisè enstitisyonèl peye plis pase $50,000 pa ane pou yo — tout nan yon sèl pakèt, fèt pou pwofesyonèl imobilye.",
+    "workflowEyebrow": "Pwosesis konplè",
+    "workflowTitle1": "Soti nan yon mèt pwopriyete enkoni rive nan",
+    "workflowTitle2": "afè fèmen",
+    "workflowTitle3": "— yon sèl platfòm",
+    "contactEyebrow": "Kòmanse",
+    "contactTitle1": "Pare pou wè PropAI",
+    "contactTitle2": "nan mache pa w la?",
+    "contactBody": "Pale nou de bwokèraj ou. N ap fè yon demonstrasyon pèsonalize epi n ap fè yon vrè rechèch mèt pwopriyete nan ZIP w la — an dirèk pandan apèl la.",
+    "contactBullet1": "14 jou gratis, san kat kredi",
+    "contactBullet2": "Aksè konplè pandan esè a",
+    "contactBullet3": "Espesyalis pèsonèl pou ede w kòmanse"
+  },
+  "modules": {
+    "01": { "title": "AI Owner Search", "desc": "Chèche dosye pwopriyete nan tout peyi a nan kèk segond. Jwenn mèt pwopriyete pa adrès, ZIP, equity, siyal distress oswa absentee.", "powered": "PropAI Search Intelligence" },
+    "02": { "title": "Contact Resolver", "desc": "Skip tracing telefòn, imèl ak rezo sosyal pou 94% mèt pwopriyete nan Etazini. Verifye, fyab, rapid.", "powered": "PropAI Contact Resolver" },
+    "03": { "title": "AI Lead Scoring", "desc": "Nòt motivasyon 0–100 selon equity, konbyen jou nan distress, istwa mèt pwopriyete ak kalite sitiyasyon.", "powered": "PropAI Language Engine" },
+    "04": { "title": "Outreach Engine", "desc": "Lèt pèsonalize pou vandè nan vwa pa w. Open rate 68% kont 22% pou rès endistri a. Voye yo ak yon klik.", "powered": "PropAI Outreach Engine" },
+    "05": { "title": "Vision Studio", "desc": "Redizay AI fotorealis pou pwopriyete nan 6 estil, anba 60 segond. HD ak 4K enkli.", "powered": "PropAI Vision Studio" },
+    "06": { "title": "AI Video Generator", "desc": "Videyo tour pwofesyonèl ak vwa AI ak kit mak ou otomatik — optimize pou YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+  },
+  "workflow": {
+    "1": { "t": "Jwenn mèt pwopriyete a", "d": "PropAI Search Intelligence chèche nan dosye pwopriyete tout peyi a.", "tag": "Search Intelligence" },
+    "2": { "t": "Skip Tracing kontak", "d": "Contact Resolver jwenn telefòn, imèl, rezo sosyal pou 94% mèt pwopriyete Etazini.", "tag": "Contact Resolver" },
+    "3": { "t": "Bay lead la yon nòt", "d": "Language Engine bay motivasyon yon nòt 0–100 dapre equity, distress, istwa.", "tag": "Language Engine" },
+    "4": { "t": "Voye yon outreach AI pèsonalize", "d": "Outreach Engine ekri yon lèt espesifik pou sitiyasyon mèt pwopriyete a.", "tag": "Outreach Engine" },
+    "5": { "t": "Prezante ak vizyèl AI", "d": "Vision Studio fè redizay yo. Video Studio kreye videyo tour la.", "tag": "Vision + Video Studio" },
+    "6": { "t": "Fèmen afè a", "d": "PropAI Agent ede w nan negosyasyon epi swiv chak kontak.", "tag": "PropAI Agent" }
+  },
+  "sidebar": {
+    "workspace": "Espas travay",
+    "landingPage": "Paj prensipal",
+    "overview": "Apèsi",
+    "propaiAgent": "PropAI Agent",
+    "leads": "Leads",
+    "leadScoring": "Lead Scoring",
+    "properties": "Pwopriyete",
+    "addressLookup": "Rechèch pa adrès",
+    "lookupHistory": "Istorik rechèch",
+    "findDistressed": "Pwopriyete an distress",
+    "auctions": "Vant ankan",
+    "watchlist": "Lis swivi",
+    "owners": "Mèt pwopriyete",
+    "contactsResolver": "Kontak (Resolver)",
+    "leadLists": "Lis leads",
+    "campaignsLanguage": "Kanpay (Language)",
+    "outreach": "Outreach",
+    "visionStudio": "Vision Studio",
+    "videosVoice": "Videyo (Vwa+Videyo)",
+    "socialAmplifier": "Anplifikatè sosyal",
+    "auditLog": "Jounal odit",
+    "smsOptOuts": "Moun ki retire nan SMS",
+    "settings": "Paramèt"
+  },
+  "overview": {
+    "eyebrow": "Byenvini tounen",
+    "titleA": "Espas",
+    "titleB": "travay ou",
+    "signedInAs": "Ou konekte tankou <b>{{email}}</b>. Chwazi yon modil pou kòmanse antre done — tout bagay rete prive nan kont ou.",
+    "records": "antre",
+    "chat": "Chat →",
+    "agentDesc": "Rezime leads, ekri outreach"
+  },
+  "empty": {
+    "nothingYet": "Pa gen anyen la a poko",
+    "description": "Modil sa a konekte ak baz done w la. Ajoute premye antre w la oswa tann lansman modil AI nan pwochèn faz la."
+  }
+}

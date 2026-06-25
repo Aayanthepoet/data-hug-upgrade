@@ -1,5 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Sidebar,
   SidebarContent,
@@ -40,29 +41,29 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 const items = [
-  { title: "Landing Page", url: "/", icon: Home, exact: true },
-  { title: "Overview", url: "/app", icon: LayoutDashboard, exact: true },
-  { title: "PropAI Agent", url: "/app/agent", icon: Bot },
-  { title: "Leads", url: "/app/leads", icon: Inbox },
-  { title: "Lead Scoring", url: "/app/scoring", icon: Flame },
-  { title: "Properties", url: "/app/properties", icon: Building2 },
-  { title: "Address Lookup", url: "/app/properties/lookup", icon: Search },
-  { title: "Lookup History", url: "/app/properties/lookup-history", icon: HistoryIcon },
-  { title: "Find Distressed", url: "/app/properties/search", icon: Search },
-  { title: "Auctions", url: "/app/auctions", icon: Gavel },
-  { title: "Watchlist", url: "/app/watchlist", icon: Bookmark },
-  { title: "Owners", url: "/app/owners", icon: Users },
-  { title: "Contacts (Resolver)", url: "/app/contacts", icon: PhoneCall },
-  { title: "Lead Lists", url: "/app/lead-lists", icon: ListChecks },
-  { title: "Campaigns (Language)", url: "/app/campaigns", icon: Megaphone },
-  { title: "Outreach", url: "/app/outreach", icon: Send },
-  { title: "Vision Studio", url: "/app/vision", icon: Eye },
-  { title: "Videos (Voice+Video)", url: "/app/videos", icon: Clapperboard },
-  { title: "Social Amplifier", url: "/app/social", icon: Share2 },
-  { title: "Audit Log", url: "/app/audit", icon: ScrollText },
-  { title: "SMS Opt-outs", url: "/app/opt-outs", icon: ShieldOff },
-  { title: "Settings", url: "/app/settings", icon: Settings },
-];
+  { key: "landingPage", url: "/", icon: Home, exact: true },
+  { key: "overview", url: "/app", icon: LayoutDashboard, exact: true },
+  { key: "propaiAgent", url: "/app/agent", icon: Bot },
+  { key: "leads", url: "/app/leads", icon: Inbox },
+  { key: "leadScoring", url: "/app/scoring", icon: Flame },
+  { key: "properties", url: "/app/properties", icon: Building2 },
+  { key: "addressLookup", url: "/app/properties/lookup", icon: Search },
+  { key: "lookupHistory", url: "/app/properties/lookup-history", icon: HistoryIcon },
+  { key: "findDistressed", url: "/app/properties/search", icon: Search },
+  { key: "auctions", url: "/app/auctions", icon: Gavel },
+  { key: "watchlist", url: "/app/watchlist", icon: Bookmark },
+  { key: "owners", url: "/app/owners", icon: Users },
+  { key: "contactsResolver", url: "/app/contacts", icon: PhoneCall },
+  { key: "leadLists", url: "/app/lead-lists", icon: ListChecks },
+  { key: "campaignsLanguage", url: "/app/campaigns", icon: Megaphone },
+  { key: "outreach", url: "/app/outreach", icon: Send },
+  { key: "visionStudio", url: "/app/vision", icon: Eye },
+  { key: "videosVoice", url: "/app/videos", icon: Clapperboard },
+  { key: "socialAmplifier", url: "/app/social", icon: Share2 },
+  { key: "auditLog", url: "/app/audit", icon: ScrollText },
+  { key: "smsOptOuts", url: "/app/opt-outs", icon: ShieldOff },
+  { key: "settings", url: "/app/settings", icon: Settings },
+] as const;
 
 
 export function AppSidebar() {
@@ -72,6 +73,7 @@ export function AppSidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const isActive = (url: string, exact?: boolean) =>
     exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
@@ -87,19 +89,23 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.workspace")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url, item.exact)}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const exact = "exact" in item ? item.exact : false;
+                const title = t(`sidebar.${item.key}`);
+                return (
+                  <SidebarMenuItem key={item.key}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url, exact)}>
+                      <Link to={item.url} className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{title}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

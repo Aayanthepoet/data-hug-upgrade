@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Trans, useTranslation } from "react-i18next";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { LeadForm } from "@/components/site/LeadForm";
@@ -15,32 +16,26 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const modules = [
-  { num: "01", icon: "🔍", title: "AI Owner Search", desc: "Query nationwide property records in seconds. Find owners by address, ZIP, equity, distress signal, or absentee status.", color: "var(--cyan)", powered: "PropAI Search Intelligence" },
-  { num: "02", icon: "👤", title: "Contact Resolver", desc: "Skip-trace phone, email, and social profiles for 94% of US property owners. Verified, deliverable, fast.", color: "var(--gold)", powered: "PropAI Contact Resolver" },
-  { num: "03", icon: "🧠", title: "AI Lead Scoring", desc: "Motivation score 0–100 from equity position, days in distress, ownership history, and situation type.", color: "var(--violet)", powered: "PropAI Language Engine" },
-  { num: "04", icon: "📨", title: "Outreach Engine", desc: "Personalized seller letters in your voice. 68% open rate vs 22% industry standard. Launch in one click.", color: "var(--green)", powered: "PropAI Outreach Engine" },
-  { num: "05", icon: "✨", title: "Vision Studio", desc: "Photorealistic AI property redesigns in 6 styles, under 60 seconds. HD and 4K output included.", color: "var(--cyan)", powered: "PropAI Vision Studio" },
-  { num: "06", icon: "🎬", title: "Video AI Generator", desc: "Professional tour videos with AI voiceover and brand kit auto-applied — optimized for YouTube, Reels, TikTok.", color: "var(--red)", powered: "PropAI Video Studio" },
-];
-
-const stats = [
-  { n: "2,400+", l: "Active agents" },
-  { n: "18,000+", l: "Deals facilitated" },
-  { n: "94%", l: "Skip-trace accuracy" },
-  { n: "68%", l: "Avg outreach open rate" },
-];
-
-const workflow = [
-  { n: 1, t: "Find the Owner", d: "PropAI's Search Intelligence queries nationwide property records.", tag: "Search Intelligence" },
-  { n: 2, t: "Skip-Trace Contact Info", d: "Contact Resolver traces phone, email, social from 94% of US owners.", tag: "Contact Resolver" },
-  { n: 3, t: "Score the Lead", d: "Language Engine scores motivation 0–100 from equity, distress, history.", tag: "Language Engine" },
-  { n: 4, t: "Send AI-Personalized Outreach", d: "Outreach Engine writes a letter specific to this owner's situation.", tag: "Outreach Engine" },
-  { n: 5, t: "Present with AI Visuals", d: "Vision Studio renders redesigns. Video Studio creates the tour video.", tag: "Vision + Video Studio" },
-  { n: 6, t: "Close the Deal", d: "PropAI Agent coaches negotiation and tracks every touchpoint.", tag: "PropAI Agent" },
-];
+const moduleKeys = ["01", "02", "03", "04", "05", "06"] as const;
+const moduleMeta: Record<(typeof moduleKeys)[number], { icon: string; color: string }> = {
+  "01": { icon: "🔍", color: "var(--cyan)" },
+  "02": { icon: "👤", color: "var(--gold)" },
+  "03": { icon: "🧠", color: "var(--violet)" },
+  "04": { icon: "📨", color: "var(--green)" },
+  "05": { icon: "✨", color: "var(--cyan)" },
+  "06": { icon: "🎬", color: "var(--red)" },
+};
+const workflowKeys = ["1", "2", "3", "4", "5", "6"] as const;
 
 function Index() {
+  const { t } = useTranslation();
+  const stats: { n: string; l: string }[] = [
+    { n: "2,400+", l: t("landing.stats.activeAgents") },
+    { n: "18,000+", l: t("landing.stats.dealsFacilitated") },
+    { n: "94%", l: t("landing.stats.skipTraceAccuracy") },
+    { n: "68%", l: t("landing.stats.avgOpenRate") },
+  ];
+
   return (
     <>
       <SiteHeader />
@@ -51,20 +46,20 @@ function Index() {
              style={{ background: "radial-gradient(circle, rgba(0,200,255,.10), transparent 65%)" }} />
         <div className="container-x grid lg:grid-cols-[1fr_540px] gap-16 items-center relative">
           <div>
-            <div className="eyebrow fu"><span className="eyebrow-dot" />AI Network Agency · PropAI Platform</div>
+            <div className="eyebrow fu"><span className="eyebrow-dot" />{t("landing.eyebrow")}</div>
             <h1 className="h-display text-[clamp(48px,6vw,88px)] mt-7 fu fu-1">
-              The Complete<br />
-              <span className="text-cyan">Intelligence</span><br />
-              <span className="h-italic text-[0.72em]">Platform for Real Estate</span>
+              {t("landing.heroTitle1")}<br />
+              <span className="text-cyan">{t("landing.heroTitle2")}</span><br />
+              <span className="h-italic text-[0.72em]">{t("landing.heroTitle3")}</span>
             </h1>
             <p className="mt-7 text-[18px] leading-[1.78] text-[var(--w55)] max-w-[520px] font-light fu fu-2">
-              PropAI transforms your real estate office into an AI-powered deal machine. Find hidden sellers, automate outreach, redesign properties, and close more deals — all inside one platform built by AI Network Agency.
+              {t("landing.heroBody")}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3 fu fu-3">
               <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary text-base px-7 py-4">
-                Start Free 14-Day Trial
+                {t("common.startTrialLong")}
               </Link>
-              <Link to="/features" className="btn-ghost text-base px-6 py-4">Explore Platform →</Link>
+              <Link to="/features" className="btn-ghost text-base px-6 py-4">{t("common.explorePlatform")}</Link>
             </div>
             <div className="mt-12 pt-8 border-t border-border flex flex-wrap items-center gap-4 fu fu-4">
               <div className="flex">
@@ -78,10 +73,14 @@ function Index() {
               <div className="w-px h-6 bg-border" />
               <div>
                 <div className="text-xs tracking-widest text-gold">★★★★★</div>
-                <div className="text-xs text-[var(--w45)]"><span className="text-white font-semibold">2,400+ agents</span> across 47 states</div>
+                <div className="text-xs text-[var(--w45)]">
+                  <Trans i18nKey="landing.ratingLine" components={{ b: <span className="text-white font-semibold" /> }} />
+                </div>
               </div>
               <div className="w-px h-6 bg-border hidden sm:block" />
-              <div className="text-xs text-[var(--w45)]"><span className="text-white font-semibold">18,000+</span> deals facilitated</div>
+              <div className="text-xs text-[var(--w45)]">
+                <Trans i18nKey="landing.dealsLine" components={{ b: <span className="text-white font-semibold" /> }} />
+              </div>
             </div>
           </div>
 
@@ -146,48 +145,51 @@ function Index() {
       {/* MODULES */}
       <section id="modules" className="container-x mt-32">
         <div className="text-center mb-16">
-          <div className="eyebrow"><span className="eyebrow-dot" />Platform Modules</div>
+          <div className="eyebrow"><span className="eyebrow-dot" />{t("landing.modulesEyebrow")}</div>
           <h2 className="h-display text-[clamp(36px,5vw,64px)] mt-6">
-            Seven AI engines. <span className="h-italic">One platform.</span>
+            {t("landing.modulesTitle1")} <span className="h-italic">{t("landing.modulesTitle2")}</span>
           </h2>
           <p className="text-[var(--w55)] mt-5 max-w-2xl mx-auto leading-relaxed">
-            The same capabilities institutional investors pay $50,000+/yr for — bundled, integrated, and purpose-built for real estate professionals.
+            {t("landing.modulesBody")}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {modules.map(m => (
-            <div key={m.num} className="surface surface-hover p-7" style={{ background: `linear-gradient(160deg, ${m.color}0d, var(--s2))` }}>
-              <div className="text-[10px] tracking-widest text-[var(--w35)] font-mono">MODULE {m.num}</div>
-              <div className="text-4xl mt-4">{m.icon}</div>
-              <div className="mt-5 text-lg font-bold">{m.title}</div>
-              <p className="mt-2 text-sm text-[var(--w55)] leading-relaxed">{m.desc}</p>
-              <div className="mt-5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: m.color }}>{m.powered}</div>
-            </div>
-          ))}
+          {moduleKeys.map(k => {
+            const meta = moduleMeta[k];
+            return (
+              <div key={k} className="surface surface-hover p-7" style={{ background: `linear-gradient(160deg, ${meta.color}0d, var(--s2))` }}>
+                <div className="text-[10px] tracking-widest text-[var(--w35)] font-mono">MODULE {k}</div>
+                <div className="text-4xl mt-4">{meta.icon}</div>
+                <div className="mt-5 text-lg font-bold">{t(`modules.${k}.title`)}</div>
+                <p className="mt-2 text-sm text-[var(--w55)] leading-relaxed">{t(`modules.${k}.desc`)}</p>
+                <div className="mt-5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: meta.color }}>{t(`modules.${k}.powered`)}</div>
+              </div>
+            );
+          })}
         </div>
         <div className="text-center mt-10 flex justify-center gap-3 flex-wrap">
-          <Link to="/features" className="btn-ghost">See all features →</Link>
-          <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary">Start Free 14-Day Trial</Link>
+          <Link to="/features" className="btn-ghost">{t("common.seeAllFeatures")}</Link>
+          <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary">{t("common.startTrialLong")}</Link>
         </div>
       </section>
 
       {/* WORKFLOW */}
       <section id="workflow" className="container-x mt-32">
         <div className="text-center mb-16">
-          <div className="eyebrow"><span className="eyebrow-dot" />End-to-End Process</div>
+          <div className="eyebrow"><span className="eyebrow-dot" />{t("landing.workflowEyebrow")}</div>
           <h2 className="h-display text-[clamp(36px,5vw,64px)] mt-6">
-            Unknown owner to <span className="h-italic">closed deal</span> — one platform
+            {t("landing.workflowTitle1")} <span className="h-italic">{t("landing.workflowTitle2")}</span> {t("landing.workflowTitle3")}
           </h2>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workflow.map(w => (
-            <div key={w.n} className="surface p-6">
+          {workflowKeys.map(k => (
+            <div key={k} className="surface p-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-cyan-d border border-[var(--cyan-b)] flex items-center justify-center font-bold text-cyan">{w.n}</div>
+                <div className="w-10 h-10 rounded-lg bg-cyan-d border border-[var(--cyan-b)] flex items-center justify-center font-bold text-cyan">{k}</div>
                 <div>
-                  <div className="font-semibold">{w.t}</div>
-                  <p className="text-sm text-[var(--w55)] mt-1.5 leading-relaxed">{w.d}</p>
-                  <div className="mt-3 text-[10px] uppercase tracking-widest text-cyan font-semibold">{w.tag}</div>
+                  <div className="font-semibold">{t(`workflow.${k}.t`)}</div>
+                  <p className="text-sm text-[var(--w55)] mt-1.5 leading-relaxed">{t(`workflow.${k}.d`)}</p>
+                  <div className="mt-3 text-[10px] uppercase tracking-widest text-cyan font-semibold">{t(`workflow.${k}.tag`)}</div>
                 </div>
               </div>
             </div>
@@ -199,17 +201,17 @@ function Index() {
       <section id="contact" className="container-x mt-32">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="eyebrow"><span className="eyebrow-dot" />Get started</div>
+            <div className="eyebrow"><span className="eyebrow-dot" />{t("landing.contactEyebrow")}</div>
             <h2 className="h-display text-[clamp(36px,5vw,56px)] mt-6">
-              Ready to see PropAI <span className="h-italic">in your market?</span>
+              {t("landing.contactTitle1")} <span className="h-italic">{t("landing.contactTitle2")}</span>
             </h2>
             <p className="text-[var(--w55)] mt-5 leading-relaxed max-w-md">
-              Tell us about your brokerage. We'll set up a personalized walkthrough and run a real owner search in your target ZIP — live, on the call.
+              {t("landing.contactBody")}
             </p>
             <div className="mt-8 space-y-3 text-sm text-[var(--w65)]">
-              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> 14-day free trial, no credit card</div>
-              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> Full platform access during trial</div>
-              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> Personal onboarding specialist</div>
+              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> {t("landing.contactBullet1")}</div>
+              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> {t("landing.contactBullet2")}</div>
+              <div className="flex items-center gap-3"><span className="text-cyan">✓</span> {t("landing.contactBullet3")}</div>
             </div>
           </div>
           <LeadForm source="landing-contact" />

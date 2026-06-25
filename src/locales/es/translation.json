@@ -1,0 +1,118 @@
+{
+  "common": {
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "startTrial": "Prueba gratuita",
+    "startTrialLong": "Prueba gratis de 14 días",
+    "openDashboard": "Abrir panel",
+    "explorePlatform": "Explorar plataforma →",
+    "seeAllFeatures": "Ver todas las funciones →",
+    "backToLanding": "Volver a la página principal",
+    "backToLandingShort": "Volver",
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "language": "Idioma"
+  },
+  "nav": {
+    "features": "Funciones",
+    "pricing": "Precios",
+    "howItWorks": "Cómo funciona",
+    "contact": "Contacto"
+  },
+  "footer": {
+    "tagline": "La plataforma de inteligencia completa para profesionales inmobiliarios. Creada por AI Network Agency.",
+    "platform": "Plataforma",
+    "company": "Empresa",
+    "privacy": "Política de privacidad",
+    "terms": "Términos y condiciones",
+    "rights": "Todos los derechos reservados."
+  },
+  "landing": {
+    "eyebrow": "AI Network Agency · Plataforma PropAI",
+    "heroTitle1": "La plataforma completa de",
+    "heroTitle2": "inteligencia",
+    "heroTitle3": "para bienes raíces",
+    "heroBody": "PropAI convierte tu oficina inmobiliaria en una máquina de negocios impulsada por IA. Encuentra vendedores ocultos, automatiza el contacto, rediseña propiedades y cierra más tratos — todo en una sola plataforma creada por AI Network Agency.",
+    "ratingLine": "<b>+2.400 agentes</b> en 47 estados",
+    "dealsLine": "<b>+18.000</b> operaciones facilitadas",
+    "stats": {
+      "activeAgents": "Agentes activos",
+      "dealsFacilitated": "Operaciones facilitadas",
+      "skipTraceAccuracy": "Precisión de skip tracing",
+      "avgOpenRate": "Tasa media de apertura"
+    },
+    "modulesEyebrow": "Módulos de la plataforma",
+    "modulesTitle1": "Siete motores de IA.",
+    "modulesTitle2": "Una sola plataforma.",
+    "modulesBody": "Las mismas capacidades por las que los inversores institucionales pagan más de 50.000 USD al año — integradas y diseñadas para profesionales inmobiliarios.",
+    "workflowEyebrow": "Proceso de principio a fin",
+    "workflowTitle1": "De propietario desconocido a",
+    "workflowTitle2": "trato cerrado",
+    "workflowTitle3": "— una sola plataforma",
+    "contactEyebrow": "Empezar",
+    "contactTitle1": "¿Listo para ver PropAI",
+    "contactTitle2": "en tu mercado?",
+    "contactBody": "Cuéntanos sobre tu corretaje. Te haremos una demostración personalizada y ejecutaremos una búsqueda real de propietarios en tu código postal objetivo — en vivo, durante la llamada.",
+    "contactBullet1": "Prueba gratis de 14 días, sin tarjeta de crédito",
+    "contactBullet2": "Acceso completo durante la prueba",
+    "contactBullet3": "Especialista de incorporación personal"
+  },
+  "modules": {
+    "01": { "title": "Búsqueda de propietarios con IA", "desc": "Consulta registros de propiedades a nivel nacional en segundos. Encuentra propietarios por dirección, código postal, equity, señal de distress o ausentismo.", "powered": "PropAI Search Intelligence" },
+    "02": { "title": "Resolución de contactos", "desc": "Skip tracing de teléfono, correo y perfiles sociales para el 94% de los propietarios en EE. UU. Verificado y rápido.", "powered": "PropAI Contact Resolver" },
+    "03": { "title": "Lead scoring con IA", "desc": "Puntuación de motivación 0–100 según equity, días en distress, historial de propiedad y tipo de situación.", "powered": "PropAI Language Engine" },
+    "04": { "title": "Motor de contacto", "desc": "Cartas a vendedores personalizadas con tu voz. 68% de apertura frente al 22% del promedio del sector. Lánzalo con un clic.", "powered": "PropAI Outreach Engine" },
+    "05": { "title": "Vision Studio", "desc": "Rediseños fotorrealistas de propiedades en 6 estilos, en menos de 60 segundos. Salida en HD y 4K.", "powered": "PropAI Vision Studio" },
+    "06": { "title": "Generador de video con IA", "desc": "Videos de recorrido profesionales con voz IA y kit de marca aplicado — optimizados para YouTube, Reels y TikTok.", "powered": "PropAI Video Studio" }
+  },
+  "workflow": {
+    "1": { "t": "Encuentra al propietario", "d": "PropAI Search Intelligence consulta registros de propiedades a nivel nacional.", "tag": "Search Intelligence" },
+    "2": { "t": "Skip tracing de contacto", "d": "Contact Resolver rastrea teléfono, correo y redes del 94% de los propietarios.", "tag": "Contact Resolver" },
+    "3": { "t": "Puntúa el lead", "d": "Language Engine puntúa la motivación 0–100 según equity, distress e historial.", "tag": "Language Engine" },
+    "4": { "t": "Envía contacto personalizado con IA", "d": "Outreach Engine escribe una carta específica para la situación del propietario.", "tag": "Outreach Engine" },
+    "5": { "t": "Presenta con visuales de IA", "d": "Vision Studio renderiza rediseños. Video Studio crea el video del recorrido.", "tag": "Vision + Video Studio" },
+    "6": { "t": "Cierra el trato", "d": "PropAI Agent guía la negociación y registra cada interacción.", "tag": "PropAI Agent" }
+  },
+  "sidebar": {
+    "workspace": "Espacio de trabajo",
+    "landingPage": "Página principal",
+    "overview": "Resumen",
+    "propaiAgent": "PropAI Agent",
+    "leads": "Leads",
+    "leadScoring": "Lead Scoring",
+    "properties": "Propiedades",
+    "addressLookup": "Búsqueda por dirección",
+    "lookupHistory": "Historial de búsquedas",
+    "findDistressed": "Propiedades en distress",
+    "auctions": "Subastas",
+    "watchlist": "Lista de seguimiento",
+    "owners": "Propietarios",
+    "contactsResolver": "Contactos (Resolver)",
+    "leadLists": "Listas de leads",
+    "campaignsLanguage": "Campañas (Language)",
+    "outreach": "Contacto",
+    "visionStudio": "Vision Studio",
+    "videosVoice": "Videos (Voz+Video)",
+    "socialAmplifier": "Amplificador social",
+    "auditLog": "Registro de auditoría",
+    "smsOptOuts": "Bajas de SMS",
+    "settings": "Configuración"
+  },
+  "overview": {
+    "eyebrow": "Bienvenido de nuevo",
+    "titleA": "Tu",
+    "titleB": "espacio de trabajo",
+    "signedInAs": "Sesión iniciada como <b>{{email}}</b>. Elige un módulo para empezar a agregar datos — todo es privado de tu cuenta.",
+    "records": "registros",
+    "chat": "Chat →",
+    "agentDesc": "Resume leads y redacta contactos"
+  },
+  "empty": {
+    "nothingYet": "Aún no hay nada aquí",
+    "description": "Este módulo está conectado a tu base de datos. Agrega tu primer registro o espera el lanzamiento del módulo de IA en la próxima fase."
+  }
+}

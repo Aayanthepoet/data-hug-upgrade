@@ -1,0 +1,118 @@
+{
+  "common": {
+    "signIn": "登录",
+    "signOut": "退出登录",
+    "startTrial": "免费试用",
+    "startTrialLong": "免费试用 14 天",
+    "openDashboard": "打开控制台",
+    "explorePlatform": "探索平台 →",
+    "seeAllFeatures": "查看全部功能 →",
+    "backToLanding": "返回首页",
+    "backToLandingShort": "返回",
+    "loading": "加载中…",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "search": "搜索",
+    "language": "语言"
+  },
+  "nav": {
+    "features": "功能",
+    "pricing": "定价",
+    "howItWorks": "工作原理",
+    "contact": "联系我们"
+  },
+  "footer": {
+    "tagline": "为房地产专业人士打造的一站式智能平台,由 AI Network Agency 出品。",
+    "platform": "平台",
+    "company": "公司",
+    "privacy": "隐私政策",
+    "terms": "条款与条件",
+    "rights": "保留所有权利。"
+  },
+  "landing": {
+    "eyebrow": "AI Network Agency · PropAI 平台",
+    "heroTitle1": "面向房地产的",
+    "heroTitle2": "智能",
+    "heroTitle3": "一站式平台",
+    "heroBody": "PropAI 让您的房地产业务变成由 AI 驱动的成交机器。发掘潜在卖家、自动化客户触达、重新设计房源、达成更多交易 —— 全部集成在 AI Network Agency 打造的同一个平台中。",
+    "ratingLine": "<b>2,400+ 名经纪人</b>,覆盖 47 个州",
+    "dealsLine": "已促成 <b>18,000+</b> 笔交易",
+    "stats": {
+      "activeAgents": "活跃经纪人",
+      "dealsFacilitated": "促成交易",
+      "skipTraceAccuracy": "Skip Tracing 准确率",
+      "avgOpenRate": "平均触达打开率"
+    },
+    "modulesEyebrow": "平台模块",
+    "modulesTitle1": "七大 AI 引擎,",
+    "modulesTitle2": "一个平台。",
+    "modulesBody": "机构投资者每年花费 5 万美元以上才能获得的能力 —— 整合在一起,专为房地产专业人士打造。",
+    "workflowEyebrow": "端到端流程",
+    "workflowTitle1": "从陌生业主到",
+    "workflowTitle2": "成交",
+    "workflowTitle3": "—— 一个平台搞定",
+    "contactEyebrow": "立即开始",
+    "contactTitle1": "准备好在您的市场中体验 PropAI",
+    "contactTitle2": "了吗?",
+    "contactBody": "告诉我们您的经纪公司情况。我们会安排一对一演示,并在您指定的邮编内现场进行真实的业主搜索。",
+    "contactBullet1": "14 天免费试用,无需信用卡",
+    "contactBullet2": "试用期内可使用全部功能",
+    "contactBullet3": "专属上手指导专员"
+  },
+  "modules": {
+    "01": { "title": "AI 业主搜索", "desc": "数秒内查询全美房产记录。可按地址、邮编、净值、distress 信号或非自住身份查找业主。", "powered": "PropAI Search Intelligence" },
+    "02": { "title": "联系方式解析", "desc": "为 94% 的美国房产业主提供电话、邮箱和社交账号的 skip tracing,验证准确、可达性高。", "powered": "PropAI Contact Resolver" },
+    "03": { "title": "AI Lead Scoring", "desc": "根据房产净值、distress 持续天数、产权历史和情况类型,给出 0–100 的意向评分。", "powered": "PropAI Language Engine" },
+    "04": { "title": "触达引擎", "desc": "用您的口吻为卖家定制信函。打开率 68%,远高于行业平均 22%。一键发送。", "powered": "PropAI Outreach Engine" },
+    "05": { "title": "Vision Studio", "desc": "60 秒内生成 6 种风格的逼真房源 AI 重设计,支持 HD 和 4K 输出。", "powered": "PropAI Vision Studio" },
+    "06": { "title": "AI 视频生成器", "desc": "专业级看房视频,自动配 AI 配音和品牌包装 —— 已针对 YouTube、Reels、TikTok 优化。", "powered": "PropAI Video Studio" }
+  },
+  "workflow": {
+    "1": { "t": "找到业主", "d": "PropAI Search Intelligence 查询全美房产记录。", "tag": "Search Intelligence" },
+    "2": { "t": "Skip Tracing 联系方式", "d": "Contact Resolver 从 94% 的美国业主中获取电话、邮箱和社交账号。", "tag": "Contact Resolver" },
+    "3": { "t": "对 Lead 评分", "d": "Language Engine 根据净值、distress 和历史给出 0–100 的意向评分。", "tag": "Language Engine" },
+    "4": { "t": "发送 AI 个性化触达", "d": "Outreach Engine 针对每位业主的具体情况撰写专属信函。", "tag": "Outreach Engine" },
+    "5": { "t": "用 AI 视觉效果展示", "d": "Vision Studio 渲染设计,Video Studio 生成看房视频。", "tag": "Vision + Video Studio" },
+    "6": { "t": "促成成交", "d": "PropAI Agent 辅导谈判,并追踪每一次互动。", "tag": "PropAI Agent" }
+  },
+  "sidebar": {
+    "workspace": "工作区",
+    "landingPage": "首页",
+    "overview": "概览",
+    "propaiAgent": "PropAI Agent",
+    "leads": "Leads",
+    "leadScoring": "Lead 评分",
+    "properties": "房源",
+    "addressLookup": "地址查询",
+    "lookupHistory": "查询历史",
+    "findDistressed": "查找 distress 房产",
+    "auctions": "拍卖",
+    "watchlist": "关注列表",
+    "owners": "业主",
+    "contactsResolver": "联系人(Resolver)",
+    "leadLists": "Lead 名单",
+    "campaignsLanguage": "营销活动(Language)",
+    "outreach": "触达",
+    "visionStudio": "Vision Studio",
+    "videosVoice": "视频(语音+视频)",
+    "socialAmplifier": "社交放大器",
+    "auditLog": "审计日志",
+    "smsOptOuts": "SMS 退订",
+    "settings": "设置"
+  },
+  "overview": {
+    "eyebrow": "欢迎回来",
+    "titleA": "您的",
+    "titleB": "工作区",
+    "signedInAs": "已以 <b>{{email}}</b> 登录。选择一个模块开始添加数据 —— 所有内容仅对您可见。",
+    "records": "条记录",
+    "chat": "聊天 →",
+    "agentDesc": "总结 lead、撰写触达"
+  },
+  "empty": {
+    "nothingYet": "暂无内容",
+    "description": "该模块已连接到您的数据库。请添加第一条记录,或等待下一阶段的 AI 模块上线。"
+  }
+}

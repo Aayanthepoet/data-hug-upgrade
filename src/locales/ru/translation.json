@@ -1,0 +1,118 @@
+{
+  "common": {
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "startTrial": "Бесплатный период",
+    "startTrialLong": "Бесплатно 14 дней",
+    "openDashboard": "Открыть панель",
+    "explorePlatform": "Изучить платформу →",
+    "seeAllFeatures": "Все возможности →",
+    "backToLanding": "На главную",
+    "backToLandingShort": "Назад",
+    "loading": "Загрузка…",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "search": "Поиск",
+    "language": "Язык"
+  },
+  "nav": {
+    "features": "Возможности",
+    "pricing": "Тарифы",
+    "howItWorks": "Как это работает",
+    "contact": "Контакты"
+  },
+  "footer": {
+    "tagline": "Единая платформа аналитики для специалистов по недвижимости. Создано AI Network Agency.",
+    "platform": "Платформа",
+    "company": "Компания",
+    "privacy": "Политика конфиденциальности",
+    "terms": "Условия использования",
+    "rights": "Все права защищены."
+  },
+  "landing": {
+    "eyebrow": "AI Network Agency · Платформа PropAI",
+    "heroTitle1": "Единая платформа",
+    "heroTitle2": "аналитики",
+    "heroTitle3": "для рынка недвижимости",
+    "heroBody": "PropAI превращает ваш офис недвижимости в машину сделок на базе ИИ. Находите скрытых продавцов, автоматизируйте outreach, преображайте объекты и закрывайте больше сделок — всё в одной платформе от AI Network Agency.",
+    "ratingLine": "<b>Более 2 400 агентов</b> в 47 штатах",
+    "dealsLine": "Проведено <b>более 18 000</b> сделок",
+    "stats": {
+      "activeAgents": "Активных агентов",
+      "dealsFacilitated": "Проведено сделок",
+      "skipTraceAccuracy": "Точность skip tracing",
+      "avgOpenRate": "Средний open rate"
+    },
+    "modulesEyebrow": "Модули платформы",
+    "modulesTitle1": "Семь ИИ-движков.",
+    "modulesTitle2": "Одна платформа.",
+    "modulesBody": "Те же возможности, за которые институциональные инвесторы платят свыше 50 000 USD в год — собраны в одной платформе для специалистов по недвижимости.",
+    "workflowEyebrow": "Процесс от начала до конца",
+    "workflowTitle1": "От неизвестного владельца до",
+    "workflowTitle2": "закрытой сделки",
+    "workflowTitle3": "— одна платформа",
+    "contactEyebrow": "Начать",
+    "contactTitle1": "Готовы увидеть PropAI",
+    "contactTitle2": "на вашем рынке?",
+    "contactBody": "Расскажите о своём агентстве. Мы проведём персональную демонстрацию и в прямом эфире выполним поиск владельцев по нужному ZIP-коду.",
+    "contactBullet1": "14 дней бесплатно, без карты",
+    "contactBullet2": "Полный доступ ко всем функциям",
+    "contactBullet3": "Личный специалист по онбордингу"
+  },
+  "modules": {
+    "01": { "title": "ИИ-поиск владельцев", "desc": "За секунды находите записи о недвижимости по всей стране — по адресу, ZIP, equity, сигналу distress или статусу absentee.", "powered": "PropAI Search Intelligence" },
+    "02": { "title": "Resolver контактов", "desc": "Skip tracing телефонов, email и соцсетей для 94% владельцев недвижимости в США. Проверено и быстро.", "powered": "PropAI Contact Resolver" },
+    "03": { "title": "ИИ Lead Scoring", "desc": "Оценка мотивации 0–100 по equity, длительности distress, истории владения и типу ситуации.", "powered": "PropAI Language Engine" },
+    "04": { "title": "Движок outreach", "desc": "Персональные письма продавцам вашим голосом. Open rate 68% против 22% по рынку. Запуск в один клик.", "powered": "PropAI Outreach Engine" },
+    "05": { "title": "Vision Studio", "desc": "Фотореалистичные ИИ-редизайны объектов в 6 стилях за минуту. HD и 4K в комплекте.", "powered": "PropAI Vision Studio" },
+    "06": { "title": "ИИ-генератор видео", "desc": "Профессиональные обзорные видео с ИИ-озвучкой и брендингом — оптимизированы для YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+  },
+  "workflow": {
+    "1": { "t": "Найдите владельца", "d": "PropAI Search Intelligence ищет в записях о недвижимости по всей стране.", "tag": "Search Intelligence" },
+    "2": { "t": "Skip tracing контактов", "d": "Contact Resolver находит телефон, email и соцсети 94% владельцев в США.", "tag": "Contact Resolver" },
+    "3": { "t": "Оцените lead", "d": "Language Engine ставит мотивации балл 0–100 по equity, distress и истории.", "tag": "Language Engine" },
+    "4": { "t": "Отправьте персональный outreach", "d": "Outreach Engine пишет письмо под конкретную ситуацию владельца.", "tag": "Outreach Engine" },
+    "5": { "t": "Покажите с ИИ-визуалом", "d": "Vision Studio рендерит редизайны, Video Studio создаёт обзорное видео.", "tag": "Vision + Video Studio" },
+    "6": { "t": "Закройте сделку", "d": "PropAI Agent ведёт переговоры и фиксирует каждый шаг.", "tag": "PropAI Agent" }
+  },
+  "sidebar": {
+    "workspace": "Рабочее пространство",
+    "landingPage": "Главная",
+    "overview": "Обзор",
+    "propaiAgent": "PropAI Agent",
+    "leads": "Leads",
+    "leadScoring": "Lead Scoring",
+    "properties": "Объекты",
+    "addressLookup": "Поиск по адресу",
+    "lookupHistory": "История поиска",
+    "findDistressed": "Distress-объекты",
+    "auctions": "Аукционы",
+    "watchlist": "Избранное",
+    "owners": "Владельцы",
+    "contactsResolver": "Контакты (Resolver)",
+    "leadLists": "Списки leads",
+    "campaignsLanguage": "Кампании (Language)",
+    "outreach": "Outreach",
+    "visionStudio": "Vision Studio",
+    "videosVoice": "Видео (Voice+Video)",
+    "socialAmplifier": "Соц. усилитель",
+    "auditLog": "Журнал аудита",
+    "smsOptOuts": "Отписки SMS",
+    "settings": "Настройки"
+  },
+  "overview": {
+    "eyebrow": "С возвращением",
+    "titleA": "Ваше",
+    "titleB": "рабочее пространство",
+    "signedInAs": "Вы вошли как <b>{{email}}</b>. Выберите модуль и начните добавлять данные — всё видно только вам.",
+    "records": "записей",
+    "chat": "Чат →",
+    "agentDesc": "Сводки по leads и черновики outreach"
+  },
+  "empty": {
+    "nothingYet": "Здесь пока ничего нет",
+    "description": "Модуль подключён к вашей базе. Добавьте первую запись или дождитесь запуска ИИ-модуля на следующем этапе."
+  }
+}

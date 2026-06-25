@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export function EmptyModule({
   eyebrow,
@@ -11,6 +12,7 @@ export function EmptyModule({
   description: string;
   cta?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="eyebrow inline-flex">
@@ -22,10 +24,9 @@ export function EmptyModule({
 
       <div className="surface mt-10 p-10 text-center">
         <div className="text-5xl mb-4">✨</div>
-        <div className="font-semibold">Nothing here yet</div>
+        <div className="font-semibold">{t("empty.nothingYet")}</div>
         <div className="text-sm text-[var(--w45)] mt-2 max-w-md mx-auto">
-          This module is wired to your database. Add your first record or wait for
-          the AI module rollout in the next phase.
+          {t("empty.description")}
         </div>
         {cta && <div className="mt-6">{cta}</div>}
       </div>

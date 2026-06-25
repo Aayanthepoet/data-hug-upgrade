@@ -1,8 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { NotificationBell } from "@/components/app/NotificationBell";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
@@ -17,6 +19,8 @@ function AppShell() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
+
 
   async function signOut() {
     await qc.cancelQueries();
@@ -44,7 +48,7 @@ function AppShell() {
                 className="ml-2 hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 hover:border-cyan transition"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                <span>Back to Landing Page</span>
+                <span>{t("common.backToLanding")}</span>
               </Link>
               <Link
                 to="/"
@@ -55,10 +59,11 @@ function AppShell() {
               </Link>
             </div>
             <div className="flex items-center gap-3 text-sm">
+              <LanguageSwitcher compact />
               <NotificationBell />
               <span className="text-[var(--w55)] hidden md:inline">{user?.email}</span>
               <button onClick={signOut} className="btn-ghost text-xs px-4 py-2">
-                Sign out
+                {t("common.signOut")}
               </button>
             </div>
           </header>
