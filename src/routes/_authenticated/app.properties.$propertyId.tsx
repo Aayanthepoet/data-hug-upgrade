@@ -11,7 +11,8 @@ import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/com
 import { listRenders, deleteRender, linkRenderToProperty } from "@/lib/vision/vision.functions";
 import { ContractsSection } from "@/components/app/ContractsSection";
 import { scoreProperty } from "@/lib/engines/scoring.functions";
-import { Flame, Home, AlertTriangle } from "lucide-react";
+import { Flame, Home, AlertTriangle, TrendingUp, ExternalLink as ExtLink2 } from "lucide-react";
+import { getMarketIntel, type MarketIntelResult } from "@/lib/market-intel.functions";
 
 import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
