@@ -953,6 +953,39 @@ export type Database = {
         }
         Relationships: []
       }
+      market_intel_cache: {
+        Row: {
+          citations: Json
+          content: string
+          created_at: string
+          expires_at: string
+          id: string
+          location_key: string
+          model: string | null
+          property_id: string
+        }
+        Insert: {
+          citations?: Json
+          content: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          location_key: string
+          model?: string | null
+          property_id: string
+        }
+        Update: {
+          citations?: Json
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          location_key?: string
+          model?: string | null
+          property_id?: string
+        }
+        Relationships: []
+      }
       media_assets: {
         Row: {
           asset_type: string

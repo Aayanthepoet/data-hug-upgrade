@@ -11,7 +11,8 @@ import { getComps, runComps, type CompRow, type ArvEstimateRow } from "@/lib/com
 import { listRenders, deleteRender, linkRenderToProperty } from "@/lib/vision/vision.functions";
 import { ContractsSection } from "@/components/app/ContractsSection";
 import { scoreProperty } from "@/lib/engines/scoring.functions";
-import { Flame, Home, AlertTriangle } from "lucide-react";
+import { Flame, Home, AlertTriangle, TrendingUp, ExternalLink as ExtLink2 } from "lucide-react";
+import { getMarketIntel, type MarketIntelResult } from "@/lib/market-intel.functions";
 
 import { ExternalLink, ArrowLeft, Search, X, Link2, Check, QrCode, Bookmark, BookmarkCheck, Gavel, Calculator, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -153,7 +154,10 @@ function PropertyDetailPage() {
 
       <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
 
+      <MarketIntelSection propertyId={propertyId} />
+
       <VisionGallerySection propertyId={propertyId} />
+
 
       <ContractsSection
         propertyId={propertyId}
@@ -345,6 +349,100 @@ function CompsSection({ propertyId, subjectSqft }: { propertyId: string; subject
           )}
         </>
       )}
+    </section>
+  );
+}
+
+function MarketIntelSection({ propertyId }: { propertyId: string }) {
+  const fetchFn = useServerFn(getMarketIntel);
+  const [result, setResult] = useState<MarketIntelResult | null>(null);
+
+  const mut = useMutation({
+    mutationFn: (refresh: boolean) => fetchFn({ data: { propertyId, refresh } }),
+    onSuccess: (d) => setResult(d),
+  });
+
+  const hasData = !!result;
+  const cachedLabel = result?.cached
+    ? `Cached · refreshes ${new Date(result.expiresAt).toLocaleString()}`
+    : result
+      ? `Fresh · valid until ${new Date(result.expiresAt).toLocaleString()}`
+      : null;
+
+  return (
+    <section className="border border-border rounded-lg">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-cyan" />
+          <h2 className="font-medium">Neighborhood & Market Intel</h2>
+          {cachedLabel && (
+            <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">· {cachedLabel}</span>
+          )}
+        </div>
+        <button
+          onClick={() => mut.mutate(hasData)}
+          disabled={mut.isPending}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-white/5 disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 text-cyan ${mut.isPending ? "animate-spin" : ""}`} />
+          {mut.isPending ? "Researching…" : hasData ? "Refresh intel" : "Get Market Intel"}
+        </button>
+      </header>
+
+      <div className="p-4 space-y-4">
+        {!hasData && !mut.isPending && !mut.isError && (
+          <p className="text-sm text-[var(--w55)]">
+            Pull current market trends, recent sales, school ratings, and zoning/development changes for this area. Only the public location (city, state, ZIP) is sent to the research provider.
+          </p>
+        )}
+
+        {mut.isPending && (
+          <div className="space-y-2">
+            <div className="h-3 w-1/3 rounded bg-white/10 animate-pulse" />
+            <div className="h-3 w-full rounded bg-white/5 animate-pulse" />
+            <div className="h-3 w-5/6 rounded bg-white/5 animate-pulse" />
+            <div className="h-3 w-2/3 rounded bg-white/5 animate-pulse" />
+          </div>
+        )}
+
+        {mut.isError && (
+          <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+            {(mut.error as Error).message || "Couldn't reach the market intel provider."}
+          </div>
+        )}
+
+        {hasData && result && (
+          <>
+            <p className="text-[11px] uppercase tracking-wider text-[var(--w55)]">
+              {result.locationLabel}
+            </p>
+            <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-sm leading-relaxed text-[var(--w85)]">
+              {result.content}
+            </div>
+            {result.citations.length > 0 && (
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-[10px] uppercase tracking-wider text-[var(--w55)] mb-2">Sources</p>
+                <ol className="space-y-1 text-xs">
+                  {result.citations.map((c, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-[var(--w55)]">[{i + 1}]</span>
+                      <a
+                        href={c.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan hover:underline inline-flex items-center gap-1 break-all"
+                      >
+                        {c.title || c.url}
+                        <ExtLink2 className="h-3 w-3 shrink-0" />
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </section>
   );
 }
