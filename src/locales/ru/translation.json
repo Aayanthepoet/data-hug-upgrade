@@ -62,20 +62,68 @@
     "contactBullet3": "Личный специалист по онбордингу"
   },
   "modules": {
-    "01": { "title": "ИИ-поиск владельцев", "desc": "За секунды находите записи о недвижимости по всей стране — по адресу, ZIP, equity, сигналу distress или статусу absentee.", "powered": "PropAI Search Intelligence" },
-    "02": { "title": "Resolver контактов", "desc": "Skip tracing телефонов, email и соцсетей для 94% владельцев недвижимости в США. Проверено и быстро.", "powered": "PropAI Contact Resolver" },
-    "03": { "title": "ИИ Lead Scoring", "desc": "Оценка мотивации 0–100 по equity, длительности distress, истории владения и типу ситуации.", "powered": "PropAI Language Engine" },
-    "04": { "title": "Движок outreach", "desc": "Персональные письма продавцам вашим голосом. Open rate 68% против 22% по рынку. Запуск в один клик.", "powered": "PropAI Outreach Engine" },
-    "05": { "title": "Vision Studio", "desc": "Фотореалистичные ИИ-редизайны объектов в 6 стилях за минуту. HD и 4K в комплекте.", "powered": "PropAI Vision Studio" },
-    "06": { "title": "ИИ-генератор видео", "desc": "Профессиональные обзорные видео с ИИ-озвучкой и брендингом — оптимизированы для YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+    "01": {
+      "title": "ИИ-поиск владельцев",
+      "desc": "За секунды находите записи о недвижимости по всей стране — по адресу, ZIP, equity, сигналу distress или статусу absentee.",
+      "powered": "PropAI Search Intelligence"
+    },
+    "02": {
+      "title": "Resolver контактов",
+      "desc": "Skip tracing телефонов, email и соцсетей для 94% владельцев недвижимости в США. Проверено и быстро.",
+      "powered": "PropAI Contact Resolver"
+    },
+    "03": {
+      "title": "ИИ Lead Scoring",
+      "desc": "Оценка мотивации 0–100 по equity, длительности distress, истории владения и типу ситуации.",
+      "powered": "PropAI Language Engine"
+    },
+    "04": {
+      "title": "Движок outreach",
+      "desc": "Персональные письма продавцам вашим голосом. Open rate 68% против 22% по рынку. Запуск в один клик.",
+      "powered": "PropAI Outreach Engine"
+    },
+    "05": {
+      "title": "Vision Studio",
+      "desc": "Фотореалистичные ИИ-редизайны объектов в 6 стилях за минуту. HD и 4K в комплекте.",
+      "powered": "PropAI Vision Studio"
+    },
+    "06": {
+      "title": "ИИ-генератор видео",
+      "desc": "Профессиональные обзорные видео с ИИ-озвучкой и брендингом — оптимизированы для YouTube, Reels, TikTok.",
+      "powered": "PropAI Video Studio"
+    }
   },
   "workflow": {
-    "1": { "t": "Найдите владельца", "d": "PropAI Search Intelligence ищет в записях о недвижимости по всей стране.", "tag": "Search Intelligence" },
-    "2": { "t": "Skip tracing контактов", "d": "Contact Resolver находит телефон, email и соцсети 94% владельцев в США.", "tag": "Contact Resolver" },
-    "3": { "t": "Оцените lead", "d": "Language Engine ставит мотивации балл 0–100 по equity, distress и истории.", "tag": "Language Engine" },
-    "4": { "t": "Отправьте персональный outreach", "d": "Outreach Engine пишет письмо под конкретную ситуацию владельца.", "tag": "Outreach Engine" },
-    "5": { "t": "Покажите с ИИ-визуалом", "d": "Vision Studio рендерит редизайны, Video Studio создаёт обзорное видео.", "tag": "Vision + Video Studio" },
-    "6": { "t": "Закройте сделку", "d": "PropAI Agent ведёт переговоры и фиксирует каждый шаг.", "tag": "PropAI Agent" }
+    "1": {
+      "t": "Найдите владельца",
+      "d": "PropAI Search Intelligence ищет в записях о недвижимости по всей стране.",
+      "tag": "Search Intelligence"
+    },
+    "2": {
+      "t": "Skip tracing контактов",
+      "d": "Contact Resolver находит телефон, email и соцсети 94% владельцев в США.",
+      "tag": "Contact Resolver"
+    },
+    "3": {
+      "t": "Оцените lead",
+      "d": "Language Engine ставит мотивации балл 0–100 по equity, distress и истории.",
+      "tag": "Language Engine"
+    },
+    "4": {
+      "t": "Отправьте персональный outreach",
+      "d": "Outreach Engine пишет письмо под конкретную ситуацию владельца.",
+      "tag": "Outreach Engine"
+    },
+    "5": {
+      "t": "Покажите с ИИ-визуалом",
+      "d": "Vision Studio рендерит редизайны, Video Studio создаёт обзорное видео.",
+      "tag": "Vision + Video Studio"
+    },
+    "6": {
+      "t": "Закройте сделку",
+      "d": "PropAI Agent ведёт переговоры и фиксирует каждый шаг.",
+      "tag": "PropAI Agent"
+    }
   },
   "sidebar": {
     "workspace": "Рабочее пространство",
@@ -114,5 +162,107 @@
   "empty": {
     "nothingYet": "Здесь пока ничего нет",
     "description": "Модуль подключён к вашей базе. Добавьте первую запись или дождитесь запуска ИИ-модуля на следующем этапе."
+  },
+  "leads": {
+    "title": "Leads — PropAI",
+    "eyebrow": "Leads",
+    "headingA": "Полученные",
+    "headingB": "leads",
+    "subtitle": "Просматривайте, ищите, фильтруйте и назначайте каждый lead, полученный с вашего сайта.",
+    "searchPlaceholder": "Поиск по имени, email, источнику, компании…",
+    "searchAria": "Загрузка",
+    "searchProperties": "Искать объекты",
+    "searching": "Поиск…",
+    "statusPlaceholder": "Статус",
+    "sourcePlaceholder": "Источник",
+    "assigneePlaceholder": "Ответственный",
+    "allStatuses": "Все статусы",
+    "allSources": "Все источники",
+    "allAssignees": "Все ответственные",
+    "unassigned": "Не назначен",
+    "countOf": "{{filtered}} из {{total}} leads",
+    "loadError": "Не удалось загрузить leads. Возможно, у вас нет прав администратора.",
+    "loadingLeads": "Загрузка leads…",
+    "noMatch": "Нет leads, подходящих под фильтры.",
+    "tryProperty": "Ищете адрес объекта? Попробуйте",
+    "findDistressed": "Найти distressed-объекты",
+    "col": {
+      "name": "Имя",
+      "email": "Email",
+      "company": "Компания",
+      "source": "Источник",
+      "status": "Статус",
+      "assignee": "Ответственный",
+      "submitted": "Отправлено"
+    },
+    "toast": {
+      "assignUpdated": "Назначение lead обновлено",
+      "assignFailed": "Не удалось обновить назначение"
+    },
+    "detail": {
+      "title": "Lead — PropAI",
+      "back": "Назад к leads",
+      "loading": "Загрузка…",
+      "loadError": "Не удалось загрузить lead.",
+      "notFound": "Lead не найден.",
+      "unnamed": "Lead без имени",
+      "submittedAt": "Отправлено {{when}}",
+      "viaSource": " · источник: {{source}}",
+      "exportCsv": "Экспорт в CSV",
+      "downloadPdf": "Скачать PDF",
+      "emailPdf": "Отправить PDF на email",
+      "dialogTitle": "Отправить PDF lead",
+      "dialogDescription": "Выберите участников команды, которым отправить сгенерированный PDF. Они получат приватную ссылку, действующую 7 дней.",
+      "recipients": "Получатели",
+      "noTeammates": "Нет участников команды с указанным email.",
+      "optionalNote": "Комментарий (необязательно)",
+      "notePlaceholder": "Добавьте короткое сообщение для коллег…",
+      "cancel": "Отмена",
+      "sending": "Отправка…",
+      "sendTo": "Отправить ({{count}})",
+      "fieldEmail": "Email",
+      "fieldPhone": "Телефон",
+      "fieldCompany": "Компания",
+      "fieldSource": "Источник",
+      "message": "Сообщение",
+      "noMessage": "Сообщение не указано.",
+      "status": "Статус",
+      "assignee": "Ответственный",
+      "unassigned": "Не назначен",
+      "notesHeading": "Заметки по работе с lead",
+      "notesPlaceholder": "Добавьте заметку по этому lead…",
+      "savingNote": "Сохранение…",
+      "addNote": "Добавить заметку",
+      "notesLoading": "Загрузка заметок…",
+      "notesEmpty": "Заметок пока нет.",
+      "deleteNoteAria": "Удалить заметку",
+      "historyHeading": "История назначений",
+      "historyLoading": "Загрузка истории…",
+      "historyEmpty": "Изменений назначения пока нет.",
+      "assignedTo": "Назначен",
+      "by": "кем",
+      "system": "система",
+      "emailHeading": "Отправка email",
+      "emailLoading": "Загрузка статуса доставки…",
+      "emailEmpty": "PDF по email ещё не отправлялся.",
+      "statusSent": "Отправлено",
+      "statusQueued": "В очереди",
+      "statusFailed": "Ошибка",
+      "toastStatusUpdated": "Статус обновлён",
+      "toastAssignUpdated": "Назначение обновлено",
+      "toastNoteEmpty": "Заметка не может быть пустой",
+      "toastNoteAdded": "Заметка добавлена",
+      "toastPickRecipient": "Выберите хотя бы одного получателя",
+      "toastMustSignIn": "Необходимо войти в систему",
+      "toastEmailed_one": "PDF отправлен {{count}} получателю",
+      "toastEmailed_few": "PDF отправлен {{count}} получателям",
+      "toastEmailed_many": "PDF отправлен {{count}} получателям",
+      "toastEmailed_other": "PDF отправлен {{count}} получателям",
+      "toastFailed_one": "{{count}} email не удалось отправить",
+      "toastFailed_few": "{{count}} email не удалось отправить",
+      "toastFailed_many": "{{count}} email не удалось отправить",
+      "toastFailed_other": "{{count}} email не удалось отправить",
+      "toastSendError": "Не удалось отправить email"
+    }
   }
 }

@@ -62,20 +62,68 @@
     "contactBullet3": "Personal onboarding specialist"
   },
   "modules": {
-    "01": { "title": "AI Owner Search", "desc": "Query nationwide property records in seconds. Find owners by address, ZIP, equity, distress signal, or absentee status.", "powered": "PropAI Search Intelligence" },
-    "02": { "title": "Contact Resolver", "desc": "Skip-trace phone, email, and social profiles for 94% of US property owners. Verified, deliverable, fast.", "powered": "PropAI Contact Resolver" },
-    "03": { "title": "AI Lead Scoring", "desc": "Motivation score 0–100 from equity position, days in distress, ownership history, and situation type.", "powered": "PropAI Language Engine" },
-    "04": { "title": "Outreach Engine", "desc": "Personalized seller letters in your voice. 68% open rate vs 22% industry standard. Launch in one click.", "powered": "PropAI Outreach Engine" },
-    "05": { "title": "Vision Studio", "desc": "Photorealistic AI property redesigns in 6 styles, under 60 seconds. HD and 4K output included.", "powered": "PropAI Vision Studio" },
-    "06": { "title": "Video AI Generator", "desc": "Professional tour videos with AI voiceover and brand kit auto-applied — optimized for YouTube, Reels, TikTok.", "powered": "PropAI Video Studio" }
+    "01": {
+      "title": "AI Owner Search",
+      "desc": "Query nationwide property records in seconds. Find owners by address, ZIP, equity, distress signal, or absentee status.",
+      "powered": "PropAI Search Intelligence"
+    },
+    "02": {
+      "title": "Contact Resolver",
+      "desc": "Skip-trace phone, email, and social profiles for 94% of US property owners. Verified, deliverable, fast.",
+      "powered": "PropAI Contact Resolver"
+    },
+    "03": {
+      "title": "AI Lead Scoring",
+      "desc": "Motivation score 0–100 from equity position, days in distress, ownership history, and situation type.",
+      "powered": "PropAI Language Engine"
+    },
+    "04": {
+      "title": "Outreach Engine",
+      "desc": "Personalized seller letters in your voice. 68% open rate vs 22% industry standard. Launch in one click.",
+      "powered": "PropAI Outreach Engine"
+    },
+    "05": {
+      "title": "Vision Studio",
+      "desc": "Photorealistic AI property redesigns in 6 styles, under 60 seconds. HD and 4K output included.",
+      "powered": "PropAI Vision Studio"
+    },
+    "06": {
+      "title": "Video AI Generator",
+      "desc": "Professional tour videos with AI voiceover and brand kit auto-applied — optimized for YouTube, Reels, TikTok.",
+      "powered": "PropAI Video Studio"
+    }
   },
   "workflow": {
-    "1": { "t": "Find the Owner", "d": "PropAI's Search Intelligence queries nationwide property records.", "tag": "Search Intelligence" },
-    "2": { "t": "Skip-Trace Contact Info", "d": "Contact Resolver traces phone, email, social from 94% of US owners.", "tag": "Contact Resolver" },
-    "3": { "t": "Score the Lead", "d": "Language Engine scores motivation 0–100 from equity, distress, history.", "tag": "Language Engine" },
-    "4": { "t": "Send AI-Personalized Outreach", "d": "Outreach Engine writes a letter specific to this owner's situation.", "tag": "Outreach Engine" },
-    "5": { "t": "Present with AI Visuals", "d": "Vision Studio renders redesigns. Video Studio creates the tour video.", "tag": "Vision + Video Studio" },
-    "6": { "t": "Close the Deal", "d": "PropAI Agent coaches negotiation and tracks every touchpoint.", "tag": "PropAI Agent" }
+    "1": {
+      "t": "Find the Owner",
+      "d": "PropAI's Search Intelligence queries nationwide property records.",
+      "tag": "Search Intelligence"
+    },
+    "2": {
+      "t": "Skip-Trace Contact Info",
+      "d": "Contact Resolver traces phone, email, social from 94% of US owners.",
+      "tag": "Contact Resolver"
+    },
+    "3": {
+      "t": "Score the Lead",
+      "d": "Language Engine scores motivation 0–100 from equity, distress, history.",
+      "tag": "Language Engine"
+    },
+    "4": {
+      "t": "Send AI-Personalized Outreach",
+      "d": "Outreach Engine writes a letter specific to this owner's situation.",
+      "tag": "Outreach Engine"
+    },
+    "5": {
+      "t": "Present with AI Visuals",
+      "d": "Vision Studio renders redesigns. Video Studio creates the tour video.",
+      "tag": "Vision + Video Studio"
+    },
+    "6": {
+      "t": "Close the Deal",
+      "d": "PropAI Agent coaches negotiation and tracks every touchpoint.",
+      "tag": "PropAI Agent"
+    }
   },
   "sidebar": {
     "workspace": "Workspace",
@@ -114,5 +162,103 @@
   "empty": {
     "nothingYet": "Nothing here yet",
     "description": "This module is wired to your database. Add your first record or wait for the AI module rollout in the next phase."
+  },
+  "leads": {
+    "title": "Leads — PropAI",
+    "eyebrow": "Leads",
+    "headingA": "Submitted",
+    "headingB": "leads",
+    "subtitle": "Browse, search, filter and assign every lead captured from your site.",
+    "searchPlaceholder": "Search by name, email, source, company…",
+    "searchAria": "Loading",
+    "searchProperties": "Search Properties",
+    "searching": "Searching…",
+    "statusPlaceholder": "Status",
+    "sourcePlaceholder": "Source",
+    "assigneePlaceholder": "Assignee",
+    "allStatuses": "All statuses",
+    "allSources": "All sources",
+    "allAssignees": "All assignees",
+    "unassigned": "Unassigned",
+    "countOf": "{{filtered}} of {{total}} leads",
+    "loadError": "Couldn't load leads. You may not have admin access.",
+    "loadingLeads": "Loading leads…",
+    "noMatch": "No leads match your filters.",
+    "tryProperty": "Looking for a property address? Try",
+    "findDistressed": "Find Distressed Properties",
+    "col": {
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "source": "Source",
+      "status": "Status",
+      "assignee": "Assignee",
+      "submitted": "Submitted"
+    },
+    "toast": {
+      "assignUpdated": "Lead assignment updated",
+      "assignFailed": "Failed to update assignment"
+    },
+    "detail": {
+      "title": "Lead — PropAI",
+      "back": "Back to leads",
+      "loading": "Loading…",
+      "loadError": "Couldn't load lead.",
+      "notFound": "Lead not found.",
+      "unnamed": "Unnamed lead",
+      "submittedAt": "Submitted {{when}}",
+      "viaSource": " · via {{source}}",
+      "exportCsv": "Export CSV",
+      "downloadPdf": "Download PDF",
+      "emailPdf": "Email PDF",
+      "dialogTitle": "Email lead PDF",
+      "dialogDescription": "Pick the team members to send the generated PDF to. They'll get a private download link valid for 7 days.",
+      "recipients": "Recipients",
+      "noTeammates": "No teammates with an email address found.",
+      "optionalNote": "Optional note",
+      "notePlaceholder": "Add a quick message for your teammates…",
+      "cancel": "Cancel",
+      "sending": "Sending…",
+      "sendTo": "Send to {{count}}",
+      "fieldEmail": "Email",
+      "fieldPhone": "Phone",
+      "fieldCompany": "Company",
+      "fieldSource": "Source",
+      "message": "Message",
+      "noMessage": "No message provided.",
+      "status": "Status",
+      "assignee": "Assignee",
+      "unassigned": "Unassigned",
+      "notesHeading": "Follow-up notes",
+      "notesPlaceholder": "Add a note about this lead…",
+      "savingNote": "Saving…",
+      "addNote": "Add note",
+      "notesLoading": "Loading notes…",
+      "notesEmpty": "No notes yet.",
+      "deleteNoteAria": "Delete note",
+      "historyHeading": "Assignment history",
+      "historyLoading": "Loading history…",
+      "historyEmpty": "No assignment changes yet.",
+      "assignedTo": "Assigned to",
+      "by": "by",
+      "system": "system",
+      "emailHeading": "Email delivery",
+      "emailLoading": "Loading delivery status…",
+      "emailEmpty": "No PDF emails sent yet.",
+      "statusSent": "Sent",
+      "statusQueued": "Queued",
+      "statusFailed": "Failed",
+      "toastStatusUpdated": "Status updated",
+      "toastAssignUpdated": "Assignment updated",
+      "toastNoteEmpty": "Note can't be empty",
+      "toastNoteAdded": "Note added",
+      "toastPickRecipient": "Pick at least one recipient",
+      "toastMustSignIn": "You must be signed in",
+      "toastEmailed_one": "Emailed PDF to {{count}} recipient",
+      "toastEmailed_other": "Emailed PDF to {{count}} recipients",
+      "toastFailed_one": "{{count}} email failed to send",
+      "toastFailed_other": "{{count}} emails failed to send",
+      "toastSendError": "Failed to send email"
+    }
   }
 }

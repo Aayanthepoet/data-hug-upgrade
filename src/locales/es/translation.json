@@ -62,20 +62,68 @@
     "contactBullet3": "Especialista de incorporación personal"
   },
   "modules": {
-    "01": { "title": "Búsqueda de propietarios con IA", "desc": "Consulta registros de propiedades a nivel nacional en segundos. Encuentra propietarios por dirección, código postal, equity, señal de distress o ausentismo.", "powered": "PropAI Search Intelligence" },
-    "02": { "title": "Resolución de contactos", "desc": "Skip tracing de teléfono, correo y perfiles sociales para el 94% de los propietarios en EE. UU. Verificado y rápido.", "powered": "PropAI Contact Resolver" },
-    "03": { "title": "Lead scoring con IA", "desc": "Puntuación de motivación 0–100 según equity, días en distress, historial de propiedad y tipo de situación.", "powered": "PropAI Language Engine" },
-    "04": { "title": "Motor de contacto", "desc": "Cartas a vendedores personalizadas con tu voz. 68% de apertura frente al 22% del promedio del sector. Lánzalo con un clic.", "powered": "PropAI Outreach Engine" },
-    "05": { "title": "Vision Studio", "desc": "Rediseños fotorrealistas de propiedades en 6 estilos, en menos de 60 segundos. Salida en HD y 4K.", "powered": "PropAI Vision Studio" },
-    "06": { "title": "Generador de video con IA", "desc": "Videos de recorrido profesionales con voz IA y kit de marca aplicado — optimizados para YouTube, Reels y TikTok.", "powered": "PropAI Video Studio" }
+    "01": {
+      "title": "Búsqueda de propietarios con IA",
+      "desc": "Consulta registros de propiedades a nivel nacional en segundos. Encuentra propietarios por dirección, código postal, equity, señal de distress o ausentismo.",
+      "powered": "PropAI Search Intelligence"
+    },
+    "02": {
+      "title": "Resolución de contactos",
+      "desc": "Skip tracing de teléfono, correo y perfiles sociales para el 94% de los propietarios en EE. UU. Verificado y rápido.",
+      "powered": "PropAI Contact Resolver"
+    },
+    "03": {
+      "title": "Lead scoring con IA",
+      "desc": "Puntuación de motivación 0–100 según equity, días en distress, historial de propiedad y tipo de situación.",
+      "powered": "PropAI Language Engine"
+    },
+    "04": {
+      "title": "Motor de contacto",
+      "desc": "Cartas a vendedores personalizadas con tu voz. 68% de apertura frente al 22% del promedio del sector. Lánzalo con un clic.",
+      "powered": "PropAI Outreach Engine"
+    },
+    "05": {
+      "title": "Vision Studio",
+      "desc": "Rediseños fotorrealistas de propiedades en 6 estilos, en menos de 60 segundos. Salida en HD y 4K.",
+      "powered": "PropAI Vision Studio"
+    },
+    "06": {
+      "title": "Generador de video con IA",
+      "desc": "Videos de recorrido profesionales con voz IA y kit de marca aplicado — optimizados para YouTube, Reels y TikTok.",
+      "powered": "PropAI Video Studio"
+    }
   },
   "workflow": {
-    "1": { "t": "Encuentra al propietario", "d": "PropAI Search Intelligence consulta registros de propiedades a nivel nacional.", "tag": "Search Intelligence" },
-    "2": { "t": "Skip tracing de contacto", "d": "Contact Resolver rastrea teléfono, correo y redes del 94% de los propietarios.", "tag": "Contact Resolver" },
-    "3": { "t": "Puntúa el lead", "d": "Language Engine puntúa la motivación 0–100 según equity, distress e historial.", "tag": "Language Engine" },
-    "4": { "t": "Envía contacto personalizado con IA", "d": "Outreach Engine escribe una carta específica para la situación del propietario.", "tag": "Outreach Engine" },
-    "5": { "t": "Presenta con visuales de IA", "d": "Vision Studio renderiza rediseños. Video Studio crea el video del recorrido.", "tag": "Vision + Video Studio" },
-    "6": { "t": "Cierra el trato", "d": "PropAI Agent guía la negociación y registra cada interacción.", "tag": "PropAI Agent" }
+    "1": {
+      "t": "Encuentra al propietario",
+      "d": "PropAI Search Intelligence consulta registros de propiedades a nivel nacional.",
+      "tag": "Search Intelligence"
+    },
+    "2": {
+      "t": "Skip tracing de contacto",
+      "d": "Contact Resolver rastrea teléfono, correo y redes del 94% de los propietarios.",
+      "tag": "Contact Resolver"
+    },
+    "3": {
+      "t": "Puntúa el lead",
+      "d": "Language Engine puntúa la motivación 0–100 según equity, distress e historial.",
+      "tag": "Language Engine"
+    },
+    "4": {
+      "t": "Envía contacto personalizado con IA",
+      "d": "Outreach Engine escribe una carta específica para la situación del propietario.",
+      "tag": "Outreach Engine"
+    },
+    "5": {
+      "t": "Presenta con visuales de IA",
+      "d": "Vision Studio renderiza rediseños. Video Studio crea el video del recorrido.",
+      "tag": "Vision + Video Studio"
+    },
+    "6": {
+      "t": "Cierra el trato",
+      "d": "PropAI Agent guía la negociación y registra cada interacción.",
+      "tag": "PropAI Agent"
+    }
   },
   "sidebar": {
     "workspace": "Espacio de trabajo",
@@ -114,5 +162,103 @@
   "empty": {
     "nothingYet": "Aún no hay nada aquí",
     "description": "Este módulo está conectado a tu base de datos. Agrega tu primer registro o espera el lanzamiento del módulo de IA en la próxima fase."
+  },
+  "leads": {
+    "title": "Leads — PropAI",
+    "eyebrow": "Leads",
+    "headingA": "Leads",
+    "headingB": "enviados",
+    "subtitle": "Explora, busca, filtra y asigna cada lead capturado desde tu sitio.",
+    "searchPlaceholder": "Buscar por nombre, email, fuente, empresa…",
+    "searchAria": "Cargando",
+    "searchProperties": "Buscar propiedades",
+    "searching": "Buscando…",
+    "statusPlaceholder": "Estado",
+    "sourcePlaceholder": "Fuente",
+    "assigneePlaceholder": "Asignado a",
+    "allStatuses": "Todos los estados",
+    "allSources": "Todas las fuentes",
+    "allAssignees": "Todos los asignados",
+    "unassigned": "Sin asignar",
+    "countOf": "{{filtered}} de {{total}} leads",
+    "loadError": "No se pudieron cargar los leads. Es posible que no tengas acceso de administrador.",
+    "loadingLeads": "Cargando leads…",
+    "noMatch": "Ningún lead coincide con tus filtros.",
+    "tryProperty": "¿Buscas una dirección de propiedad? Prueba",
+    "findDistressed": "Buscar propiedades en distress",
+    "col": {
+      "name": "Nombre",
+      "email": "Email",
+      "company": "Empresa",
+      "source": "Fuente",
+      "status": "Estado",
+      "assignee": "Asignado a",
+      "submitted": "Enviado"
+    },
+    "toast": {
+      "assignUpdated": "Asignación de lead actualizada",
+      "assignFailed": "No se pudo actualizar la asignación"
+    },
+    "detail": {
+      "title": "Lead — PropAI",
+      "back": "Volver a leads",
+      "loading": "Cargando…",
+      "loadError": "No se pudo cargar el lead.",
+      "notFound": "Lead no encontrado.",
+      "unnamed": "Lead sin nombre",
+      "submittedAt": "Enviado {{when}}",
+      "viaSource": " · vía {{source}}",
+      "exportCsv": "Exportar CSV",
+      "downloadPdf": "Descargar PDF",
+      "emailPdf": "Enviar PDF por email",
+      "dialogTitle": "Enviar PDF del lead",
+      "dialogDescription": "Elige a los miembros del equipo a quienes enviar el PDF generado. Recibirán un enlace privado válido por 7 días.",
+      "recipients": "Destinatarios",
+      "noTeammates": "No se encontraron compañeros con dirección de email.",
+      "optionalNote": "Nota opcional",
+      "notePlaceholder": "Agrega un mensaje breve para tu equipo…",
+      "cancel": "Cancelar",
+      "sending": "Enviando…",
+      "sendTo": "Enviar a {{count}}",
+      "fieldEmail": "Email",
+      "fieldPhone": "Teléfono",
+      "fieldCompany": "Empresa",
+      "fieldSource": "Fuente",
+      "message": "Mensaje",
+      "noMessage": "Sin mensaje.",
+      "status": "Estado",
+      "assignee": "Asignado a",
+      "unassigned": "Sin asignar",
+      "notesHeading": "Notas de seguimiento",
+      "notesPlaceholder": "Agrega una nota sobre este lead…",
+      "savingNote": "Guardando…",
+      "addNote": "Agregar nota",
+      "notesLoading": "Cargando notas…",
+      "notesEmpty": "Aún no hay notas.",
+      "deleteNoteAria": "Eliminar nota",
+      "historyHeading": "Historial de asignaciones",
+      "historyLoading": "Cargando historial…",
+      "historyEmpty": "Aún no hay cambios de asignación.",
+      "assignedTo": "Asignado a",
+      "by": "por",
+      "system": "sistema",
+      "emailHeading": "Entrega de email",
+      "emailLoading": "Cargando estado de entrega…",
+      "emailEmpty": "Aún no se han enviado PDFs por email.",
+      "statusSent": "Enviado",
+      "statusQueued": "En cola",
+      "statusFailed": "Falló",
+      "toastStatusUpdated": "Estado actualizado",
+      "toastAssignUpdated": "Asignación actualizada",
+      "toastNoteEmpty": "La nota no puede estar vacía",
+      "toastNoteAdded": "Nota agregada",
+      "toastPickRecipient": "Selecciona al menos un destinatario",
+      "toastMustSignIn": "Debes iniciar sesión",
+      "toastEmailed_one": "PDF enviado a {{count}} destinatario",
+      "toastEmailed_other": "PDF enviado a {{count}} destinatarios",
+      "toastFailed_one": "{{count}} email no se pudo enviar",
+      "toastFailed_other": "{{count}} emails no se pudieron enviar",
+      "toastSendError": "No se pudo enviar el email"
+    }
   }
 }
