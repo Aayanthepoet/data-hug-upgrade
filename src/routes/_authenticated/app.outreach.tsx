@@ -250,11 +250,22 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           e.preventDefault();
           setErr(null);
           if (!to.trim() || !body.trim()) { setErr("Recipient and body are required."); return; }
+          if (isDnc) { setErr("This recipient is flagged Do Not Contact. Remove the DNC flag in Contacts before sending."); return; }
           mut.mutate();
         }}
         className="bg-[#0a0f17] border border-border rounded-lg w-full max-w-lg p-5 space-y-4"
       >
         <h2 className="text-lg font-semibold">New outreach message</h2>
+
+        {isDnc && (
+          <div className="flex items-start gap-2 border border-red-500/40 bg-red-500/10 text-red-200 text-xs rounded p-3">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <div>
+              <div className="font-semibold">Do Not Contact</div>
+              <div className="opacity-80">This {channel === "sms" ? "number" : "email"} is on your DNC list. Sending and exporting are disabled. Re-enable via Contacts → Allow.</div>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2">
           {(["sms", "email", "mail"] as const).map((c) => {
