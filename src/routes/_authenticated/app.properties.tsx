@@ -24,7 +24,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, MapPin, DollarSign, Home } from "lucide-react";
+import { Plus, Search, MapPin, DollarSign, Home, X, SlidersHorizontal } from "lucide-react";
+
+type DistressFilter = "all" | "preforeclosure" | "reo" | "auction" | "tax_lien" | "tax_delinquent" | "fsbo_stale" | "vacant" | "absentee";
+type ScoreFilter = "all" | "hot" | "warm" | "cold";
+type PriceFilter = "all" | "u250" | "250_500" | "500_1m" | "o1m";
+
+const DISTRESS_CHIPS: { value: DistressFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "preforeclosure", label: "Pre-foreclosure" },
+  { value: "reo", label: "REO" },
+  { value: "auction", label: "Auction" },
+  { value: "tax_lien", label: "Tax Lien" },
+  { value: "vacant", label: "Vacant" },
+  { value: "absentee", label: "Absentee" },
+];
+const SCORE_CHIPS: { value: ScoreFilter; label: string }[] = [
+  { value: "all", label: "Any score" },
+  { value: "hot", label: "Hot 80+" },
+  { value: "warm", label: "Warm 50-79" },
+  { value: "cold", label: "Cold <50" },
+];
+const PRICE_CHIPS: { value: PriceFilter; label: string }[] = [
+  { value: "all", label: "Any price" },
+  { value: "u250", label: "< $250k" },
+  { value: "250_500", label: "$250k–500k" },
+  { value: "500_1m", label: "$500k–1M" },
+  { value: "o1m", label: "$1M+" },
+];
 
 export const Route = createFileRoute("/_authenticated/app/properties")({
   head: () => ({ meta: [{ title: "Properties — PropAI" }] }),
@@ -48,17 +75,71 @@ function PropertiesPage() {
   const [isAbsentee, setIsAbsentee] = useState(false);
   const [distressType, setDistressType] = useState<string>("none");
 
-  const { data, isLoading } = useQuery({
+  // Filter state
+  const [searchText, setSearchText] = useState("");
+  const [locationText, setLocationText] = useState("");
+  const [distressFilter, setDistressFilter] = useState<DistressFilter>("all");
+  const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
+
+  const { data: allData, isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("id, address, city, state, zip, estimated_value, lead_score, is_preforeclosure, is_vacant, is_absentee")
+        .select("id, address, city, state, zip, estimated_value, lead_score, distress_type, is_preforeclosure, is_vacant, is_absentee")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
+  const data = (allData ?? []).filter((p) => {
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      const hay = `${p.address ?? ""} ${p.city ?? ""} ${p.state ?? ""} ${p.zip ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (locationText.trim()) {
+      const q = locationText.toLowerCase();
+      const hay = `${p.city ?? ""} ${p.state ?? ""} ${p.zip ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (distressFilter !== "all") {
+      if (distressFilter === "vacant" && !p.is_vacant && p.distress_type !== "vacant") return false;
+      if (distressFilter === "absentee" && !p.is_absentee && p.distress_type !== "absentee") return false;
+      if (distressFilter === "preforeclosure" && !p.is_preforeclosure && p.distress_type !== "preforeclosure") return false;
+      if (!["vacant","absentee","preforeclosure"].includes(distressFilter) && p.distress_type !== distressFilter) return false;
+    }
+    if (scoreFilter !== "all") {
+      const s = p.lead_score ?? -1;
+      if (scoreFilter === "hot" && s < 80) return false;
+      if (scoreFilter === "warm" && (s < 50 || s >= 80)) return false;
+      if (scoreFilter === "cold" && s >= 50) return false;
+    }
+    if (priceFilter !== "all") {
+      const v = Number(p.estimated_value ?? 0);
+      if (priceFilter === "u250" && !(v > 0 && v < 250000)) return false;
+      if (priceFilter === "250_500" && !(v >= 250000 && v < 500000)) return false;
+      if (priceFilter === "500_1m" && !(v >= 500000 && v < 1000000)) return false;
+      if (priceFilter === "o1m" && v < 1000000) return false;
+    }
+    return true;
+  });
+
+  const activeFilterCount =
+    (distressFilter !== "all" ? 1 : 0) +
+    (scoreFilter !== "all" ? 1 : 0) +
+    (priceFilter !== "all" ? 1 : 0) +
+    (locationText.trim() ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchText("");
+    setLocationText("");
+    setDistressFilter("all");
+    setScoreFilter("all");
+    setPriceFilter("all");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -269,7 +350,7 @@ function PropertiesPage() {
 
   if (isLoading) return <div className="text-[var(--w55)] p-8">Loading properties…</div>;
 
-  if (!data?.length) {
+  if (!allData?.length) {
     return (
       <EmptyModule
         eyebrow="Properties"
@@ -289,9 +370,25 @@ function PropertiesPage() {
     );
   }
 
+  const Chip = <T extends string>({
+    active, onClick, children,
+  }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition whitespace-nowrap ${
+        active
+          ? "bg-cyan/15 border-cyan/60 text-cyan"
+          : "bg-white/5 border-border text-[var(--w65)] hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
+  );
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6 gap-3 flex-wrap">
         <div>
           <div className="eyebrow inline-flex">
             <span className="eyebrow-dot" /> Properties
@@ -308,43 +405,133 @@ function PropertiesPage() {
         </div>
       </div>
 
+      {/* Search + filters */}
+      <div className="surface p-4 mb-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--w45)]" />
+            <Input
+              placeholder="Search address, city, ZIP…"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-9 bg-[var(--s1)] border-border text-white"
+            />
+          </div>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--w45)]" />
+            <Input
+              placeholder="Filter by city, state, or ZIP"
+              value={locationText}
+              onChange={(e) => setLocationText(e.target.value)}
+              className="pl-9 bg-[var(--s1)] border-border text-white"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--w45)] uppercase tracking-widest mr-1">
+            <SlidersHorizontal className="w-3 h-3" /> Distress
+          </div>
+          {DISTRESS_CHIPS.map((c) => (
+            <Chip key={c.value} active={distressFilter === c.value} onClick={() => setDistressFilter(c.value)}>
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--w45)] uppercase tracking-widest mr-1">
+            <DollarSign className="w-3 h-3" /> Price
+          </div>
+          {PRICE_CHIPS.map((c) => (
+            <Chip key={c.value} active={priceFilter === c.value} onClick={() => setPriceFilter(c.value)}>
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--w45)] uppercase tracking-widest mr-1">
+            Score
+          </div>
+          {SCORE_CHIPS.map((c) => (
+            <Chip key={c.value} active={scoreFilter === c.value} onClick={() => setScoreFilter(c.value)}>
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between pt-1 text-xs text-[var(--w55)]">
+          <span>
+            Showing <span className="text-white font-semibold">{data.length}</span> of {allData.length} properties
+            {activeFilterCount > 0 && <span className="ml-2 text-cyan">· {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active</span>}
+          </span>
+          {(activeFilterCount > 0 || searchText) && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-[var(--w65)] hover:text-white transition"
+            >
+              <X className="w-3 h-3" /> Clear all
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="surface overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="text-left text-[var(--w55)] text-xs uppercase tracking-widest bg-[rgba(0,0,0,0.1)]">
-            <tr>
-              <th className="p-4">Address</th>
-              <th className="p-4">City</th>
-              <th className="p-4">Value</th>
-              <th className="p-4">Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((p) => (
-              <tr key={p.id} className="border-t border-border hover:bg-[rgba(255,255,255,.02)] transition-colors">
-                <td className="p-4">
-                  <Link to="/app/properties/$propertyId" params={{ propertyId: p.id }} className="text-cyan hover:underline font-medium">
-                    {p.address}
-                  </Link>
-                </td>
-                <td className="p-4">
-                  {p.city ? `${p.city}, ${p.state || ""} ${p.zip || ""}` : "—"}
-                </td>
-                <td className="p-4">
-                  {p.estimated_value ? `$${Number(p.estimated_value).toLocaleString()}` : "—"}
-                </td>
-                <td className="p-4">
-                  {p.lead_score !== null ? (
-                    <span className={`px-2 py-0.5 rounded text-xs font-semibold font-mono ${
-                      p.lead_score >= 80 ? "text-cyan bg-cyan-d/20" : p.lead_score >= 50 ? "text-gold bg-gold/10" : "text-[var(--w45)] bg-white/5"
-                    }`}>
-                      {p.lead_score}
-                    </span>
-                  ) : "—"}
-                </td>
+        {data.length === 0 ? (
+          <div className="p-12 text-center text-[var(--w55)]">
+            <Home className="w-8 h-8 mx-auto mb-3 text-[var(--w35)]" />
+            <p className="text-sm">No properties match your filters.</p>
+            <button onClick={clearFilters} className="mt-3 text-cyan text-xs hover:underline">
+              Clear all filters
+            </button>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="text-left text-[var(--w55)] text-xs uppercase tracking-widest bg-[rgba(0,0,0,0.1)]">
+              <tr>
+                <th className="p-4">Address</th>
+                <th className="p-4">Location</th>
+                <th className="p-4">Distress</th>
+                <th className="p-4">Value</th>
+                <th className="p-4">Score</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((p) => (
+                <tr key={p.id} className="border-t border-border hover:bg-[rgba(255,255,255,.02)] transition-colors">
+                  <td className="p-4">
+                    <Link to="/app/properties/$propertyId" params={{ propertyId: p.id }} className="text-cyan hover:underline font-medium">
+                      {p.address}
+                    </Link>
+                  </td>
+                  <td className="p-4 text-[var(--w65)]">
+                    {p.city ? `${p.city}, ${p.state || ""} ${p.zip || ""}` : "—"}
+                  </td>
+                  <td className="p-4">
+                    {p.distress_type && p.distress_type !== "none" ? (
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        {String(p.distress_type).replace(/_/g, " ")}
+                      </span>
+                    ) : <span className="text-[var(--w35)]">—</span>}
+                  </td>
+                  <td className="p-4">
+                    {p.estimated_value ? `$${Number(p.estimated_value).toLocaleString()}` : "—"}
+                  </td>
+                  <td className="p-4">
+                    {p.lead_score !== null ? (
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold font-mono ${
+                        p.lead_score >= 80 ? "text-cyan bg-cyan-d/20" : p.lead_score >= 50 ? "text-gold bg-gold/10" : "text-[var(--w45)] bg-white/5"
+                      }`}>
+                        {p.lead_score}
+                      </span>
+                    ) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
