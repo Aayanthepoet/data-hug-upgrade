@@ -6,7 +6,7 @@ import { NotificationBell } from "@/components/app/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
-import { Home } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Workspace — PropAI" }] }),
