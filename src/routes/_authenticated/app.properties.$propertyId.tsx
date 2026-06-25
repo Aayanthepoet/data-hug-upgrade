@@ -154,7 +154,10 @@ function PropertyDetailPage() {
 
       <CompsSection propertyId={propertyId} subjectSqft={p.sqft ?? null} />
 
+      <MarketIntelSection propertyId={propertyId} />
+
       <VisionGallerySection propertyId={propertyId} />
+
 
       <ContractsSection
         propertyId={propertyId}
