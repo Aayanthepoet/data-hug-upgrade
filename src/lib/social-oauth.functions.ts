@@ -103,13 +103,16 @@ export const listAvailableMetaAccounts = createServerFn({ method: "GET" })
       return { simulated: false, needs_connect: true, pages: [] };
     }
 
-    const userToken = accounts.access_token_enc;
+    const userToken = decryptToken(accounts.access_token_enc);
+    if (!userToken) {
+      return { simulated: false, needs_connect: true, pages: [] };
+    }
 
     try {
       // Query Graph API for user's pages and linked Instagram accounts
       const fields = "id,name,access_token,picture{url},instagram_business_account{id,username,profile_picture_url}";
       const pagesUrl = `https://graph.facebook.com/v21.0/me/accounts?fields=${fields}&access_token=${userToken}`;
-      
+
       const res = await fetch(pagesUrl);
       if (!res.ok) {
         // If the token is invalid or expired, prompt re-connection
@@ -134,17 +137,17 @@ export const listAvailableMetaAccounts = createServerFn({ method: "GET" })
         }>;
       };
 
+      // Do NOT return per-page access_tokens to the browser. The save step
+      // re-fetches them server-side using the master token.
       const pages = body.data.map((p) => ({
         external_id: p.id,
         name: p.name,
         avatar_url: p.picture?.data?.url ?? null,
-        access_token: p.access_token,
         linked_instagram: p.instagram_business_account
           ? {
               external_id: p.instagram_business_account.id,
               username: p.instagram_business_account.username,
               avatar_url: p.instagram_business_account.profile_picture_url ?? null,
-              access_token: p.access_token, // can publish to IG using the linked Page token
             }
           : null,
       }));
