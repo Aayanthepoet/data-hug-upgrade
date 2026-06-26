@@ -39,7 +39,7 @@ export const backfillLocations = createServerFn({ method: "POST" })
       const haystack = [row.message, row.company].filter(Boolean).join(" \n ");
       if (!haystack) continue;
       const parsed = parseLocation(haystack);
-      const patch: Record<string, string> = {};
+      const patch: { city?: string; state?: string; zip?: string; neighborhood?: string } = {};
       if (!row.city && parsed.city) patch.city = parsed.city;
       if (!row.state && parsed.state) patch.state = parsed.state;
       if (!row.zip && parsed.zip) patch.zip = parsed.zip;
@@ -61,7 +61,7 @@ export const backfillLocations = createServerFn({ method: "POST" })
     for (const row of props ?? []) {
       const haystack = [row.address, row.notes].filter(Boolean).join(" \n ");
       const parsed = parseLocation(haystack);
-      const patch: Record<string, string> = {};
+      const patch: { city?: string; state?: string; zip?: string; neighborhood?: string } = {};
       if (!row.city && parsed.city) patch.city = parsed.city;
       if (!row.state && parsed.state) patch.state = parsed.state;
       if (!row.zip && parsed.zip) patch.zip = parsed.zip;
