@@ -87,16 +87,41 @@ export const generateRedesign = createServerFn({ method: "POST" })
       .update({ status: "rendering", provider: provider.name })
       .eq("id", renderId);
 
-    // 3. Render.
+    // 3. Resolve the source photo (if any) to a signed URL the gateway can
+    //    fetch, so the provider can switch to the image-edit path.
+    let resolvedSourceUrl: string | null = null;
+    if (data.source_image_url) {
+      if (/^https?:\/\//i.test(data.source_image_url)) {
+        resolvedSourceUrl = data.source_image_url;
+      } else {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: signed, error: signErr } = await supabaseAdmin.storage
+          .from(BUCKET)
+          .createSignedUrl(data.source_image_url, 60 * 10);
+        if (signErr) throw new Error(`Could not sign source image: ${signErr.message}`);
+        resolvedSourceUrl = signed.signedUrl;
+      }
+    }
+
+    // 4. Render. Provider auto-picks image-edit (Gemini) vs text-to-image
+    //    (gpt-image-2) based on whether a source image is present.
     let imageBase64: string;
+    let usedProviderName = provider.name;
     try {
       const out = await provider.render({
         prompt: data.prompt,
         style: data.style,
         resolution: data.resolution,
-        sourceImageUrl: data.source_image_url ?? null,
+        sourceImageUrl: resolvedSourceUrl,
       });
       imageBase64 = out.imageBase64;
+      usedProviderName = out.provider;
+      if (out.provider !== provider.name) {
+        await supabase
+          .from("media_assets")
+          .update({ provider: out.provider })
+          .eq("id", renderId);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Render failed";
       await supabase
@@ -105,6 +130,7 @@ export const generateRedesign = createServerFn({ method: "POST" })
         .eq("id", renderId);
       throw new Error(msg);
     }
+    void usedProviderName;
 
     // 4. Upload PNG to private bucket under <userId>/<renderId>.png so the
     //    bucket RLS (user-prefixed) lets the owner — and only the owner —
