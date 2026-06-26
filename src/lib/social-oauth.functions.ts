@@ -422,7 +422,7 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
             .update({
               display_name: ig.username,
               avatar_url: ig.profile_picture_url ?? null,
-              access_token_enc: p.access_token,
+              access_token_enc: encryptToken(p.access_token),
               expires_at: expires,
               status: "active",
             })
