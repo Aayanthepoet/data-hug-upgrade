@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { requireApiAuth } from "@/lib/api-auth.server";
 
 export const Route = createFileRoute("/api/transcribe")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const auth = await requireApiAuth(request);
+        if (auth instanceof Response) return auth;
+
         const lovableKey = process.env.LOVABLE_API_KEY;
         if (!lovableKey) {
           return new Response("Missing LOVABLE_API_KEY", { status: 500 });

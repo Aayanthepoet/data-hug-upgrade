@@ -1,7 +1,17 @@
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
+
+function getSecret(): string {
+  const secret = process.env.META_APP_SECRET;
+  if (!secret || secret.length < 16) {
+    throw new Error(
+      "OAuth state signing unavailable: META_APP_SECRET is not configured.",
+    );
+  }
+  return secret;
+}
 
 export function generateOAuthState(userId: string): string {
-  const secret = process.env.META_APP_SECRET || "default_oauth_state_secret_123";
+  const secret = getSecret();
   const timestamp = Date.now().toString();
   const message = `${userId}:${timestamp}`;
   const hmac = createHmac("sha256", secret).update(message).digest("hex");
@@ -9,23 +19,28 @@ export function generateOAuthState(userId: string): string {
 }
 
 export function verifyOAuthState(state: string): string | null {
-  const secret = process.env.META_APP_SECRET || "default_oauth_state_secret_123";
+  let secret: string;
+  try {
+    secret = getSecret();
+  } catch {
+    return null;
+  }
   const parts = state.split(":");
   if (parts.length !== 3) return null;
-  
+
   const [userId, timestamp, signature] = parts;
-  
-  // Verify timestamp is within 1 hour (3600000 ms)
+
   const age = Date.now() - parseInt(timestamp, 10);
   if (isNaN(age) || age < 0 || age > 3600000) {
     return null;
   }
-  
+
   const expectedMessage = `${userId}:${timestamp}`;
   const expectedSignature = createHmac("sha256", secret).update(expectedMessage).digest("hex");
-  
-  if (signature === expectedSignature) {
-    return userId;
-  }
-  return null;
+
+  const a = Buffer.from(signature, "hex");
+  const b = Buffer.from(expectedSignature, "hex");
+  if (a.length !== b.length) return null;
+  if (!timingSafeEqual(a, b)) return null;
+  return userId;
 }
