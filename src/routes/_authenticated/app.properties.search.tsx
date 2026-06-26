@@ -437,6 +437,21 @@ function PropertySearch() {
         </div>
       )}
 
+      {usedFallback && results.length > 0 && (
+        <div
+          role="note"
+          className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm flex items-start gap-3"
+        >
+          <div className="flex-1">
+            <div className="font-medium text-amber-300">Showing sample data</div>
+            <div className="text-xs text-[var(--w55)] mt-1">
+              The live property data source returned no results for these filters{providerName ? ` (provider: ${providerName})` : ""}.
+              The rows below are illustrative samples, not real listings — don't import them as live leads.
+            </div>
+          </div>
+        </div>
+      )}
+
       {runMutation.isSuccess && results.length === 0 && (
         <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
           No properties matched those filters. Try widening the location, price, equity, or distress-type filters.

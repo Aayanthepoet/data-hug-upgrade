@@ -34,6 +34,7 @@ import {
   LogOut,
   Settings,
   Share2,
+  FileSignature,
   History as HistoryIcon,
   Home,
 } from "lucide-react";
@@ -60,6 +61,7 @@ const items = [
   { key: "visionStudio", url: "/app/vision", icon: Eye },
   { key: "videosVoice", url: "/app/videos", icon: Clapperboard },
   { key: "socialAmplifier", url: "/app/social", icon: Share2 },
+  { key: "contracts", url: "/app/contracts", icon: FileSignature },
   { key: "auditLog", url: "/app/audit", icon: ScrollText },
   { key: "smsOptOuts", url: "/app/opt-outs", icon: ShieldOff },
   { key: "settings", url: "/app/settings", icon: Settings },
