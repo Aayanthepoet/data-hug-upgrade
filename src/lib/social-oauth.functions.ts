@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateOAuthState } from "./oauth-state.server";
+import { encryptToken, decryptToken } from "./social-token-crypto.server";
+
 
 const MOCK_PAGES = [
   {

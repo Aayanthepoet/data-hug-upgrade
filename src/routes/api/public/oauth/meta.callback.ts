@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyOAuthState } from "@/lib/oauth-state.server";
+import { encryptToken } from "@/lib/social-token-crypto.server";
+
 
 export const Route = createFileRoute("/api/public/oauth/meta/callback")({
   server: {
@@ -112,7 +114,7 @@ export const Route = createFileRoute("/api/public/oauth/meta/callback")({
               platform: "facebook",
               external_account_id: `meta_master_${fbUserId}`,
               display_name: `${displayName} (Connected Profile)`,
-              access_token_enc: longLivedToken,
+              access_token_enc: encryptToken(longLivedToken),
               expires_at: expiresAt,
               scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "instagram_basic", "instagram_content_publish"],
               status: "active",
