@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
+import { Route as AuthenticatedAppContractsRouteImport } from './routes/_authenticated/app.contracts'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
 import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
 import { Route as AuthenticatedAppAuditRouteImport } from './routes/_authenticated/app.audit'
@@ -246,6 +247,12 @@ const AuthenticatedAppLeadListsRoute =
     path: '/lead-lists',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppContractsRoute =
+  AuthenticatedAppContractsRouteImport.update({
+    id: '/contracts',
+    path: '/contracts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppContactsRoute =
   AuthenticatedAppContactsRouteImport.update({
     id: '/contacts',
@@ -398,9 +405,9 @@ const AuthenticatedAppLeadsLeadIdRoute =
   } as any)
 const AuthenticatedAppContractsContractIdRoute =
   AuthenticatedAppContractsContractIdRouteImport.update({
-    id: '/contracts/$contractId',
-    path: '/contracts/$contractId',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/$contractId',
+    path: '/$contractId',
+    getParentRoute: () => AuthenticatedAppContractsRoute,
   } as any)
 const AuthenticatedAppAuctionsAuctionIdRoute =
   AuthenticatedAppAuctionsAuctionIdRouteImport.update({
@@ -458,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/app/audit': typeof AuthenticatedAppAuditRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -524,6 +532,7 @@ export interface FileRoutesByTo {
   '/app/audit': typeof AuthenticatedAppAuditRoute
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -593,6 +602,7 @@ export interface FileRoutesById {
   '/_authenticated/app/audit': typeof AuthenticatedAppAuditRoute
   '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
+  '/_authenticated/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -662,6 +672,7 @@ export interface FileRouteTypes {
     | '/app/audit'
     | '/app/campaigns'
     | '/app/contacts'
+    | '/app/contracts'
     | '/app/lead-lists'
     | '/app/leads'
     | '/app/notifications'
@@ -728,6 +739,7 @@ export interface FileRouteTypes {
     | '/app/audit'
     | '/app/campaigns'
     | '/app/contacts'
+    | '/app/contracts'
     | '/app/lead-lists'
     | '/app/leads'
     | '/app/notifications'
@@ -796,6 +808,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/audit'
     | '/_authenticated/app/campaigns'
     | '/_authenticated/app/contacts'
+    | '/_authenticated/app/contracts'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
     | '/_authenticated/app/notifications'
@@ -1109,6 +1122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLeadListsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/contracts': {
+      id: '/_authenticated/app/contracts'
+      path: '/contracts'
+      fullPath: '/app/contracts'
+      preLoaderRoute: typeof AuthenticatedAppContractsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/contacts': {
       id: '/_authenticated/app/contacts'
       path: '/contacts'
@@ -1293,10 +1313,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/contracts/$contractId': {
       id: '/_authenticated/app/contracts/$contractId'
-      path: '/contracts/$contractId'
+      path: '/$contractId'
       fullPath: '/app/contracts/$contractId'
       preLoaderRoute: typeof AuthenticatedAppContractsContractIdRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppContractsRoute
     }
     '/_authenticated/app/auctions/$auctionId': {
       id: '/_authenticated/app/auctions/$auctionId'
@@ -1369,6 +1389,21 @@ const AuthenticatedAppAuctionsRouteChildren: AuthenticatedAppAuctionsRouteChildr
 const AuthenticatedAppAuctionsRouteWithChildren =
   AuthenticatedAppAuctionsRoute._addFileChildren(
     AuthenticatedAppAuctionsRouteChildren,
+  )
+
+interface AuthenticatedAppContractsRouteChildren {
+  AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
+}
+
+const AuthenticatedAppContractsRouteChildren: AuthenticatedAppContractsRouteChildren =
+  {
+    AuthenticatedAppContractsContractIdRoute:
+      AuthenticatedAppContractsContractIdRoute,
+  }
+
+const AuthenticatedAppContractsRouteWithChildren =
+  AuthenticatedAppContractsRoute._addFileChildren(
+    AuthenticatedAppContractsRouteChildren,
   )
 
 interface AuthenticatedAppLeadsRouteChildren {
@@ -1478,6 +1513,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAuditRoute: typeof AuthenticatedAppAuditRoute
   AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
+  AuthenticatedAppContractsRoute: typeof AuthenticatedAppContractsRouteWithChildren
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
@@ -1493,7 +1529,6 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRouteWithChildren
-  AuthenticatedAppContractsContractIdRoute: typeof AuthenticatedAppContractsContractIdRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -1502,6 +1537,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAuditRoute: AuthenticatedAppAuditRoute,
   AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
+  AuthenticatedAppContractsRoute: AuthenticatedAppContractsRouteWithChildren,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
@@ -1518,8 +1554,6 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppAdminContractsRoute:
     AuthenticatedAppAdminContractsRouteWithChildren,
-  AuthenticatedAppContractsContractIdRoute:
-    AuthenticatedAppContractsContractIdRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
