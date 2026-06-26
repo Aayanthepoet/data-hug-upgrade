@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateOAuthState } from "./oauth-state.server";
+import { encryptToken, decryptToken } from "./social-token-crypto.server";
+
 
 const MOCK_PAGES = [
   {
@@ -101,13 +103,16 @@ export const listAvailableMetaAccounts = createServerFn({ method: "GET" })
       return { simulated: false, needs_connect: true, pages: [] };
     }
 
-    const userToken = accounts.access_token_enc;
+    const userToken = decryptToken(accounts.access_token_enc);
+    if (!userToken) {
+      return { simulated: false, needs_connect: true, pages: [] };
+    }
 
     try {
       // Query Graph API for user's pages and linked Instagram accounts
       const fields = "id,name,access_token,picture{url},instagram_business_account{id,username,profile_picture_url}";
       const pagesUrl = `https://graph.facebook.com/v21.0/me/accounts?fields=${fields}&access_token=${userToken}`;
-      
+
       const res = await fetch(pagesUrl);
       if (!res.ok) {
         // If the token is invalid or expired, prompt re-connection
@@ -132,17 +137,17 @@ export const listAvailableMetaAccounts = createServerFn({ method: "GET" })
         }>;
       };
 
+      // Do NOT return per-page access_tokens to the browser. The save step
+      // re-fetches them server-side using the master token.
       const pages = body.data.map((p) => ({
         external_id: p.id,
         name: p.name,
         avatar_url: p.picture?.data?.url ?? null,
-        access_token: p.access_token,
         linked_instagram: p.instagram_business_account
           ? {
               external_id: p.instagram_business_account.id,
               username: p.instagram_business_account.username,
               avatar_url: p.instagram_business_account.profile_picture_url ?? null,
-              access_token: p.access_token, // can publish to IG using the linked Page token
             }
           : null,
       }));
@@ -155,26 +160,9 @@ export const listAvailableMetaAccounts = createServerFn({ method: "GET" })
   });
 
 const SelectionSchema = z.object({
-  pages: z
-    .array(
-      z.object({
-        external_id: z.string().min(1),
-        name: z.string().min(1),
-        avatar_url: z.string().url().nullable().optional(),
-        access_token: z.string().nullable().optional(),
-      }),
-    )
-    .max(20),
-  instagram: z
-    .array(
-      z.object({
-        external_id: z.string().min(1),
-        username: z.string().min(1),
-        avatar_url: z.string().url().nullable().optional(),
-        access_token: z.string().nullable().optional(),
-      }),
-    )
-    .max(20),
+  // Client only sends IDs now; we re-fetch tokens server-side.
+  page_ids: z.array(z.string().min(1)).max(20),
+  ig_ids: z.array(z.string().min(1)).max(20),
 });
 
 export const saveMetaAccountSelection = createServerFn({ method: "POST" })
@@ -183,7 +171,48 @@ export const saveMetaAccountSelection = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    // Delete any existing page/IG selections (but KEEP the meta_master user profile!)
+    // Look up the master user-token (encrypted at rest).
+    const { data: master } = await supabase
+      .from("social_accounts")
+      .select("access_token_enc")
+      .eq("user_id", userId)
+      .eq("platform", "facebook")
+      .like("external_account_id", "meta_master_%")
+      .maybeSingle();
+
+    const userToken = master?.access_token_enc ? decryptToken(master.access_token_enc) : null;
+    if (!userToken) {
+      throw new Error("Meta is not connected. Please reconnect Facebook.");
+    }
+
+    // Re-fetch the page list directly from Meta — never trust client-supplied
+    // access tokens.
+    const fields =
+      "id,name,access_token,picture{url},instagram_business_account{id,username,profile_picture_url}";
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/me/accounts?fields=${fields}&access_token=${userToken}`,
+    );
+    if (!res.ok) {
+      throw new Error("Could not load Facebook Pages. Please reconnect.");
+    }
+    const body = (await res.json()) as {
+      data: Array<{
+        id: string;
+        name: string;
+        access_token: string;
+        picture?: { data?: { url?: string } };
+        instagram_business_account?: {
+          id: string;
+          username: string;
+          profile_picture_url?: string;
+        };
+      }>;
+    };
+
+    const pageIdSet = new Set(data.page_ids);
+    const igIdSet = new Set(data.ig_ids);
+
+    // Replace existing page/IG selections; KEEP the meta_master profile.
     await supabase
       .from("social_accounts")
       .delete()
@@ -192,35 +221,41 @@ export const saveMetaAccountSelection = createServerFn({ method: "POST" })
       .not("external_account_id", "like", "meta_master_%");
 
     const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+    const rows: any[] = [];
 
-    const rows = [
-      ...data.pages.map((p) => ({
-        user_id: userId,
-        platform: "facebook" as const,
-        external_account_id: p.external_id,
-        display_name: p.name,
-        avatar_url: p.avatar_url ?? null,
-        access_token_enc: p.access_token || "SIMULATED",
-        refresh_token_enc: null,
-        expires_at: expires,
-        scopes: ["pages_show_list", "pages_manage_posts", "pages_read_engagement"],
-        status: "active" as const,
-        metadata: { page_id: p.external_id, simulated: !p.access_token },
-      })),
-      ...data.instagram.map((i) => ({
-        user_id: userId,
-        platform: "instagram" as const,
-        external_account_id: i.external_id,
-        display_name: i.username,
-        avatar_url: i.avatar_url ?? null,
-        access_token_enc: i.access_token || "SIMULATED",
-        refresh_token_enc: null,
-        expires_at: expires,
-        scopes: ["instagram_basic", "instagram_content_publish"],
-        status: "active" as const,
-        metadata: { ig_user_id: i.external_id, simulated: !i.access_token },
-      })),
-    ];
+    for (const p of body.data) {
+      if (pageIdSet.has(p.id)) {
+        rows.push({
+          user_id: userId,
+          platform: "facebook" as const,
+          external_account_id: p.id,
+          display_name: p.name,
+          avatar_url: p.picture?.data?.url ?? null,
+          access_token_enc: encryptToken(p.access_token),
+          refresh_token_enc: null,
+          expires_at: expires,
+          scopes: ["pages_show_list", "pages_manage_posts", "pages_read_engagement"],
+          status: "active" as const,
+          metadata: { page_id: p.id },
+        });
+      }
+      const ig = p.instagram_business_account;
+      if (ig && igIdSet.has(ig.id)) {
+        rows.push({
+          user_id: userId,
+          platform: "instagram" as const,
+          external_account_id: ig.id,
+          display_name: ig.username,
+          avatar_url: ig.profile_picture_url ?? null,
+          access_token_enc: encryptToken(p.access_token),
+          refresh_token_enc: null,
+          expires_at: expires,
+          scopes: ["instagram_basic", "instagram_content_publish"],
+          status: "active" as const,
+          metadata: { ig_user_id: ig.id },
+        });
+      }
+    }
 
     if (rows.length) {
       const { error } = await supabase.from("social_accounts").insert(rows);
@@ -275,7 +310,10 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       return { ok: true, needs_connect: true, updated: 0 };
     }
 
-    const userToken = master.access_token_enc;
+    const userToken = decryptToken(master.access_token_enc);
+    if (!userToken) {
+      return { ok: true, needs_connect: true, updated: 0 };
+    }
 
     try {
       const fields =
@@ -368,7 +406,7 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
             .update({
               display_name: p.name,
               avatar_url: p.picture?.data?.url ?? null,
-              access_token_enc: p.access_token,
+              access_token_enc: encryptToken(p.access_token),
               expires_at: expires,
               status: "active",
             })
@@ -384,7 +422,7 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
             .update({
               display_name: ig.username,
               avatar_url: ig.profile_picture_url ?? null,
-              access_token_enc: p.access_token,
+              access_token_enc: encryptToken(p.access_token),
               expires_at: expires,
               status: "active",
             })

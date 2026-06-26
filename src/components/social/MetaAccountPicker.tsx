@@ -78,18 +78,11 @@ export function MetaAccountPicker({ open, onOpenChange }: Props) {
     mutationFn: () =>
       saveFn({
         data: {
-          pages: pages
-            .filter((p) => pageIds.has(p.external_id))
-            .map((p) => ({ external_id: p.external_id, name: p.name, avatar_url: p.avatar_url, access_token: (p as any).access_token })),
-          instagram: pages
+          page_ids: pages.filter((p) => pageIds.has(p.external_id)).map((p) => p.external_id),
+          ig_ids: pages
             .map((p) => p.linked_instagram)
             .filter((i): i is NonNullable<typeof i> => i !== null && igIds.has(i.external_id))
-            .map((i) => ({
-              external_id: i.external_id,
-              username: i.username,
-              avatar_url: i.avatar_url,
-              access_token: (i as any).access_token,
-            })),
+            .map((i) => i.external_id),
         },
       }),
     onSuccess: (res) => {

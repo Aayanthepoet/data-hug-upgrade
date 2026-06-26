@@ -29,6 +29,19 @@ export const getNotificationPreferences = createServerFn({ method: "GET" })
     );
   });
 
+/** Returns true if the authenticated user has the admin role. */
+export const getIsAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (error) return { isAdmin: false };
+    return { isAdmin: Boolean(data) };
+  });
+
 const PreferencesSchema = z.object({
   channel_in_app: z.boolean(),
   channel_sms: z.boolean(),

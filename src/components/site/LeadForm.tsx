@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Required").max(120),
@@ -40,29 +39,23 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
     }
     setLoading(true);
     const { sms_opt_in, ...rest } = parsed.data;
-    const { data: inserted, error } = await supabase
-      .from("leads")
-      .insert({
-        ...rest,
-        sms_opt_in: true,
-        sms_opt_in_at: new Date().toISOString(),
-        source,
-      })
-      .select("id")
-      .single();
-    if (error || !inserted) {
-      setLoading(false);
-      toast.error("Couldn't submit. Try again.");
-      return;
-    }
-    // Fire-and-forget: server records IP/user-agent for consent audit and
-    // sends the team notification email. Never block UX on this.
-    fetch("/api/public/lead-notify", {
+    // Honeypot value — should always be empty for real users.
+    const honeypot = (fd.get("website") as string | null) ?? "";
+
+    const resp = await fetch("/api/public/lead-notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...rest, lead_id: inserted.id, sms_opt_in: true, source }),
-    }).catch(() => {});
+      body: JSON.stringify({ ...rest, sms_opt_in: true, source, website: honeypot }),
+    });
     setLoading(false);
+    if (!resp.ok) {
+      if (resp.status === 429) {
+        toast.error("Too many submissions from your network. Try again later.");
+      } else {
+        toast.error("Couldn't submit. Try again.");
+      }
+      return;
+    }
     setDone(true);
     toast.success("Thanks! We'll be in touch within 24 hours.");
   }
@@ -79,6 +72,12 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
 
   return (
     <form onSubmit={onSubmit} className="surface p-7 space-y-4">
+      {/* Honeypot — visually hidden, off-screen, not tab-reachable. */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+        <label>Website (leave blank)
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       <div className="grid sm:grid-cols-2 gap-3">
         <input name="full_name" required placeholder="Full name" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
         <input name="email" type="email" required placeholder="Work email" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
