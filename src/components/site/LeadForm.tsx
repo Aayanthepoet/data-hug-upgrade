@@ -13,6 +13,9 @@ const schema = z.object({
     .regex(/^[+()\-\s\d]+$/, "Enter a valid phone number"),
   company: z.string().trim().max(120).optional(),
   message: z.string().trim().max(2000).optional(),
+  city: z.string().trim().max(80).optional(),
+  state: z.string().trim().regex(/^[A-Za-z]{2}$/i, "Use 2-letter state").optional().or(z.literal("")),
+  zip: z.string().trim().regex(/^\d{5}(-\d{4})?$/, "5-digit ZIP").optional().or(z.literal("")),
   sms_opt_in: z.literal("on", {
     errorMap: () => ({ message: "You must agree to receive text messages to continue" }),
   }),
@@ -31,6 +34,9 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
       phone: fd.get("phone"),
       company: fd.get("company") || undefined,
       message: fd.get("message") || undefined,
+      city: fd.get("city") || undefined,
+      state: fd.get("state") || undefined,
+      zip: fd.get("zip") || undefined,
       sms_opt_in: fd.get("sms_opt_in"),
     });
     if (!parsed.success) {
