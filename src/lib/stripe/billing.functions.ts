@@ -72,7 +72,10 @@ export const createEmbeddedCheckoutSession = createServerFn({ method: "POST" })
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       return_url: `${origin}/billing/return?session_id={CHECKOUT_SESSION_ID}`,
-      subscription_data: { metadata: { supabase_user_id: userId } },
+      subscription_data: {
+        trial_period_days: 7,
+        metadata: { supabase_user_id: userId },
+      },
       metadata: { supabase_user_id: userId },
       allow_promotion_codes: true,
     });
