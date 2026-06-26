@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { getAttomStatus } from "@/lib/distress/attom-status.functions";
+import { backfillLocations, type BackfillResult } from "@/lib/location-backfill.functions";
 
 export const Route = createFileRoute("/_authenticated/app/settings/integrations")({
   head: () => ({ meta: [{ title: "Integrations — PropAI" }] }),
@@ -123,7 +126,66 @@ function IntegrationsPage() {
           <li>If ATTOM is unavailable, the system gracefully falls back to the simulator.</li>
         </ul>
       </section>
+
+      <LocationBackfillSection />
     </div>
+  );
+}
+
+function LocationBackfillSection() {
+  const runBackfill = useServerFn(backfillLocations);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<BackfillResult | null>(null);
+
+  async function onRun() {
+    setBusy(true);
+    try {
+      const r = await runBackfill();
+      setResult(r);
+      toast.success(
+        `Backfilled ${r.leads.updated} lead(s) and ${r.properties.updated} property record(s).`,
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Backfill failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <MapPin className="h-4 w-4" /> Backfill neighborhood &amp; market intel locations
+          </h2>
+          <p className="text-sm text-[var(--w55)] mt-1">
+            Parses city, neighborhood, state and ZIP out of existing website leads and
+            property addresses, then fills any blank location columns. Existing values
+            are never overwritten. Used by the Neighborhood &amp; Market Intel briefings.
+          </p>
+        </div>
+        <Button size="sm" onClick={onRun} disabled={busy}>
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
+          {busy ? "Running…" : "Run backfill"}
+        </Button>
+      </div>
+      {result && (
+        <div className="rounded-lg border border-border/60 bg-background/40 p-3 text-sm grid grid-cols-2 gap-3">
+          <div>
+            <div className="text-[var(--w55)] text-xs">Leads</div>
+            <div className="font-medium">{result.leads.updated} updated / {result.leads.scanned} scanned</div>
+          </div>
+          <div>
+            <div className="text-[var(--w55)] text-xs">Properties</div>
+            <div className="font-medium">{result.properties.updated} updated / {result.properties.scanned} scanned</div>
+          </div>
+        </div>
+      )}
+      <p className="text-xs text-[var(--w45)] flex items-center gap-1.5">
+        <ShieldAlert className="h-3 w-3" /> Admin only. New website submissions are parsed automatically.
+      </p>
+    </section>
   );
 }
 
