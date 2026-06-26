@@ -863,6 +863,7 @@ export type Database = {
       leads: {
         Row: {
           assigned_to: string | null
+          city: string | null
           company: string | null
           consent_ip: unknown
           consent_user_agent: string | null
@@ -871,15 +872,19 @@ export type Database = {
           full_name: string
           id: string
           message: string | null
+          neighborhood: string | null
           phone: string | null
           phone_e164: string | null
           sms_opt_in: boolean
           sms_opt_in_at: string | null
           source: string | null
+          state: string | null
           status: string
+          zip: string | null
         }
         Insert: {
           assigned_to?: string | null
+          city?: string | null
           company?: string | null
           consent_ip?: unknown
           consent_user_agent?: string | null
@@ -888,15 +893,19 @@ export type Database = {
           full_name: string
           id?: string
           message?: string | null
+          neighborhood?: string | null
           phone?: string | null
           phone_e164?: string | null
           sms_opt_in?: boolean
           sms_opt_in_at?: string | null
           source?: string | null
+          state?: string | null
           status?: string
+          zip?: string | null
         }
         Update: {
           assigned_to?: string | null
+          city?: string | null
           company?: string | null
           consent_ip?: unknown
           consent_user_agent?: string | null
@@ -905,12 +914,15 @@ export type Database = {
           full_name?: string
           id?: string
           message?: string | null
+          neighborhood?: string | null
           phone?: string | null
           phone_e164?: string | null
           sms_opt_in?: boolean
           sms_opt_in_at?: string | null
           source?: string | null
+          state?: string | null
           status?: string
+          zip?: string | null
         }
         Relationships: []
       }
@@ -1370,6 +1382,7 @@ export type Database = {
           list_price: number | null
           listing_status: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft: number | null
+          neighborhood: string | null
           notes: string | null
           parcel_id: string | null
           property_type: string | null
@@ -1406,6 +1419,7 @@ export type Database = {
           list_price?: number | null
           listing_status?: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft?: number | null
+          neighborhood?: string | null
           notes?: string | null
           parcel_id?: string | null
           property_type?: string | null
@@ -1442,6 +1456,7 @@ export type Database = {
           list_price?: number | null
           listing_status?: Database["public"]["Enums"]["listing_status"] | null
           lot_sqft?: number | null
+          neighborhood?: string | null
           notes?: string | null
           parcel_id?: string | null
           property_type?: string | null

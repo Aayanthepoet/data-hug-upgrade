@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { parseLocation } from '@/lib/location-parse'
 
 const SITE_NAME = 'PropAI'
 const SENDER_DOMAIN = 'notify.www.ainetworkagency.com'
@@ -18,6 +19,10 @@ const schema = z.object({
   message: z.string().trim().max(2000).optional(),
   source: z.string().trim().max(80).optional(),
   sms_opt_in: z.boolean().optional(),
+  city: z.string().trim().max(80).optional(),
+  neighborhood: z.string().trim().max(120).optional(),
+  state: z.string().trim().length(2).optional(),
+  zip: z.string().trim().regex(/^\d{5}(-\d{4})?$/).optional(),
   // Honeypot: real users leave this empty. Bots fill every field.
   website: z.string().max(0).optional().or(z.literal('')),
 })
@@ -79,6 +84,14 @@ export const Route = createFileRoute('/api/public/lead-notify')({
           }
         }
 
+        // Parse city / neighborhood / state / zip from the free-text message
+        // and merge with whatever the form supplied. Form values win.
+        const parsedLoc = parseLocation(data.message)
+        const city = data.city ?? parsedLoc.city ?? null
+        const neighborhood = data.neighborhood ?? parsedLoc.neighborhood ?? null
+        const stateCode = (data.state ?? parsedLoc.state ?? null)?.toUpperCase() ?? null
+        const zip = data.zip ?? parsedLoc.zip ?? null
+
         // Server-side insert (anon INSERT is revoked on the leads table).
         const { data: inserted, error: insertErr } = await supabase
           .from('leads')
@@ -93,6 +106,10 @@ export const Route = createFileRoute('/api/public/lead-notify')({
             sms_opt_in_at: data.sms_opt_in ? new Date().toISOString() : null,
             consent_ip: ip,
             consent_user_agent: ua,
+            city,
+            neighborhood,
+            state: stateCode,
+            zip,
           })
           .select('id')
           .single()
