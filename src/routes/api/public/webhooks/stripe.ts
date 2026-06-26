@@ -32,6 +32,9 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             return;
           }
           const item = sub.items.data[0];
+          const periodEnd =
+            (item as unknown as { current_period_end?: number } | undefined)?.current_period_end ??
+            (sub as unknown as { current_period_end?: number }).current_period_end;
           await supabaseAdmin.from("subscriptions").upsert(
             {
               user_id: userId,
@@ -39,9 +42,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
               stripe_subscription_id: sub.id,
               status: sub.status,
               price_id: item?.price.id ?? null,
-              current_period_end: sub.current_period_end
-                ? new Date(sub.current_period_end * 1000).toISOString()
-                : null,
+              current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
               cancel_at_period_end: sub.cancel_at_period_end,
             },
             { onConflict: "user_id" },

@@ -23,12 +23,14 @@ import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AgentsSlugRouteImport } from './routes/agents.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
 import { Route as ApiPublicAttomHealthRouteImport } from './routes/api/public/attom-health'
 import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
+import { Route as AuthenticatedBillingReturnRouteImport } from './routes/_authenticated/billing.return'
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
 import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
@@ -51,6 +53,7 @@ import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticat
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
 import { Route as ApiPublicHooksSignwellRouteImport } from './routes/api/public/hooks/signwell'
@@ -146,6 +149,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -176,6 +184,12 @@ const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
   path: '/api/engines/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBillingReturnRoute =
+  AuthenticatedBillingReturnRouteImport.update({
+    id: '/return',
+    path: '/return',
+    getParentRoute: () => AuthenticatedBillingRoute,
+  } as any)
 const AuthenticatedAppWatchlistRoute =
   AuthenticatedAppWatchlistRouteImport.update({
     id: '/watchlist',
@@ -299,6 +313,11 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
+  id: '/api/public/webhooks/stripe',
+  path: '/api/public/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksTwilioVoiceRoute =
   ApiPublicHooksTwilioVoiceRouteImport.update({
     id: '/api/public/hooks/twilio-voice',
@@ -455,6 +474,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
@@ -479,6 +499,7 @@ export interface FileRoutesByFullPath {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
+  '/billing/return': typeof AuthenticatedBillingReturnRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -506,6 +527,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -522,6 +544,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
@@ -546,6 +569,7 @@ export interface FileRoutesByTo {
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
+  '/billing/return': typeof AuthenticatedBillingReturnRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -573,6 +597,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -592,6 +617,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/billing': typeof AuthenticatedBillingRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/agents/$slug': typeof AgentsSlugRouteWithChildren
   '/api/chat': typeof ApiChatRoute
@@ -616,6 +642,7 @@ export interface FileRoutesById {
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
+  '/_authenticated/billing/return': typeof AuthenticatedBillingReturnRoute
   '/api/engines/tts': typeof ApiEnginesTtsRoute
   '/api/public/attom-health': typeof ApiPublicAttomHealthRoute
   '/api/public/lead-notify': typeof ApiPublicLeadNotifyRoute
@@ -643,6 +670,7 @@ export interface FileRoutesById {
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
+  '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -662,6 +690,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/app'
+    | '/billing'
     | '/dashboard'
     | '/agents/$slug'
     | '/api/chat'
@@ -686,6 +715,7 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
+    | '/billing/return'
     | '/api/engines/tts'
     | '/api/public/attom-health'
     | '/api/public/lead-notify'
@@ -713,6 +743,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
+    | '/api/public/webhooks/stripe'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -729,6 +760,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
+    | '/billing'
     | '/dashboard'
     | '/agents/$slug'
     | '/api/chat'
@@ -753,6 +785,7 @@ export interface FileRouteTypes {
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
+    | '/billing/return'
     | '/api/engines/tts'
     | '/api/public/attom-health'
     | '/api/public/lead-notify'
@@ -780,6 +813,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
+    | '/api/public/webhooks/stripe'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -798,6 +832,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/app'
+    | '/_authenticated/billing'
     | '/_authenticated/dashboard'
     | '/agents/$slug'
     | '/api/chat'
@@ -822,6 +857,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/videos'
     | '/_authenticated/app/vision'
     | '/_authenticated/app/watchlist'
+    | '/_authenticated/billing/return'
     | '/api/engines/tts'
     | '/api/public/attom-health'
     | '/api/public/lead-notify'
@@ -849,6 +885,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
+    | '/api/public/webhooks/stripe'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -882,6 +919,7 @@ export interface RootRouteChildren {
   ApiPublicHooksSignwellRoute: typeof ApiPublicHooksSignwellRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
+  ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -989,6 +1027,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
@@ -1030,6 +1075,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/engines/tts'
       preLoaderRoute: typeof ApiEnginesTtsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/billing/return': {
+      id: '/_authenticated/billing/return'
+      path: '/return'
+      fullPath: '/billing/return'
+      preLoaderRoute: typeof AuthenticatedBillingReturnRouteImport
+      parentRoute: typeof AuthenticatedBillingRoute
     }
     '/_authenticated/app/watchlist': {
       id: '/_authenticated/app/watchlist'
@@ -1183,6 +1235,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/queue/process'
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/stripe': {
+      id: '/api/public/webhooks/stripe'
+      path: '/api/public/webhooks/stripe'
+      fullPath: '/api/public/webhooks/stripe'
+      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/twilio-voice': {
@@ -1559,13 +1618,26 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
 const AuthenticatedAppRouteWithChildren =
   AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
 
+interface AuthenticatedBillingRouteChildren {
+  AuthenticatedBillingReturnRoute: typeof AuthenticatedBillingReturnRoute
+}
+
+const AuthenticatedBillingRouteChildren: AuthenticatedBillingRouteChildren = {
+  AuthenticatedBillingReturnRoute: AuthenticatedBillingReturnRoute,
+}
+
+const AuthenticatedBillingRouteWithChildren =
+  AuthenticatedBillingRoute._addFileChildren(AuthenticatedBillingRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+  AuthenticatedBillingRoute: AuthenticatedBillingRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
@@ -1609,6 +1681,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksSignwellRoute: ApiPublicHooksSignwellRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
+  ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,

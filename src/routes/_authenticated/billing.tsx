@@ -1,6 +1,4 @@
-import { createFileRoute, Link, useNavigate, useServerFn } from "@tanstack/react-router";
-// useServerFn lives in @tanstack/react-start, but createFileRoute is from react-router.
-// Re-import properly below.
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { loadStripe, type Stripe as StripeJS } from "@stripe/stripe-js";
