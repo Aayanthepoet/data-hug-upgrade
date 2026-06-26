@@ -90,7 +90,12 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
       </div>
       <input name="phone" type="tel" required placeholder="Mobile phone (e.g. +1 555 123 4567)" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
       <input name="company" placeholder="Brokerage / company (optional)" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
-      <textarea name="message" rows={3} placeholder="What are you hoping PropAI can do for you?" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan resize-none" />
+      <div className="grid grid-cols-2 sm:grid-cols-[1fr_80px_120px] gap-3">
+        <input name="city" placeholder="Target city (optional)" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
+        <input name="state" maxLength={2} placeholder="ST" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full uppercase focus:outline-none focus:border-cyan" />
+        <input name="zip" inputMode="numeric" maxLength={10} placeholder="ZIP" className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
+      </div>
+      <textarea name="message" rows={3} placeholder="What are you hoping PropAI can do for you? Tell us about target neighborhoods." className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan resize-none" />
 
       <label className="flex gap-3 items-start text-[12px] leading-[1.55] text-[var(--w55)] cursor-pointer select-none">
         <input
