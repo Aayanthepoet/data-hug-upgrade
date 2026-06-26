@@ -20,8 +20,7 @@ const tiles = [
   { name: "Contacts", to: "/app/contacts", table: "contacts" as const, color: "var(--violet)" },
   { name: "Lead Lists", to: "/app/lead-lists", table: "lead_lists" as const, color: "var(--green)" },
   { name: "Campaigns", to: "/app/campaigns", table: "campaigns" as const, color: "var(--cyan)" },
-  
-  { name: "Videos", to: "/app/videos", table: "videos" as const, color: "var(--red)" },
+  { name: "Contracts", to: "/app/contracts", table: "contracts" as const, color: "var(--red)" },
 ];
 
 function Overview() {

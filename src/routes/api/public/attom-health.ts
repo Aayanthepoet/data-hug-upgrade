@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { requireApiAuth } from "@/lib/api-auth.server";
 
+// NOTE: lives under /api/public/* because the prefix bypasses Lovable's
+// edge auth gate on published sites, but we ALWAYS verify a Supabase bearer
+// token here — this is a privileged diagnostic that touches ATTOM credits
+// and returns live property data. Never make this anonymous.
 export const Route = createFileRoute("/api/public/attom-health")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const auth = await requireApiAuth(request);
+        if (auth instanceof Response) return auth;
+
         const key = process.env.ATTOM_API_KEY ?? "";
         if (!key) {
           return Response.json({ ok: false, configured: false, reason: "ATTOM_API_KEY not set" });
@@ -43,7 +51,6 @@ export const Route = createFileRoute("/api/public/attom-health")({
             zip,
             sampleTotal: total,
             sample,
-            keySuffix: key.slice(-4),
           });
         } catch (e) {
           return Response.json({

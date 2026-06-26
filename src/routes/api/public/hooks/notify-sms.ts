@@ -13,6 +13,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { timingSafeEqual } from "crypto";
 
 const PayloadSchema = z.object({
   user_id: z.string().uuid(),
@@ -22,13 +23,20 @@ const PayloadSchema = z.object({
   type: z.string().max(50),
 });
 
+function safeEq(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
+
 export const Route = createFileRoute("/api/public/hooks/notify-sms")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const secret = process.env.NOTIFY_HOOK_SECRET;
         const provided = request.headers.get("x-notify-secret") ?? "";
-        if (!secret || provided !== secret) {
+        if (!secret || !safeEq(provided, secret)) {
           return new Response("Unauthorized", { status: 401 });
         }
 

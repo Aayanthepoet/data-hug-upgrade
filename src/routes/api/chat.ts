@@ -66,6 +66,9 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
 
+        // Cap request body to 1MB before JSON parse.
+        const cl = Number(request.headers.get("content-length") ?? "0");
+        if (cl > 1_000_000) return new Response("Payload too large", { status: 413 });
         const body = (await request.json()) as { messages?: unknown; threadId?: unknown };
         if (!Array.isArray(body.messages)) return new Response("Messages required", { status: 400 });
         const threadId = typeof body.threadId === "string" ? body.threadId : "";

@@ -42,10 +42,16 @@ export const generateRedesign = createServerFn({ method: "POST" })
     //    so unsupported tiers (e.g. 4K on gpt-image-2) surface a clean
     //    error to the UI instead of a half-written audit row.
     const key = process.env.LOVABLE_API_KEY;
-    const { mockVisionProvider } = await import("./mock-provider.server");
+    if (!key) {
+      // Don't silently render a blank 1x1 PNG when no key is configured —
+      // surface a clear error so the UI can prompt the operator.
+      throw new Error(
+        "Vision Studio is not configured: missing LOVABLE_API_KEY. Enable Lovable Cloud / AI Gateway to render images.",
+      );
+    }
     const { createLovableVisionProvider } = await import("./lovable-provider.server");
     const { RESOLUTION_LABELS } = await import("./provider");
-    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
+    const provider = createLovableVisionProvider(key);
 
     if (!provider.supportedResolutions.includes(data.resolution)) {
       const supportedLabel = provider.supportedResolutions

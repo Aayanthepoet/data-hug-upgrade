@@ -4,6 +4,14 @@
 //
 // Expected URL: /api/public/hooks/signwell?token=<SIGNWELL_WEBHOOK_SECRET>
 import { createFileRoute } from "@tanstack/react-router";
+import { timingSafeEqual } from "crypto";
+
+function safeEq(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
 
 type SignwellEvent = {
   event?: { type?: string; time?: number };
@@ -39,7 +47,7 @@ export const Route = createFileRoute("/api/public/hooks/signwell")({
         }
         const url = new URL(request.url);
         const provided = url.searchParams.get("token") ?? "";
-        if (provided !== expected) {
+        if (!safeEq(provided, expected)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
