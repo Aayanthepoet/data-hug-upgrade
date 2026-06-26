@@ -310,7 +310,10 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
       return { ok: true, needs_connect: true, updated: 0 };
     }
 
-    const userToken = master.access_token_enc;
+    const userToken = decryptToken(master.access_token_enc);
+    if (!userToken) {
+      return { ok: true, needs_connect: true, updated: 0 };
+    }
 
     try {
       const fields =
@@ -403,7 +406,7 @@ export const syncMetaAccounts = createServerFn({ method: "POST" })
             .update({
               display_name: p.name,
               avatar_url: p.picture?.data?.url ?? null,
-              access_token_enc: p.access_token,
+              access_token_enc: encryptToken(p.access_token),
               expires_at: expires,
               status: "active",
             })
