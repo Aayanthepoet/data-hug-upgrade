@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
 import { ArrowLeft, Home } from "lucide-react";
+import { SubscriptionGate } from "@/components/billing/SubscriptionGate";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Workspace — PropAI" }] }),
@@ -68,7 +69,9 @@ function AppShell() {
             </div>
           </header>
           <main className="flex-1 px-6 md:px-10 py-10 max-w-6xl w-full">
-            <Outlet />
+            <SubscriptionGate>
+              <Outlet />
+            </SubscriptionGate>
           </main>
         </div>
       </div>
