@@ -3,7 +3,7 @@
     "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
     "startTrial": "Prueba gratuita",
-    "startTrialLong": "Prueba gratis de 14 días",
+    "startTrialLong": "Prueba gratis de 7 días",
     "openDashboard": "Abrir panel",
     "explorePlatform": "Explorar plataforma →",
     "seeAllFeatures": "Ver todas las funciones →",
@@ -57,7 +57,7 @@
     "contactTitle1": "¿Listo para ver PropAI",
     "contactTitle2": "en tu mercado?",
     "contactBody": "Cuéntanos sobre tu corretaje. Te haremos una demostración personalizada y ejecutaremos una búsqueda real de propietarios en tu código postal objetivo — en vivo, durante la llamada.",
-    "contactBullet1": "Prueba gratis de 14 días, sin tarjeta de crédito",
+    "contactBullet1": "Prueba gratis de 7 días, sin tarjeta de crédito",
     "contactBullet2": "Acceso completo durante la prueba",
     "contactBullet3": "Especialista de incorporación personal"
   },
