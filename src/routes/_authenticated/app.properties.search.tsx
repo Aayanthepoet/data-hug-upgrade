@@ -330,7 +330,15 @@ function PropertySearchPage() {
                           Save to pipeline
                         </Button>
                         <Button asChild size="sm" variant="ghost">
-                          <Link to={lookupHref}>
+                          <Link
+                            to="/app/properties/lookup"
+                            search={{
+                              line1: r.address ?? "",
+                              city: r.city ?? "",
+                              state: r.state ?? "",
+                              zip: r.zip ?? "",
+                            }}
+                          >
                             <ExternalLink className="h-3.5 w-3.5 mr-1" />
                             Details
                           </Link>
