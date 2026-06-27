@@ -300,9 +300,6 @@ function PropertySearchPage() {
             <tbody>
               {filteredResults.map((r) => {
                 const label = TYPE_OPTIONS.find((t) => t.value === r.distressType)?.label ?? r.distressType;
-                const lookupHref = `/app/properties/lookup?address=${encodeURIComponent(
-                  [r.address, r.city, r.state, r.zip].filter(Boolean).join(", "),
-                )}`;
                 return (
                   <tr key={r.sourceRecordId} className="border-t border-border align-top">
                     <td className="px-4 py-3">
