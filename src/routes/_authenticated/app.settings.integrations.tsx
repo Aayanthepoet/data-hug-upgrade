@@ -2,11 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle } from "lucide-react";
+import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle, Database, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getAttomStatus, testAttomConnection } from "@/lib/distress/attom-status.functions";
 import { backfillLocations, type BackfillResult } from "@/lib/location-backfill.functions";
+import { runDistressSyncNow, getRecentSyncRuns, type SyncRunRow } from "@/lib/distress/sync.functions";
 
 export const Route = createFileRoute("/_authenticated/app/settings/integrations")({
   head: () => ({ meta: [{ title: "Integrations — PropAI" }] }),
@@ -146,10 +147,133 @@ function IntegrationsPage() {
         </ul>
       </section>
 
+      <DistressSyncSection />
+
       <LocationBackfillSection />
     </div>
   );
 }
+
+function DistressSyncSection() {
+  const runNow = useServerFn(runDistressSyncNow);
+  const fetchRuns = useServerFn(getRecentSyncRuns);
+  const [busy, setBusy] = useState(false);
+
+  const { data: runs, refetch, isFetching } = useQuery<SyncRunRow[]>({
+    queryKey: ["sync-runs"],
+    queryFn: () => fetchRuns(),
+    staleTime: 30_000,
+  });
+
+  async function onRun() {
+    setBusy(true);
+    try {
+      const r = await runNow();
+      const totals = r.summaries.reduce(
+        (acc, s) => ({ ins: acc.ins + s.inserted, upd: acc.upd + s.updated }),
+        { ins: 0, upd: 0 },
+      );
+      toast.success(`Sync complete — ${totals.ins} added, ${totals.upd} updated`);
+      refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sync failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Latest run per provider
+  const latestByProvider = new Map<string, SyncRunRow>();
+  for (const r of runs ?? []) {
+    if (!latestByProvider.has(r.provider)) latestByProvider.set(r.provider, r);
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Database className="h-4 w-4" /> Nightly distress data sync
+          </h2>
+          <p className="text-sm text-[var(--w55)] mt-1">
+            Pulls fresh pre-foreclosure / distress records every night from free NYC
+            (Socrata) &amp; Philadelphia (Carto) public data into your properties table.
+            Only manages rows it created — your manual entries and saved properties are
+            never touched. ZIP list is edited in{" "}
+            <code className="text-xs">src/lib/distress/sync-config.ts</code>.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            {isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          </Button>
+          <Button size="sm" onClick={onRun} disabled={busy}>
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <PlayCircle className="h-3.5 w-3.5 mr-1.5" />}
+            {busy ? "Running…" : "Run sync now"}
+          </Button>
+        </div>
+      </div>
+
+      {latestByProvider.size === 0 ? (
+        <div className="rounded-lg border border-border/60 bg-background/40 p-3 text-sm text-[var(--w55)]">
+          No sync runs yet. Click "Run sync now" to pull the first batch.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {Array.from(latestByProvider.values()).map((r) => (
+            <SyncRunCard key={r.provider} run={r} />
+          ))}
+        </div>
+      )}
+
+      {runs && runs.length > 0 && (
+        <details className="text-xs">
+          <summary className="cursor-pointer text-[var(--w55)] hover:text-[var(--w85)]">
+            Show recent run history
+          </summary>
+          <div className="mt-2 rounded border border-border/60 bg-background/40 divide-y divide-border/60">
+            {runs.map((r) => (
+              <div key={r.id} className="flex items-center justify-between px-3 py-2 text-[var(--w55)]">
+                <span>
+                  <span className="text-[var(--w85)] font-medium">{r.provider}</span>{" "}
+                  · {new Date(r.started_at).toLocaleString()} · {r.triggered_by}
+                </span>
+                <span>
+                  +{r.inserted} / ~{r.updated}
+                  {r.error && <span className="text-red-400 ml-2">error</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </section>
+  );
+}
+
+function SyncRunCard({ run }: { run: SyncRunRow }) {
+  const ok = !run.error;
+  return (
+    <div className={`rounded-lg border p-3 text-sm ${ok ? "border-border/60 bg-background/40" : "border-red-900/40 bg-red-950/10"}`}>
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{run.provider}</span>
+        <span className="text-xs text-[var(--w55)]">
+          {run.finished_at ? new Date(run.finished_at).toLocaleString() : "running…"}
+        </span>
+      </div>
+      <div className="mt-1 text-xs text-[var(--w55)]">
+        <span className="text-emerald-400">+{run.inserted} added</span>
+        {" · "}
+        <span className="text-cyan-400">~{run.updated} updated</span>
+        {run.skipped > 0 && <> · {run.skipped} skipped</>}
+        {" · "}
+        <span>via {run.triggered_by}</span>
+      </div>
+      {run.error && <div className="mt-1 text-xs text-red-300">{run.error}</div>}
+    </div>
+  );
+}
+
 
 function LocationBackfillSection() {
   const runBackfill = useServerFn(backfillLocations);
