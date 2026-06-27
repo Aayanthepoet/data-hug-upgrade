@@ -50,6 +50,7 @@ import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppAuditRouteImport } from './routes/_authenticated/app.audit'
 import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
 import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticated/app.agent'
+import { Route as AuthenticatedAppPropertiesIndexRouteImport } from './routes/_authenticated/app.properties.index'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -298,6 +299,12 @@ const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
   path: '/agent',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppPropertiesIndexRoute =
+  AuthenticatedAppPropertiesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -552,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/properties/': typeof AuthenticatedAppPropertiesIndexRoute
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
@@ -585,7 +593,6 @@ export interface FileRoutesByTo {
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
-  '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
@@ -625,6 +632,7 @@ export interface FileRoutesByTo {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesIndexRoute
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
@@ -701,6 +709,7 @@ export interface FileRoutesById {
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
+  '/_authenticated/app/properties/': typeof AuthenticatedAppPropertiesIndexRoute
   '/_authenticated/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
@@ -777,6 +786,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/properties/'
     | '/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
@@ -810,7 +820,6 @@ export interface FileRouteTypes {
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
-    | '/app/properties'
     | '/app/scoring'
     | '/app/settings'
     | '/app/social'
@@ -850,6 +859,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/app/properties'
     | '/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
@@ -925,6 +935,7 @@ export interface FileRouteTypes {
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
+    | '/_authenticated/app/properties/'
     | '/_authenticated/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
@@ -1257,6 +1268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgentRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/properties/': {
+      id: '/_authenticated/app/properties/'
+      path: '/'
+      fullPath: '/app/properties/'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesIndexRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1545,6 +1563,7 @@ interface AuthenticatedAppPropertiesRouteChildren {
   AuthenticatedAppPropertiesLookupRoute: typeof AuthenticatedAppPropertiesLookupRoute
   AuthenticatedAppPropertiesLookupHistoryRoute: typeof AuthenticatedAppPropertiesLookupHistoryRoute
   AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
+  AuthenticatedAppPropertiesIndexRoute: typeof AuthenticatedAppPropertiesIndexRoute
 }
 
 const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteChildren =
@@ -1557,6 +1576,7 @@ const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteCh
       AuthenticatedAppPropertiesLookupHistoryRoute,
     AuthenticatedAppPropertiesSearchRoute:
       AuthenticatedAppPropertiesSearchRoute,
+    AuthenticatedAppPropertiesIndexRoute: AuthenticatedAppPropertiesIndexRoute,
   }
 
 const AuthenticatedAppPropertiesRouteWithChildren =
