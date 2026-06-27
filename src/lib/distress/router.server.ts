@@ -29,24 +29,14 @@ export async function searchDistressedViaRouter(
   const provider = selectProvider(filters);
   try {
     const records = await provider.searchDistressed(filters);
-    // If a live provider returns zero rows, fall back to mock so the UI still
-    // has something to show — but flag it so we can surface "no live matches".
-    if (records.length === 0 && provider.name !== "mock") {
-      const mock = new MockProvider();
-      return {
-        records: await mock.searchDistressed(filters),
-        provider: provider.name,
-        usedFallback: true,
-      };
-    }
+    // Live provider with zero rows → return an honest empty result.
+    // We only fall back to mock for the mock provider itself (unsupported markets),
+    // never to fake out a real NYC / Philly / ATTOM search.
     return { records, provider: provider.name, usedFallback: false };
   } catch (e) {
     console.error(`[distress] provider ${provider.name} failed:`, e);
-    const mock = new MockProvider();
-    return {
-      records: await mock.searchDistressed(filters),
-      provider: provider.name,
-      usedFallback: true,
-    };
+    // On a hard provider error, return empty + flag — the UI shows an error/empty
+    // state instead of silently substituting synthetic data.
+    return { records: [], provider: provider.name, usedFallback: true };
   }
 }
