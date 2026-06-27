@@ -18,28 +18,18 @@ type GateOutcome =
   | { ok: false; httpStatus: 402 | 403; code: "no_subscription" | "sub_inactive"; status: string | null };
 
 /**
- * Pure check: given an authenticated supabase client (RLS as the user) and the user id,
+ * Pure check: given a supabase client (RLS as the user) and the user id,
  * decide whether the caller may use paid features.
  */
-export async function evaluateSubscriptionAccess(
-  supabase: {
-    from: (t: string) => {
-      select: (cols: string) => {
-        eq: (c: string, v: string) => { maybeSingle: () => Promise<{ data: { status: string | null } | null }> };
-      };
-    };
-    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: boolean | null }>;
-  },
-  userId: string,
-): Promise<GateOutcome> {
-  const [{ data: sub }, { data: isAdmin }] = await Promise.all([
-    supabase
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", userId)
-      .maybeSingle(),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function evaluateSubscriptionAccess(supabase: any, userId: string): Promise<GateOutcome> {
+  const [subRes, adminRes] = await Promise.all([
+    supabase.from("subscriptions").select("status").eq("user_id", userId).maybeSingle(),
     supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
   ]);
+
+  const sub = (subRes?.data ?? null) as { status: string | null } | null;
+  const isAdmin = Boolean(adminRes?.data);
 
   if (isAdmin) return { ok: true, isAdmin: true, status: sub?.status ?? null };
 
