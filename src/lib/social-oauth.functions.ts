@@ -558,22 +558,27 @@ export const connectLinkedInViaGateway = createServerFn({ method: "POST" })
       picture?: string;
     };
 
-    const { error } = await supabase.from("social_accounts").upsert(
-      {
-        user_id: userId,
-        platform: "linkedin" as const,
-        external_account_id: profile.sub,
-        display_name: profile.name ?? profile.email ?? "LinkedIn Member",
-        avatar_url: profile.picture ?? null,
-        access_token_enc: encryptToken("gateway"),
-        refresh_token_enc: null,
-        expires_at: null,
-        scopes: ["openid", "profile", "email", "w_member_social"],
-        status: "active" as const,
-        metadata: { via: "lovable_gateway" },
-      },
-      { onConflict: "user_id,platform,external_account_id" },
-    );
+    // Replace any existing LinkedIn row for this user+account
+    await supabase
+      .from("social_accounts")
+      .delete()
+      .eq("user_id", userId)
+      .eq("platform", "linkedin")
+      .eq("external_account_id", profile.sub);
+
+    const { error } = await supabase.from("social_accounts").insert({
+      user_id: userId,
+      platform: "linkedin" as const,
+      external_account_id: profile.sub,
+      display_name: profile.name ?? profile.email ?? "LinkedIn Member",
+      avatar_url: profile.picture ?? null,
+      access_token_enc: encryptToken("gateway"),
+      refresh_token_enc: null,
+      expires_at: null,
+      scopes: ["openid", "profile", "email", "w_member_social"],
+      status: "active" as const,
+      metadata: { via: "lovable_gateway" },
+    });
 
     if (error) return { ok: false, error: error.message };
     return { ok: true, display_name: profile.name ?? "LinkedIn" };
