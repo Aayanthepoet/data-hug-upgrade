@@ -36,6 +36,20 @@ function SocialHubPage() {
   const updateStatus = useServerFn(updatePostStatus);
   const disconnect = useServerFn(disconnectSocialAccount);
   const syncMeta = useServerFn(syncMetaAccounts);
+  const connectLinkedIn = useServerFn(connectLinkedInViaGateway);
+
+  const linkedInMut = useMutation({
+    mutationFn: () => connectLinkedIn(),
+    onSuccess: (res: any) => {
+      if (res?.ok) {
+        toast.success(`LinkedIn connected: ${res.display_name}`);
+        qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+      } else {
+        toast.error(res?.error ?? "LinkedIn connect failed");
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
