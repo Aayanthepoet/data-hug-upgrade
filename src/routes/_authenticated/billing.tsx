@@ -20,8 +20,18 @@ export const Route = createFileRoute("/_authenticated/billing")({
 
 function BillingPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const subQ = useQuery({ queryKey: ["my-subscription"], queryFn: () => getMySubscription() });
   const pkQ = useQuery({ queryKey: ["stripe-pk"], queryFn: () => getStripePublishableKey() });
+
+  const reconciledRef = useRef(false);
+  useEffect(() => {
+    if (reconciledRef.current) return;
+    reconciledRef.current = true;
+    reconcileMySubscription()
+      .then(() => qc.invalidateQueries({ queryKey: ["my-subscription"] }))
+      .catch(() => {});
+  }, [qc]);
 
   const stripePromise = useMemo<Promise<StripeJS | null> | null>(() => {
     const pk = pkQ.data?.publishableKey;
