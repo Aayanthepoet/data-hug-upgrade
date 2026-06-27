@@ -4,6 +4,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 import { z } from "zod";
 
 const Channel = z.enum(["sms", "email", "mail"]);
@@ -19,7 +20,7 @@ const SendInput = z.object({
 });
 
 export const sendOutreach = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: unknown) => SendInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;

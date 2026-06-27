@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 import { z } from "zod";
 
 const propertyIdInput = z.object({ propertyId: z.string().uuid() });
@@ -71,7 +72,7 @@ export const getComps = createServerFn({ method: "GET" })
   });
 
 export const runComps = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: { propertyId: string }) => propertyIdInput.parse(d))
   .handler(async ({ data, context }): Promise<CompsResult> => {
     const { supabase, userId } = context;

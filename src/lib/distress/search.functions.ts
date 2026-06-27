@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 import type { DistressType } from "./provider";
 
 const distressTypeEnum = z.enum([
@@ -47,7 +48,7 @@ function score(rec: {
 }
 
 export const searchDistressedProperties = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((data: unknown) => filtersSchema.parse(data))
   .handler(async ({ data }) => {
     const { searchDistressedViaRouter } = await import("./router.server");
@@ -96,7 +97,7 @@ const importSchema = z.object({
 });
 
 export const importDistressedProperties = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((data: unknown) => importSchema.parse(data))
   .handler(async ({ data, context }) => {
     const rows = data.records.map((r) => ({

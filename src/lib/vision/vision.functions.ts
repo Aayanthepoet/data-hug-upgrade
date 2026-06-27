@@ -5,6 +5,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 import { z } from "zod";
 
 const STYLES = ["modern", "scandinavian", "industrial", "farmhouse", "mid-century", "coastal"] as const;
@@ -32,7 +33,7 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 export const generateRedesign = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: unknown) => GenerateInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
