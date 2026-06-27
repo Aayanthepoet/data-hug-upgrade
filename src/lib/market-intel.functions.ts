@@ -21,7 +21,7 @@ const inputSchema = z.object({
 const CACHE_HOURS = 24;
 
 export const getMarketIntel = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((data) => inputSchema.parse(data))
   .handler(async ({ data, context }): Promise<MarketIntelResult> => {
     const { supabase } = context;

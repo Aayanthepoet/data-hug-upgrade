@@ -20,7 +20,7 @@ const SendInput = z.object({
 });
 
 export const sendOutreach = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: unknown) => SendInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;

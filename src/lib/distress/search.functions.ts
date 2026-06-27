@@ -48,7 +48,7 @@ function score(rec: {
 }
 
 export const searchDistressedProperties = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((data: unknown) => filtersSchema.parse(data))
   .handler(async ({ data }) => {
     const { searchDistressedViaRouter } = await import("./router.server");
@@ -97,7 +97,7 @@ const importSchema = z.object({
 });
 
 export const importDistressedProperties = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((data: unknown) => importSchema.parse(data))
   .handler(async ({ data, context }) => {
     const rows = data.records.map((r) => ({

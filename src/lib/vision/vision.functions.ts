@@ -33,7 +33,7 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 export const generateRedesign = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: unknown) => GenerateInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;

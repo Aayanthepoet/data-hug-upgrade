@@ -72,7 +72,7 @@ export const getComps = createServerFn({ method: "GET" })
   });
 
 export const runComps = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireActiveSubscription])
   .inputValidator((d: { propertyId: string }) => propertyIdInput.parse(d))
   .handler(async ({ data, context }): Promise<CompsResult> => {
     const { supabase, userId } = context;
