@@ -51,6 +51,28 @@ export const reconcileMySubscription = createServerFn({ method: "POST" })
 
     let customerId = existing?.stripe_customer_id ?? null;
 
+    // Validate stored customer exists in current Stripe mode; clear if stale (e.g. test-mode id under live keys).
+    if (customerId) {
+      try {
+        const cust = await stripe.customers.retrieve(customerId);
+        if ((cust as { deleted?: boolean }).deleted) customerId = null;
+      } catch (e) {
+        const msg = (e as { message?: string })?.message ?? "";
+        if (/No such customer/i.test(msg)) {
+          customerId = null;
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin
+            .from("subscriptions")
+            .upsert(
+              { user_id: userId, stripe_customer_id: null, stripe_subscription_id: null, status: null },
+              { onConflict: "user_id" },
+            );
+        } else {
+          throw e;
+        }
+      }
+    }
+
     if (!customerId) {
       try {
         const search = await stripe.customers.search({
