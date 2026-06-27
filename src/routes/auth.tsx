@@ -96,7 +96,7 @@ function AuthPage() {
           <div className="lg:hidden mb-8"><Link to="/" className="font-bold text-xl">Prop<span className="text-cyan">AI</span></Link></div>
           <h1 className="h-display text-3xl">{isSignup ? "Create your account" : "Welcome back"}</h1>
           <p className="text-sm text-[var(--w55)] mt-2">
-            {isSignup ? "Start your free 14-day trial. No credit card required." : "Sign in to your PropAI dashboard."}
+            {isSignup ? "Start your free 7-day trial. No credit card required." : "Sign in to your PropAI dashboard."}
           </p>
 
           <button onClick={signInGoogle} disabled={loading}
