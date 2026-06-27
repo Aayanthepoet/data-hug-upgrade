@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { loadStripe, type Stripe as StripeJS } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { toast } from "sonner";
@@ -9,7 +9,9 @@ import {
   createPortalSession,
   getMySubscription,
   getStripePublishableKey,
+  reconcileMySubscription,
 } from "@/lib/stripe/billing.functions";
+
 
 export const Route = createFileRoute("/_authenticated/billing")({
   head: () => ({ meta: [{ title: "Billing — PropAI" }] }),
@@ -18,8 +20,18 @@ export const Route = createFileRoute("/_authenticated/billing")({
 
 function BillingPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const subQ = useQuery({ queryKey: ["my-subscription"], queryFn: () => getMySubscription() });
   const pkQ = useQuery({ queryKey: ["stripe-pk"], queryFn: () => getStripePublishableKey() });
+
+  const reconciledRef = useRef(false);
+  useEffect(() => {
+    if (reconciledRef.current) return;
+    reconciledRef.current = true;
+    reconcileMySubscription()
+      .then(() => qc.invalidateQueries({ queryKey: ["my-subscription"] }))
+      .catch(() => {});
+  }, [qc]);
 
   const stripePromise = useMemo<Promise<StripeJS | null> | null>(() => {
     const pk = pkQ.data?.publishableKey;
