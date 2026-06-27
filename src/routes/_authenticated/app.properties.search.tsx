@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, MapPin, Plus, ExternalLink } from "lucide-react";
+import { Search, RefreshCw, MapPin, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
   head: () => ({ meta: [{ title: "Property Search — PropAI" }] }),
@@ -102,11 +102,16 @@ function PropertySearchPage() {
     mutationFn: async (r: ResultRow) => importFn({ data: { records: [r] } }),
     onSuccess: (res) => {
       const id = res.ids?.[0];
-      toast.success("Saved to your workspace");
+      toast.success("Saved to your pipeline");
       if (id) navigate({ to: "/app/properties/$propertyId", params: { propertyId: id } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const openRow = (r: ResultRow) => {
+    if (importOne.isPending) return;
+    importOne.mutate(r);
+  };
 
   const toggleType = (t: SupportedType) =>
     setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
@@ -249,11 +254,11 @@ function PropertySearchPage() {
         </div>
       </div>
 
-      {/* Provider-fallback banner */}
+      {/* Honest "no live matches" banner */}
       {runMutation.data && usedFallback && (
         <div className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm">
-          The live <strong>{market.label}</strong> source returned no matches for these filters.
-          Try widening the value range, clearing the ZIP, or switching distress types.
+          The live <strong>{market.label}</strong> data source didn't respond. Try again
+          in a moment, or widen your filters.
         </div>
       )}
 
@@ -300,10 +305,24 @@ function PropertySearchPage() {
             <tbody>
               {filteredResults.map((r) => {
                 const label = TYPE_OPTIONS.find((t) => t.value === r.distressType)?.label ?? r.distressType;
+                const isOpening = importOne.isPending && importOne.variables?.sourceRecordId === r.sourceRecordId;
                 return (
-                  <tr key={r.sourceRecordId} className="border-t border-border align-top">
+                  <tr
+                    key={r.sourceRecordId}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openRow(r)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openRow(r);
+                      }
+                    }}
+                    aria-label={`Open ${r.address}`}
+                    className="border-t border-border align-top cursor-pointer hover:bg-[var(--w05)] focus:bg-[var(--w05)] focus:outline-none transition-colors"
+                  >
                     <td className="px-4 py-3">
-                      <div className="font-medium">{r.address}</div>
+                      <div className="font-medium text-cyan hover:underline">{r.address}</div>
                       <div className="text-xs text-[var(--w55)]">
                         {[r.city, r.state, r.zip].filter(Boolean).join(", ")}
                       </div>
@@ -318,32 +337,18 @@ function PropertySearchPage() {
                         ? <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40">Absentee</Badge>
                         : <Badge variant="outline">Owner-occupied</Badge>}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="inline-flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => importOne.mutate(r)}
-                          disabled={importOne.isPending}
-                        >
-                          <Plus className="h-3.5 w-3.5 mr-1" />
-                          Save to pipeline
-                        </Button>
-                        <Button asChild size="sm" variant="ghost">
-                          <Link
-                            to="/app/properties/lookup"
-                            search={{
-                              line1: r.address ?? "",
-                              city: r.city ?? "",
-                              state: r.state ?? "",
-                              zip: r.zip ?? "",
-                            }}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                            Details
-                          </Link>
-                        </Button>
-                      </div>
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => importOne.mutate(r)}
+                        disabled={importOne.isPending}
+                      >
+                        {isOpening
+                          ? <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" />
+                          : <Plus className="h-3.5 w-3.5 mr-1" />}
+                        Save to pipeline
+                      </Button>
                     </td>
                   </tr>
                 );
