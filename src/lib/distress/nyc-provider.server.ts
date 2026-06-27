@@ -187,9 +187,6 @@ function boroughCodeToCounty(b: string | undefined): string | null {
   }
 }
 
-function boroughToCounty(borough: string): string | null {
-  return boroughCodeToCounty(borough);
-}
 
 function bldgClassToType(c: string | undefined): string {
   const first = (c ?? "").charAt(0).toUpperCase();
