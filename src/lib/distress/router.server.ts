@@ -13,14 +13,18 @@ import { isPhilly, PhillyCartoProvider } from "./philly-provider.server";
 import { MockProvider } from "./mock-provider.server";
 import { AttomProvider } from "./attom-provider.server";
 
-export function selectProvider(filters: DistressSearchFilters): PropertyProvider {
+export function selectProvider(filters: DistressSearchFilters): PropertyProvider | null {
   if (isNYC(filters)) return new NYCOpenDataProvider();
   if (isPhilly(filters)) return new PhillyCartoProvider();
+  // ATTOM is paid. Gate behind ENABLE_ATTOM=true so out-of-coverage searches
+  // return an honest empty state instead of silently billing.
+  const attomEnabled = (process.env.ENABLE_ATTOM ?? "false").toLowerCase() === "true";
   const attomKey = process.env.ATTOM_API_KEY;
-  if (attomKey && (filters.zip || (filters.city && filters.state))) {
+  if (attomEnabled && attomKey && (filters.zip || (filters.city && filters.state))) {
     return new AttomProvider(attomKey);
   }
-  return new MockProvider();
+  // Out of coverage and no paid provider enabled → no provider.
+  return null;
 }
 
 export async function searchDistressedViaRouter(
