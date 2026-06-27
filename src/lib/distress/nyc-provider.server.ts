@@ -1,8 +1,13 @@
-// NYC live data provider — combines two free public Socrata datasets:
-//   - HPD Pre-Foreclosure Notices (`9y3g-c5g6`) → preforeclosure leads
+// NYC live data provider — one free public Socrata dataset:
 //   - PLUTO Primary Land Use Tax Lot Output (`64uk-42ks`) → owner / value
-//     records used as "absentee" leads when mailing address ≠ property address.
+//     records used as "absentee" leads when filters select residential lots.
 // No API key required. Free public endpoints.
+//
+// NYC Open Data does NOT publish a foreclosure / pre-foreclosure / lis-pendens
+// dataset. The old HPD dataset `9y3g-c5g6` was retired and not replaced;
+// foreclosure filings live in the NYS court system (NYSCEF), not here.
+// PLUTO rows are property/owner records — labeled `absentee`, NEVER as
+// foreclosure.
 //
 // Triggered when filters.state === "NY" AND county matches a NYC borough.
 
