@@ -186,8 +186,17 @@ export async function runDistressSync(
         if (existingSet.has(id)) updated++;
         else inserted++;
       }
-    } catch (e) {
-      errorMsg = e instanceof Error ? e.message : String(e);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        errorMsg = e.message;
+      } else if (e && typeof e === "object") {
+        const o = e as Record<string, unknown>;
+        errorMsg = [o.message, o.details, o.hint, o.code]
+          .filter(Boolean)
+          .join(" | ") || JSON.stringify(o);
+      } else {
+        errorMsg = String(e);
+      }
       console.error(`[sync] provider ${provider} failed:`, e);
     }
 
