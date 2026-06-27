@@ -3,7 +3,7 @@
     "signIn": "登录",
     "signOut": "退出登录",
     "startTrial": "免费试用",
-    "startTrialLong": "免费试用 14 天",
+    "startTrialLong": "免费试用 7 天",
     "openDashboard": "打开控制台",
     "explorePlatform": "探索平台 →",
     "seeAllFeatures": "查看全部功能 →",
@@ -57,7 +57,7 @@
     "contactTitle1": "准备好在您的市场中体验 PropAI",
     "contactTitle2": "了吗?",
     "contactBody": "告诉我们您的经纪公司情况。我们会安排一对一演示,并在您指定的邮编内现场进行真实的业主搜索。",
-    "contactBullet1": "14 天免费试用,无需信用卡",
+    "contactBullet1": "7 天免费试用,无需信用卡",
     "contactBullet2": "试用期内可使用全部功能",
     "contactBullet3": "专属上手指导专员"
   },

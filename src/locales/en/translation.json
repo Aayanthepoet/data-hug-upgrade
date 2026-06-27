@@ -3,7 +3,7 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "startTrial": "Start free trial",
-    "startTrialLong": "Start Free 14-Day Trial",
+    "startTrialLong": "Start Free 7-Day Trial",
     "openDashboard": "Open dashboard",
     "explorePlatform": "Explore Platform →",
     "seeAllFeatures": "See all features →",
@@ -57,7 +57,7 @@
     "contactTitle1": "Ready to see PropAI",
     "contactTitle2": "in your market?",
     "contactBody": "Tell us about your brokerage. We'll set up a personalized walkthrough and run a real owner search in your target ZIP — live, on the call.",
-    "contactBullet1": "14-day free trial, no credit card",
+    "contactBullet1": "7-day free trial, no credit card",
     "contactBullet2": "Full platform access during trial",
     "contactBullet3": "Personal onboarding specialist"
   },

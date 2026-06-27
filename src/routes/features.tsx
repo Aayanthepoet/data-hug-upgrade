@@ -62,7 +62,7 @@ function Features() {
         </div>
         <div className="text-center mt-16">
           <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary text-base px-7 py-4">
-            Start Free 14-Day Trial
+            Start Free 7-Day Trial
           </Link>
         </div>
       </section>

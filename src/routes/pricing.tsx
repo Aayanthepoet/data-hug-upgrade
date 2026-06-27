@@ -6,9 +6,9 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — PropAI Platform" },
-      { name: "description", content: "Simple plans for solo agents, teams, and brokerages. Start with a free 14-day trial." },
+      { name: "description", content: "Simple plans for solo agents, teams, and brokerages. Start with a free 7-day trial." },
       { property: "og:title", content: "PropAI Pricing" },
-      { property: "og:description", content: "Plans for solo agents, teams, and brokerages. 14-day free trial." },
+      { property: "og:description", content: "Plans for solo agents, teams, and brokerages. 7-day free trial." },
     ],
   }),
   component: Pricing,
@@ -44,7 +44,7 @@ function Pricing() {
         <h1 className="h-display text-[clamp(44px,6vw,72px)] mt-6">
           Plans that <span className="h-italic">scale with you</span>
         </h1>
-        <p className="text-[var(--w55)] mt-5 max-w-xl mx-auto">14-day free trial on every plan. No credit card required. Cancel anytime.</p>
+        <p className="text-[var(--w55)] mt-5 max-w-xl mx-auto">7-day free trial on every plan. No credit card required. Cancel anytime.</p>
       </section>
 
       <section className="container-x mt-16">
