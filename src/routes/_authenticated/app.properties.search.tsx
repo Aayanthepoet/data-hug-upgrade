@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, MapPin, Plus, ExternalLink } from "lucide-react";
+import { Search, RefreshCw, MapPin, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
   head: () => ({ meta: [{ title: "Property Search — PropAI" }] }),
