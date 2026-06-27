@@ -37,6 +37,7 @@ import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppSocialRouteImport } from './routes/_authenticated/app.social'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
+import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
 import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
 import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
 import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
@@ -225,6 +226,12 @@ const AuthenticatedAppScoringRoute = AuthenticatedAppScoringRouteImport.update({
   path: '/scoring',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppPropertiesRoute =
+  AuthenticatedAppPropertiesRouteImport.update({
+    id: '/properties',
+    path: '/properties',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
   id: '/owners',
   path: '/owners',
@@ -294,9 +301,9 @@ const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
 } as any)
 const AuthenticatedAppPropertiesIndexRoute =
   AuthenticatedAppPropertiesIndexRouteImport.update({
-    id: '/properties/',
-    path: '/properties/',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
@@ -403,27 +410,27 @@ const AuthenticatedAppSettingsIntegrationsRoute =
   } as any)
 const AuthenticatedAppPropertiesSearchRoute =
   AuthenticatedAppPropertiesSearchRouteImport.update({
-    id: '/properties/search',
-    path: '/properties/search',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const AuthenticatedAppPropertiesLookupHistoryRoute =
   AuthenticatedAppPropertiesLookupHistoryRouteImport.update({
-    id: '/properties/lookup-history',
-    path: '/properties/lookup-history',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/lookup-history',
+    path: '/lookup-history',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const AuthenticatedAppPropertiesLookupRoute =
   AuthenticatedAppPropertiesLookupRouteImport.update({
-    id: '/properties/lookup',
-    path: '/properties/lookup',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/lookup',
+    path: '/lookup',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const AuthenticatedAppPropertiesPropertyIdRoute =
   AuthenticatedAppPropertiesPropertyIdRouteImport.update({
-    id: '/properties/$propertyId',
-    path: '/properties/$propertyId',
-    getParentRoute: () => AuthenticatedAppRoute,
+    id: '/$propertyId',
+    path: '/$propertyId',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const AuthenticatedAppLeadsLeadIdRoute =
   AuthenticatedAppLeadsLeadIdRouteImport.update({
@@ -512,6 +519,7 @@ export interface FileRoutesByFullPath {
   '/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/app/owners': typeof AuthenticatedAppOwnersRoute
+  '/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
@@ -661,6 +669,7 @@ export interface FileRoutesById {
   '/_authenticated/app/opt-outs': typeof AuthenticatedAppOptOutsRoute
   '/_authenticated/app/outreach': typeof AuthenticatedAppOutreachRoute
   '/_authenticated/app/owners': typeof AuthenticatedAppOwnersRoute
+  '/_authenticated/app/properties': typeof AuthenticatedAppPropertiesRouteWithChildren
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/_authenticated/app/social': typeof AuthenticatedAppSocialRouteWithChildren
@@ -737,6 +746,7 @@ export interface FileRouteTypes {
     | '/app/opt-outs'
     | '/app/outreach'
     | '/app/owners'
+    | '/app/properties'
     | '/app/scoring'
     | '/app/settings'
     | '/app/social'
@@ -885,6 +895,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/opt-outs'
     | '/_authenticated/app/outreach'
     | '/_authenticated/app/owners'
+    | '/_authenticated/app/properties'
     | '/_authenticated/app/scoring'
     | '/_authenticated/app/settings'
     | '/_authenticated/app/social'
@@ -1166,6 +1177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppScoringRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/properties': {
+      id: '/_authenticated/app/properties'
+      path: '/properties'
+      fullPath: '/app/properties'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/owners': {
       id: '/_authenticated/app/owners'
       path: '/owners'
@@ -1252,10 +1270,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/properties/': {
       id: '/_authenticated/app/properties/'
-      path: '/properties'
+      path: '/'
       fullPath: '/app/properties/'
       preLoaderRoute: typeof AuthenticatedAppPropertiesIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -1385,31 +1403,31 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/properties/search': {
       id: '/_authenticated/app/properties/search'
-      path: '/properties/search'
+      path: '/search'
       fullPath: '/app/properties/search'
       preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/_authenticated/app/properties/lookup-history': {
       id: '/_authenticated/app/properties/lookup-history'
-      path: '/properties/lookup-history'
+      path: '/lookup-history'
       fullPath: '/app/properties/lookup-history'
       preLoaderRoute: typeof AuthenticatedAppPropertiesLookupHistoryRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/_authenticated/app/properties/lookup': {
       id: '/_authenticated/app/properties/lookup'
-      path: '/properties/lookup'
+      path: '/lookup'
       fullPath: '/app/properties/lookup'
       preLoaderRoute: typeof AuthenticatedAppPropertiesLookupRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/_authenticated/app/properties/$propertyId': {
       id: '/_authenticated/app/properties/$propertyId'
-      path: '/properties/$propertyId'
+      path: '/$propertyId'
       fullPath: '/app/properties/$propertyId'
       preLoaderRoute: typeof AuthenticatedAppPropertiesPropertyIdRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/_authenticated/app/leads/$leadId': {
       id: '/_authenticated/app/leads/$leadId'
@@ -1540,6 +1558,32 @@ const AuthenticatedAppLeadsRouteWithChildren =
     AuthenticatedAppLeadsRouteChildren,
   )
 
+interface AuthenticatedAppPropertiesRouteChildren {
+  AuthenticatedAppPropertiesPropertyIdRoute: typeof AuthenticatedAppPropertiesPropertyIdRoute
+  AuthenticatedAppPropertiesLookupRoute: typeof AuthenticatedAppPropertiesLookupRoute
+  AuthenticatedAppPropertiesLookupHistoryRoute: typeof AuthenticatedAppPropertiesLookupHistoryRoute
+  AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
+  AuthenticatedAppPropertiesIndexRoute: typeof AuthenticatedAppPropertiesIndexRoute
+}
+
+const AuthenticatedAppPropertiesRouteChildren: AuthenticatedAppPropertiesRouteChildren =
+  {
+    AuthenticatedAppPropertiesPropertyIdRoute:
+      AuthenticatedAppPropertiesPropertyIdRoute,
+    AuthenticatedAppPropertiesLookupRoute:
+      AuthenticatedAppPropertiesLookupRoute,
+    AuthenticatedAppPropertiesLookupHistoryRoute:
+      AuthenticatedAppPropertiesLookupHistoryRoute,
+    AuthenticatedAppPropertiesSearchRoute:
+      AuthenticatedAppPropertiesSearchRoute,
+    AuthenticatedAppPropertiesIndexRoute: AuthenticatedAppPropertiesIndexRoute,
+  }
+
+const AuthenticatedAppPropertiesRouteWithChildren =
+  AuthenticatedAppPropertiesRoute._addFileChildren(
+    AuthenticatedAppPropertiesRouteChildren,
+  )
+
 interface AuthenticatedAppSettingsRouteChildren {
   AuthenticatedAppSettingsIntegrationsRoute: typeof AuthenticatedAppSettingsIntegrationsRoute
   AuthenticatedAppSettingsPublicProfileRoute: typeof AuthenticatedAppSettingsPublicProfileRoute
@@ -1617,6 +1661,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppOptOutsRoute: typeof AuthenticatedAppOptOutsRoute
   AuthenticatedAppOutreachRoute: typeof AuthenticatedAppOutreachRoute
   AuthenticatedAppOwnersRoute: typeof AuthenticatedAppOwnersRoute
+  AuthenticatedAppPropertiesRoute: typeof AuthenticatedAppPropertiesRouteWithChildren
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRouteWithChildren
   AuthenticatedAppSocialRoute: typeof AuthenticatedAppSocialRouteWithChildren
@@ -1625,11 +1670,6 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppAdminContractsRoute: typeof AuthenticatedAppAdminContractsRouteWithChildren
-  AuthenticatedAppPropertiesPropertyIdRoute: typeof AuthenticatedAppPropertiesPropertyIdRoute
-  AuthenticatedAppPropertiesLookupRoute: typeof AuthenticatedAppPropertiesLookupRoute
-  AuthenticatedAppPropertiesLookupHistoryRoute: typeof AuthenticatedAppPropertiesLookupHistoryRoute
-  AuthenticatedAppPropertiesSearchRoute: typeof AuthenticatedAppPropertiesSearchRoute
-  AuthenticatedAppPropertiesIndexRoute: typeof AuthenticatedAppPropertiesIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -1645,6 +1685,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppOptOutsRoute: AuthenticatedAppOptOutsRoute,
   AuthenticatedAppOutreachRoute: AuthenticatedAppOutreachRoute,
   AuthenticatedAppOwnersRoute: AuthenticatedAppOwnersRoute,
+  AuthenticatedAppPropertiesRoute: AuthenticatedAppPropertiesRouteWithChildren,
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRouteWithChildren,
   AuthenticatedAppSocialRoute: AuthenticatedAppSocialRouteWithChildren,
@@ -1654,13 +1695,6 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppAdminContractsRoute:
     AuthenticatedAppAdminContractsRouteWithChildren,
-  AuthenticatedAppPropertiesPropertyIdRoute:
-    AuthenticatedAppPropertiesPropertyIdRoute,
-  AuthenticatedAppPropertiesLookupRoute: AuthenticatedAppPropertiesLookupRoute,
-  AuthenticatedAppPropertiesLookupHistoryRoute:
-    AuthenticatedAppPropertiesLookupHistoryRoute,
-  AuthenticatedAppPropertiesSearchRoute: AuthenticatedAppPropertiesSearchRoute,
-  AuthenticatedAppPropertiesIndexRoute: AuthenticatedAppPropertiesIndexRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
