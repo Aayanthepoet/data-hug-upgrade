@@ -11,14 +11,12 @@ import { PhillyCartoProvider } from "./philly-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
 
-type SupabaseAdmin = Awaited<
-  ReturnType<typeof import("@/integrations/supabase/client.server").then>
->["supabaseAdmin"];
-
 async function getAdminClient() {
   const mod = await import("@/integrations/supabase/client.server");
   return mod.supabaseAdmin;
 }
+
+type SupabaseAdmin = Awaited<ReturnType<typeof getAdminClient>>;
 
 /** First admin user — synced rows are owned by this account. */
 async function resolveSyncOwnerId(admin: SupabaseAdmin): Promise<string> {
