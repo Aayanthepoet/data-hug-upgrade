@@ -254,11 +254,11 @@ function PropertySearchPage() {
         </div>
       </div>
 
-      {/* Provider-fallback banner */}
+      {/* Honest "no live matches" banner */}
       {runMutation.data && usedFallback && (
         <div className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm">
-          The live <strong>{market.label}</strong> source returned no matches for these filters.
-          Try widening the value range, clearing the ZIP, or switching distress types.
+          The live <strong>{market.label}</strong> data source didn't respond. Try again
+          in a moment, or widen your filters.
         </div>
       )}
 
