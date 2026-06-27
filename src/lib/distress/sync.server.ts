@@ -158,14 +158,24 @@ export async function runDistressSync(
       }
 
       const allIds = Array.from(rows.keys());
-      const { data: existing, error: existErr } = await admin
-        .from("properties")
-        .select("source_record_id")
-        .eq("user_id", ownerId)
-        .eq("source_provider", provider)
-        .in("source_record_id", allIds);
-      if (existErr) throw existErr;
-      const existingSet = new Set((existing ?? []).map((r) => r.source_record_id));
+
+      // Batch the existence query — a single .in() with hundreds of IDs blows
+      // past PostgREST's URL length limit and returns an opaque error object.
+      const existingSet = new Set<string>();
+      const ID_CHUNK = 100;
+      for (let i = 0; i < allIds.length; i += ID_CHUNK) {
+        const idSlice = allIds.slice(i, i + ID_CHUNK);
+        const { data: existing, error: existErr } = await admin
+          .from("properties")
+          .select("source_record_id")
+          .eq("user_id", ownerId)
+          .eq("source_provider", provider)
+          .in("source_record_id", idSlice);
+        if (existErr) throw existErr;
+        for (const r of existing ?? []) {
+          if (r.source_record_id) existingSet.add(r.source_record_id);
+        }
+      }
 
       const payload = Array.from(rows.values()).map((r) => recordToRow(ownerId, provider, r));
 
