@@ -154,7 +154,7 @@ export const createEmbeddedCheckoutSession = createServerFn({ method: "POST" })
       (getRequestHeader("host") ? `https://${getRequestHeader("host")}` : "");
 
     const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded" as never,
+      ui_mode: "embedded_page" as never,
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
