@@ -68,10 +68,8 @@ export const requireActiveSubscription = createMiddleware({ type: "function" })
  * For raw HTTP routes (server routes under /api/*). Pass the authed user id and
  * a supabase client scoped to that user. Returns null on access or a Response to short-circuit.
  */
-export async function requireActiveSubscriptionApi(
-  supabase: Parameters<typeof evaluateSubscriptionAccess>[0],
-  userId: string,
-): Promise<Response | null> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function requireActiveSubscriptionApi(supabase: any, userId: string): Promise<Response | null> {
   const result = await evaluateSubscriptionAccess(supabase, userId);
   if (result.ok) return null;
   return new Response(
