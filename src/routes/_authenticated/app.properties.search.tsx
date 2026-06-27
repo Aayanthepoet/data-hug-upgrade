@@ -102,11 +102,16 @@ function PropertySearchPage() {
     mutationFn: async (r: ResultRow) => importFn({ data: { records: [r] } }),
     onSuccess: (res) => {
       const id = res.ids?.[0];
-      toast.success("Saved to your workspace");
+      toast.success("Saved to your pipeline");
       if (id) navigate({ to: "/app/properties/$propertyId", params: { propertyId: id } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const openRow = (r: ResultRow) => {
+    if (importOne.isPending) return;
+    importOne.mutate(r);
+  };
 
   const toggleType = (t: SupportedType) =>
     setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
