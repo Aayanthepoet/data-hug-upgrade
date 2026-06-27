@@ -207,18 +207,12 @@ export class NYCOpenDataProvider implements PropertyProvider {
     const limit = Math.min(filters.limit ?? 50, 200);
     const county = filters.county ? nycCountyInfo(filters.county) : null;
     const types = new Set<DistressType>(
-      filters.distressTypes?.length ? filters.distressTypes : ["preforeclosure", "absentee"],
+      filters.distressTypes?.length ? filters.distressTypes : ["absentee"],
     );
 
     const tasks: Promise<DistressedPropertyRecord[]>[] = [];
-    if (types.has("preforeclosure")) {
-      tasks.push(
-        fetchPreforeclosure(county?.borough ?? null, filters.zip, limit).catch((e) => {
-          console.error("[nyc] preforeclosure fetch failed:", e);
-          return [];
-        }),
-      );
-    }
+    // NYC Open Data does not publish a foreclosure dataset; preforeclosure
+    // requests return an empty list rather than substituting another source.
     if (types.has("absentee") || types.size === 0) {
       tasks.push(
         fetchAbsentee(
@@ -232,6 +226,7 @@ export class NYCOpenDataProvider implements PropertyProvider {
         }),
       );
     }
+
 
     const results = (await Promise.all(tasks)).flat();
 
