@@ -1,0 +1,1 @@
+ALTER TABLE public.properties ADD CONSTRAINT properties_source_unique UNIQUE (user_id, source_provider, source_record_id);

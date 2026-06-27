@@ -62,8 +62,7 @@ async function fetchOpaProperties(
     "location IS NOT NULL",
     "owner_1 IS NOT NULL",
     "market_value > 0",
-    "lat IS NOT NULL",
-    "lng IS NOT NULL",
+    "the_geom IS NOT NULL",
     // residential only
     "category_code_description ILIKE '%residential%'",
   ];
