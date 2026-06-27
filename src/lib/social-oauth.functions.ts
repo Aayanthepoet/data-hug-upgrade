@@ -523,3 +523,58 @@ function classifyMetaError(
     message: err.message ? `Meta error: ${err.message}` : `Meta error (HTTP ${status}).`,
   };
 }
+
+/**
+ * Connect LinkedIn via Lovable's gateway connector.
+ * Uses workspace-linked LinkedIn credentials — no per-user OAuth dev app needed.
+ * Fetches the connected member's profile and upserts a social_accounts row.
+ */
+export const connectLinkedInViaGateway = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const linkedinKey = process.env.LINKEDIN_API_KEY;
+    if (!lovableKey || !linkedinKey) {
+      return { ok: false, error: "LinkedIn connector is not linked to this project." };
+    }
+
+    const res = await fetch("https://connector-gateway.lovable.dev/linkedin/v2/userinfo", {
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": linkedinKey,
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      return { ok: false, error: `LinkedIn gateway error (${res.status}): ${body.slice(0, 200)}` };
+    }
+
+    const profile = (await res.json()) as {
+      sub: string;
+      name?: string;
+      email?: string;
+      picture?: string;
+    };
+
+    const { error } = await supabase.from("social_accounts").upsert(
+      {
+        user_id: userId,
+        platform: "linkedin" as const,
+        external_account_id: profile.sub,
+        display_name: profile.name ?? profile.email ?? "LinkedIn Member",
+        avatar_url: profile.picture ?? null,
+        access_token_enc: encryptToken("gateway"),
+        refresh_token_enc: null,
+        expires_at: null,
+        scopes: ["openid", "profile", "email", "w_member_social"],
+        status: "active" as const,
+        metadata: { via: "lovable_gateway" },
+      },
+      { onConflict: "user_id,platform,external_account_id" },
+    );
+
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, display_name: profile.name ?? "LinkedIn" };
+  });
