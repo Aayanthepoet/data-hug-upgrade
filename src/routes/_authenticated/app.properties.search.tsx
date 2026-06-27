@@ -305,10 +305,24 @@ function PropertySearchPage() {
             <tbody>
               {filteredResults.map((r) => {
                 const label = TYPE_OPTIONS.find((t) => t.value === r.distressType)?.label ?? r.distressType;
+                const isOpening = importOne.isPending && importOne.variables?.sourceRecordId === r.sourceRecordId;
                 return (
-                  <tr key={r.sourceRecordId} className="border-t border-border align-top">
+                  <tr
+                    key={r.sourceRecordId}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openRow(r)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openRow(r);
+                      }
+                    }}
+                    aria-label={`Open ${r.address}`}
+                    className="border-t border-border align-top cursor-pointer hover:bg-[var(--w05)] focus:bg-[var(--w05)] focus:outline-none transition-colors"
+                  >
                     <td className="px-4 py-3">
-                      <div className="font-medium">{r.address}</div>
+                      <div className="font-medium text-cyan hover:underline">{r.address}</div>
                       <div className="text-xs text-[var(--w55)]">
                         {[r.city, r.state, r.zip].filter(Boolean).join(", ")}
                       </div>
@@ -323,32 +337,18 @@ function PropertySearchPage() {
                         ? <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40">Absentee</Badge>
                         : <Badge variant="outline">Owner-occupied</Badge>}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="inline-flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => importOne.mutate(r)}
-                          disabled={importOne.isPending}
-                        >
-                          <Plus className="h-3.5 w-3.5 mr-1" />
-                          Save to pipeline
-                        </Button>
-                        <Button asChild size="sm" variant="ghost">
-                          <Link
-                            to="/app/properties/lookup"
-                            search={{
-                              line1: r.address ?? "",
-                              city: r.city ?? "",
-                              state: r.state ?? "",
-                              zip: r.zip ?? "",
-                            }}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                            Details
-                          </Link>
-                        </Button>
-                      </div>
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => importOne.mutate(r)}
+                        disabled={importOne.isPending}
+                      >
+                        {isOpening
+                          ? <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" />
+                          : <Plus className="h-3.5 w-3.5 mr-1" />}
+                        Save to pipeline
+                      </Button>
                     </td>
                   </tr>
                 );
