@@ -1,7 +1,7 @@
 // Routes a distressed-property search to the best available provider:
 //   - NYC boroughs → NYCOpenDataProvider (free public Socrata APIs)
 //   - Philadelphia → PhillyCartoProvider (free public Carto SQL API)
-//   - Everywhere else → MockProvider (deterministic synthetic data)
+//   - Everywhere else → ATTOM (only when ENABLE_ATTOM=true) or empty.
 
 import type {
   DistressSearchFilters,
@@ -10,7 +10,6 @@ import type {
 } from "./provider";
 import { isNYC, NYCOpenDataProvider } from "./nyc-provider.server";
 import { isPhilly, PhillyCartoProvider } from "./philly-provider.server";
-import { MockProvider } from "./mock-provider.server";
 import { AttomProvider } from "./attom-provider.server";
 
 export function selectProvider(filters: DistressSearchFilters): PropertyProvider | null {
