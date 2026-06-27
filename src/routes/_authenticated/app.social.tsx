@@ -10,7 +10,7 @@ import {
   updatePostStatus,
   getMyPublicProfile,
 } from "@/lib/social.functions";
-import { disconnectSocialAccount, syncMetaAccounts } from "@/lib/social-oauth.functions";
+import { disconnectSocialAccount, syncMetaAccounts, connectLinkedInViaGateway } from "@/lib/social-oauth.functions";
 import { MetaAccountPicker } from "@/components/social/MetaAccountPicker";
 import { Button } from "@/components/ui/button";
 
@@ -36,6 +36,20 @@ function SocialHubPage() {
   const updateStatus = useServerFn(updatePostStatus);
   const disconnect = useServerFn(disconnectSocialAccount);
   const syncMeta = useServerFn(syncMetaAccounts);
+  const connectLinkedIn = useServerFn(connectLinkedInViaGateway);
+
+  const linkedInMut = useMutation({
+    mutationFn: () => connectLinkedIn(),
+    onSuccess: (res: any) => {
+      if (res?.ok) {
+        toast.success(`LinkedIn connected: ${res.display_name}`);
+        qc.invalidateQueries({ queryKey: ["my-social-accounts"] });
+      } else {
+        toast.error(res?.error ?? "LinkedIn connect failed");
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -228,6 +242,22 @@ function SocialHubPage() {
                   >
                     Choose accounts →
                   </button>
+                ) : p.id === "linkedin" ? (
+                  <button
+                    onClick={() => linkedInMut.mutate()}
+                    disabled={linkedInMut.isPending}
+                    className="text-xs text-cyan hover:underline disabled:opacity-50"
+                  >
+                    {linkedInMut.isPending ? "Connecting…" : "Connect LinkedIn →"}
+                  </button>
+                ) : p.id === "youtube" ? (
+                  <a href="/api/public/oauth/youtube/start" className="text-xs text-cyan hover:underline">
+                    Connect YouTube →
+                  </a>
+                ) : p.id === "x" ? (
+                  <a href="/api/public/oauth/x/start" className="text-xs text-cyan hover:underline">
+                    Connect X →
+                  </a>
                 ) : (
                   <span className="text-xs text-[var(--w35)]">Coming soon</span>
                 )}

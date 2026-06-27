@@ -76,6 +76,8 @@ import { Route as AuthenticatedAppContractsContractIdRouteImport } from './route
 import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
 import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
 import { Route as AuthenticatedAppAdminContractsRouteImport } from './routes/_authenticated/app.admin.contracts'
+import { Route as ApiPublicOauthYoutubeStartRouteImport } from './routes/api/public/oauth/youtube.start'
+import { Route as ApiPublicOauthXStartRouteImport } from './routes/api/public/oauth/x.start'
 import { Route as ApiPublicOauthMetaStartRouteImport } from './routes/api/public/oauth/meta.start'
 import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta.callback'
 import { Route as AuthenticatedAppAdminContractsContractIdRouteImport } from './routes/_authenticated/app.admin.contracts.$contractId'
@@ -446,6 +448,17 @@ const AuthenticatedAppAdminContractsRoute =
     path: '/admin/contracts',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiPublicOauthYoutubeStartRoute =
+  ApiPublicOauthYoutubeStartRouteImport.update({
+    id: '/api/public/oauth/youtube/start',
+    path: '/api/public/oauth/youtube/start',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicOauthXStartRoute = ApiPublicOauthXStartRouteImport.update({
+  id: '/api/public/oauth/x/start',
+  path: '/api/public/oauth/x/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOauthMetaStartRoute = ApiPublicOauthMetaStartRouteImport.update({
   id: '/api/public/oauth/meta/start',
   path: '/api/public/oauth/meta/start',
@@ -534,6 +547,8 @@ export interface FileRoutesByFullPath {
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
+  '/api/public/oauth/x/start': typeof ApiPublicOauthXStartRoute
+  '/api/public/oauth/youtube/start': typeof ApiPublicOauthYoutubeStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -604,6 +619,8 @@ export interface FileRoutesByTo {
   '/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
+  '/api/public/oauth/x/start': typeof ApiPublicOauthXStartRoute
+  '/api/public/oauth/youtube/start': typeof ApiPublicOauthYoutubeStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -677,6 +694,8 @@ export interface FileRoutesById {
   '/_authenticated/app/admin/contracts/$contractId': typeof AuthenticatedAppAdminContractsContractIdRoute
   '/api/public/oauth/meta/callback': typeof ApiPublicOauthMetaCallbackRoute
   '/api/public/oauth/meta/start': typeof ApiPublicOauthMetaStartRoute
+  '/api/public/oauth/x/start': typeof ApiPublicOauthXStartRoute
+  '/api/public/oauth/youtube/start': typeof ApiPublicOauthYoutubeStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -750,6 +769,8 @@ export interface FileRouteTypes {
     | '/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
+    | '/api/public/oauth/x/start'
+    | '/api/public/oauth/youtube/start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -820,6 +841,8 @@ export interface FileRouteTypes {
     | '/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
+    | '/api/public/oauth/x/start'
+    | '/api/public/oauth/youtube/start'
   id:
     | '__root__'
     | '/'
@@ -892,6 +915,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin/contracts/$contractId'
     | '/api/public/oauth/meta/callback'
     | '/api/public/oauth/meta/start'
+    | '/api/public/oauth/x/start'
+    | '/api/public/oauth/youtube/start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -925,6 +950,8 @@ export interface RootRouteChildren {
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
   ApiPublicOauthMetaCallbackRoute: typeof ApiPublicOauthMetaCallbackRoute
   ApiPublicOauthMetaStartRoute: typeof ApiPublicOauthMetaStartRoute
+  ApiPublicOauthXStartRoute: typeof ApiPublicOauthXStartRoute
+  ApiPublicOauthYoutubeStartRoute: typeof ApiPublicOauthYoutubeStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1398,6 +1425,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/oauth/youtube/start': {
+      id: '/api/public/oauth/youtube/start'
+      path: '/api/public/oauth/youtube/start'
+      fullPath: '/api/public/oauth/youtube/start'
+      preLoaderRoute: typeof ApiPublicOauthYoutubeStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/oauth/x/start': {
+      id: '/api/public/oauth/x/start'
+      path: '/api/public/oauth/x/start'
+      fullPath: '/api/public/oauth/x/start'
+      preLoaderRoute: typeof ApiPublicOauthXStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/oauth/meta/start': {
       id: '/api/public/oauth/meta/start'
       path: '/api/public/oauth/meta/start'
@@ -1687,6 +1728,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
   ApiPublicOauthMetaCallbackRoute: ApiPublicOauthMetaCallbackRoute,
   ApiPublicOauthMetaStartRoute: ApiPublicOauthMetaStartRoute,
+  ApiPublicOauthXStartRoute: ApiPublicOauthXStartRoute,
+  ApiPublicOauthYoutubeStartRoute: ApiPublicOauthYoutubeStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
