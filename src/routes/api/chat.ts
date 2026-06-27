@@ -66,6 +66,11 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) return new Response("Unauthorized", { status: 401 });
 
+        // Subscription guard — 402 (no sub) / 403 (status not active/trialing). Admins pass.
+        const { requireActiveSubscriptionApi } = await import("@/lib/billing/require-subscription.server");
+        const subBlocked = await requireActiveSubscriptionApi(supabase, userData.user.id);
+        if (subBlocked) return subBlocked;
+
         // Cap request body to 1MB before JSON parse.
         const cl = Number(request.headers.get("content-length") ?? "0");
         if (cl > 1_000_000) return new Response("Payload too large", { status: 413 });
