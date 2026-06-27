@@ -57,70 +57,12 @@ async function soqlGet<T>(dataset: string, params: Record<string, string>): Prom
   });
 }
 
-// ----- HPD Pre-Foreclosure Notices -----
-type PreFNRow = {
-  servicer_name?: string;
-  property_address?: string;
-  unit?: string;
-  zip_code?: string;
-  borough?: string;
-  date_of_first_default?: string;
-  date_notice_received?: string;
-  number_of_units?: string;
-};
+// ----- HPD Pre-Foreclosure Notices: REMOVED -----
+// Dataset `9y3g-c5g6` was retired by NYC Open Data and has no replacement.
+// We intentionally do NOT substitute another dataset and call it foreclosure
+// data. If/when NYC publishes a real pre-foreclosure or lis-pendens feed,
+// reintroduce a fetcher here.
 
-async function fetchPreforeclosure(
-  borough: string | null,
-  zip: string | undefined,
-  limit: number,
-): Promise<DistressedPropertyRecord[]> {
-  const where: string[] = [];
-  if (borough) where.push(`upper(borough) = '${borough}'`);
-  if (zip) where.push(`zip_code = '${zip}'`);
-
-  const rows = await soqlGet<PreFNRow>("9y3g-c5g6", {
-    $select: "property_address, zip_code, borough, date_notice_received, number_of_units, servicer_name",
-    $where: where.join(" AND ") || "property_address IS NOT NULL",
-    $order: "date_notice_received DESC",
-    $limit: String(Math.min(limit, 200)),
-  });
-
-  return rows
-    .filter((r) => r.property_address)
-    .map((r, i) => {
-      const dom = r.date_notice_received
-        ? Math.max(0, Math.floor((Date.now() - Date.parse(r.date_notice_received)) / 86_400_000))
-        : null;
-      return {
-        sourceRecordId: `nyc-prefn-${(r.borough ?? "")}-${r.zip_code ?? ""}-${r.property_address}-${r.date_notice_received ?? i}`,
-        address: r.property_address!,
-        city: titleCase(r.borough ?? "New York"),
-        state: "NY",
-        zip: r.zip_code ?? null,
-        county: r.borough ? boroughToCounty(r.borough) : null,
-        propertyType: Number(r.number_of_units ?? 1) > 1 ? "multi_family" : "single_family",
-        beds: null,
-        baths: null,
-        sqft: null,
-        yearBuilt: null,
-        estimatedValue: null,
-        equity: null,
-        listPrice: null,
-        listDate: r.date_notice_received?.slice(0, 10) ?? null,
-        daysOnMarket: dom,
-        auctionDate: null,
-        taxOwed: null,
-        lienAmount: null,
-        distressType: "preforeclosure" as DistressType,
-        listingStatus: "off_market" as const,
-        ownerName: r.servicer_name ?? null,
-        isAbsentee: false,
-        isVacant: false,
-        lat: null,
-        lng: null,
-      } satisfies DistressedPropertyRecord;
-    });
-}
 
 // ----- PLUTO (absentee + general property records) -----
 type PlutoRow = {
