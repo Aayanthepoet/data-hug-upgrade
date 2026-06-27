@@ -53,7 +53,7 @@ const PRICE_CHIPS: { value: PriceFilter; label: string }[] = [
   { value: "o1m", label: "$1M+" },
 ];
 
-export const Route = createFileRoute("/_authenticated/app/properties")({
+export const Route = createFileRoute("/_authenticated/app/properties/")({
   head: () => ({ meta: [{ title: "Properties — PropAI" }] }),
   component: PropertiesPage,
 });
