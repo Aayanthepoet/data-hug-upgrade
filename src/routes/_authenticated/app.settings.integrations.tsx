@@ -2,11 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle } from "lucide-react";
+import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle, Database, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getAttomStatus, testAttomConnection } from "@/lib/distress/attom-status.functions";
 import { backfillLocations, type BackfillResult } from "@/lib/location-backfill.functions";
+import { runDistressSyncNow, getRecentSyncRuns, type SyncRunRow } from "@/lib/distress/sync.functions";
 
 export const Route = createFileRoute("/_authenticated/app/settings/integrations")({
   head: () => ({ meta: [{ title: "Integrations — PropAI" }] }),
