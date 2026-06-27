@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 
 export type MarketIntelCitation = { url: string; title?: string };
 export type MarketIntelResult = {

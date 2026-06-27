@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 import type { DistressType } from "./provider";
 
 const distressTypeEnum = z.enum([
