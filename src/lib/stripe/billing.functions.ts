@@ -31,6 +31,93 @@ export const getMySubscription = createServerFn({ method: "GET" })
     };
   });
 
+/**
+ * Reconcile the caller's Supabase subscription row from Stripe (source of truth).
+ * Looks up the customer, fetches the most recent subscription, and upserts the row.
+ * Safe to call on /billing and /app loads — short-circuits if no customer exists.
+ */
+export const reconcileMySubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId, claims } = context;
+    const { getStripe } = await import("./stripe.server");
+    const stripe = getStripe();
+
+    const { data: existing } = await supabase
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    let customerId = existing?.stripe_customer_id ?? null;
+
+    if (!customerId) {
+      try {
+        const search = await stripe.customers.search({
+          query: `metadata['supabase_user_id']:'${userId}'`,
+          limit: 1,
+        });
+        customerId = search.data[0]?.id ?? null;
+      } catch {
+        // search may be unavailable; fall through
+      }
+    }
+    if (!customerId) {
+      const email = (claims as { email?: string }).email;
+      if (email) {
+        const byEmail = await stripe.customers.list({ email, limit: 1 });
+        customerId = byEmail.data[0]?.id ?? null;
+      }
+    }
+
+    if (!customerId) return { reconciled: false as const, reason: "no_customer" as const };
+
+    const subs = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "all",
+      limit: 1,
+    });
+    const sub = subs.data[0];
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (!sub) {
+      await supabaseAdmin.from("subscriptions").upsert(
+        {
+          user_id: userId,
+          stripe_customer_id: customerId,
+          stripe_subscription_id: null,
+          status: null,
+          price_id: null,
+          current_period_end: null,
+          cancel_at_period_end: false,
+        },
+        { onConflict: "user_id" },
+      );
+      return { reconciled: true as const, status: null as string | null };
+    }
+
+    const item = sub.items.data[0];
+    const periodEnd =
+      (item as unknown as { current_period_end?: number } | undefined)?.current_period_end ??
+      (sub as unknown as { current_period_end?: number }).current_period_end;
+
+    await supabaseAdmin.from("subscriptions").upsert(
+      {
+        user_id: userId,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: sub.id,
+        status: sub.status,
+        price_id: item?.price.id ?? null,
+        current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+        cancel_at_period_end: sub.cancel_at_period_end,
+      },
+      { onConflict: "user_id" },
+    );
+
+    return { reconciled: true as const, status: sub.status };
+  });
+
 /** Creates (or reuses) a Stripe Customer and an embedded Checkout Session for the subscription. */
 export const createEmbeddedCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
