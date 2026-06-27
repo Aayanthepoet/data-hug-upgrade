@@ -159,6 +159,15 @@ export const createEmbeddedCheckoutSession = createServerFn({ method: "POST" })
       .maybeSingle();
 
     let customerId = existing?.stripe_customer_id ?? null;
+    if (customerId) {
+      try {
+        const cust = await stripe.customers.retrieve(customerId);
+        if ((cust as { deleted?: boolean }).deleted) customerId = null;
+      } catch (e) {
+        if (/No such customer/i.test((e as { message?: string })?.message ?? "")) customerId = null;
+        else throw e;
+      }
+    }
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: email ?? undefined,
