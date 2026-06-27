@@ -1,359 +1,207 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   searchDistressedProperties,
   importDistressedProperties,
-  saveSearch,
   type DistressFilters,
 } from "@/lib/distress/search.functions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search, Save, Download, RefreshCw, Map as MapIcon, List } from "lucide-react";
-import { getCountiesForState } from "@/lib/distress/counties";
-import type { MapPin } from "@/components/app/DistressMap";
-
-// Leaflet imports CSS + accesses window — only load client-side.
-const DistressMap = lazy(() =>
-  import("@/components/app/DistressMap").then((m) => ({ default: m.DistressMap })),
-);
+import { Search, RefreshCw, MapPin, Plus, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/properties/search")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-  }),
-  head: () => ({ meta: [{ title: "Find Distressed Properties — PropAI" }] }),
-  component: PropertySearch,
+  head: () => ({ meta: [{ title: "Property Search — PropAI" }] }),
+  component: PropertySearchPage,
 });
 
-type DistressType = NonNullable<DistressFilters["distressTypes"]>[number];
+// Markets we actually have wired up via free public APIs.
+type Market =
+  | { id: "nyc"; label: "New York City"; state: "NY" }
+  | { id: "philly"; label: "Philadelphia"; state: "PA" };
 
-const TYPE_OPTIONS: { value: DistressType; label: string }[] = [
-  { value: "reo", label: "REO / Bank-owned" },
-  { value: "preforeclosure", label: "Pre-foreclosure / NOD" },
-  { value: "auction", label: "Auction scheduled" },
-  { value: "tax_lien", label: "Tax lien" },
-  { value: "tax_delinquent", label: "Tax delinquent" },
-  { value: "fsbo_stale", label: "FSBO 60+ days" },
-  { value: "vacant", label: "Vacant" },
-  { value: "absentee", label: "Absentee owner" },
+const MARKETS: Market[] = [
+  { id: "nyc", label: "New York City", state: "NY" },
+  { id: "philly", label: "Philadelphia", state: "PA" },
 ];
 
-const FEATURED_STATES = ["NY", "NJ", "CT", "PA"];
-const OTHER_STATES = [
-  "AL","AK","AZ","AR","CA","CO","DE","FL","GA","HI","ID","IL","IN","IA","KS",
-  "KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NM","NC",
-  "ND","OH","OK","OR","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
+const NYC_BOROUGHS: { value: string; label: string }[] = [
+  { value: "New York (Manhattan)", label: "Manhattan" },
+  { value: "Kings (Brooklyn)", label: "Brooklyn" },
+  { value: "Queens", label: "Queens" },
+  { value: "Bronx", label: "Bronx" },
+  { value: "Richmond (Staten Island)", label: "Staten Island" },
 ];
 
-function PropertySearch() {
-  const qc = useQueryClient();
+// Only distress types we can actually answer from NYC Socrata / Philly Carto.
+// pre-foreclosure -> NYC HPD dataset
+// tax delinquent  -> Philly real_estate_tax_balances (the closest thing to "tax lien")
+// absentee owner  -> both providers infer this from owner mailing address
+type SupportedType = "preforeclosure" | "tax_delinquent" | "absentee";
+
+const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"][] }[] = [
+  { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"] },
+  { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"] },
+  { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"] },
+];
+
+type ResultRow = Awaited<ReturnType<typeof searchDistressedProperties>>["records"][number];
+
+function fmtMoney(n: number | null | undefined): string {
+  if (n == null) return "—";
+  return `$${Math.round(n).toLocaleString()}`;
+}
+
+function PropertySearchPage() {
+  const navigate = useNavigate();
   const search = useServerFn(searchDistressedProperties);
   const importFn = useServerFn(importDistressedProperties);
-  const saveFn = useServerFn(saveSearch);
 
-  const [state, setState] = useState("NY");
-  const [county, setCounty] = useState<string>("");
+  const [marketId, setMarketId] = useState<Market["id"]>("nyc");
+  const market = MARKETS.find((m) => m.id === marketId)!;
+  const [borough, setBorough] = useState<string>("");
   const [zip, setZip] = useState("");
-  const [city, setCity] = useState("");
-  const [types, setTypes] = useState<DistressType[]>(["preforeclosure","reo","tax_lien","fsbo_stale"]);
-  const [minEquity, setMinEquity] = useState("");
-  const [minDom, setMinDom] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [searchName, setSearchName] = useState("");
-  const [view, setView] = useState<"list" | "map">("list");
-  const [quickQuery, setQuickQuery] = useState("");
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [minValue, setMinValue] = useState("");
+  const [maxValue, setMaxValue] = useState("");
+  const [types, setTypes] = useState<SupportedType[]>(["preforeclosure", "tax_delinquent", "absentee"]);
+  const [absenteeOnly, setAbsenteeOnly] = useState(false);
 
-  const US_STATES = new Set([...FEATURED_STATES, ...OTHER_STATES]);
+  const availableTypes = useMemo(
+    () => TYPE_OPTIONS.filter((t) => t.markets.includes(marketId)),
+    [marketId],
+  );
 
-  /** Validate the structured filter fields (state/zip/city). Returns an error message or null. */
-  const validateFilters = (f: { state?: string; zip?: string; city?: string }): string | null => {
-    if (f.state && !US_STATES.has(f.state.toUpperCase())) {
-      return `"${f.state}" isn't a valid US state code. Use a 2-letter code like NY or TX.`;
-    }
-    if (f.zip && !/^\d{5}(-\d{4})?$/.test(f.zip.trim())) {
-      return `ZIP "${f.zip}" is invalid. Use a 5-digit ZIP (e.g. 10001) or ZIP+4.`;
-    }
-    if (f.city && !/^[A-Za-z][A-Za-z .'\-]{1,59}$/.test(f.city.trim())) {
-      return `City "${f.city}" looks invalid. Use letters, spaces, hyphens, or apostrophes only.`;
-    }
-    return null;
-  };
-
-  /** Validate a free-text quick-search query. Returns an error message or null. */
-  const validateQuickQuery = (q: string): string | null => {
-    if (!q) return null;
-    if (q.length > 120) return "Search is too long — keep it under 120 characters.";
-    if (!/^[A-Za-z0-9 ,.'\-#]+$/.test(q)) {
-      return "Search contains unsupported characters. Use letters, numbers, spaces, commas, periods, hyphens.";
-    }
-    if (!/[A-Za-z0-9]/.test(q)) return "Enter an address, city, or 5-digit ZIP.";
-    const zipMatch = q.match(/\b(\d{5})\b/);
-    const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
-    if (stateMatch && !US_STATES.has(stateMatch[1].toUpperCase())) {
-      return `"${stateMatch[1].toUpperCase()}" isn't a valid US state code.`;
-    }
-    if (!zipMatch && !stateMatch && q.replace(/[^A-Za-z]/g, "").length < 2) {
-      return "Enter a city, a 5-digit ZIP, or include a state like \"Brooklyn, NY\".";
-    }
-    return null;
-  };
-
-  const { q: incomingQ } = Route.useSearch();
-  useEffect(() => {
-    if (incomingQ && incomingQ.trim()) {
-      setQuickQuery(incomingQ);
-      // defer to allow state update
-      setTimeout(() => runQuickSearch(), 0);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incomingQ]);
-
-  const runQuickSearch = () => {
-    const q = quickQuery.trim();
-    const quickErr = validateQuickQuery(q);
-    if (quickErr) { setValidationError(quickErr); return; }
-    const base = filters();
-    if (!q) {
-      const err = validateFilters(base);
-      if (err) { setValidationError(err); return; }
-      setValidationError(null);
-      runMutation.mutate(undefined);
-      return;
-    }
-    const zipMatch = q.match(/\b(\d{5})\b/);
-    const stateMatch = q.match(/,\s*([A-Za-z]{2})\b/);
-    let cityPart = q.replace(/\b\d{5}\b/g, "").replace(/,\s*[A-Za-z]{2}\b/, "").trim().replace(/,$/, "").trim();
-    const override: DistressFilters = {
-      ...base,
-      zip: zipMatch ? zipMatch[1] : undefined,
-      city: cityPart || undefined,
-      state: stateMatch ? stateMatch[1].toUpperCase() : base.state,
-      county: undefined,
+  const buildFilters = (): DistressFilters => {
+    // Only send distress types this market supports.
+    const activeTypes = types.filter((t) => availableTypes.some((a) => a.value === t));
+    return {
+      state: market.state,
+      county: marketId === "nyc" ? (borough || undefined) : "Philadelphia",
+      city: marketId === "philly" ? "Philadelphia" : undefined,
+      zip: zip.trim() || undefined,
+      distressTypes: activeTypes.length ? activeTypes : undefined,
+      minListPrice: minValue ? Number(minValue) : undefined,
+      maxListPrice: maxValue ? Number(maxValue) : undefined,
+      limit: 50,
     };
-    const err = validateFilters(override);
-    if (err) { setValidationError(err); return; }
-    setValidationError(null);
-    if (override.state) setState(override.state);
-    setCity(override.city ?? "");
-    setZip(override.zip ?? "");
-    setCounty("");
-    runMutation.mutate(override);
-  };
-
-
-  const counties = getCountiesForState(state);
-  const activeCounty = counties.find((c) => c.name === county);
-  const zipSuggestions = activeCounty?.zips ?? [];
-
-  const filters = (): DistressFilters => ({
-    state: state || undefined,
-    county: county || undefined,
-    zip: zip.trim() || undefined,
-    city: city.trim() || undefined,
-    distressTypes: types.length ? types : undefined,
-    minEquity: minEquity ? Number(minEquity) : undefined,
-    minDaysOnMarket: minDom ? Number(minDom) : undefined,
-    minListPrice: minPrice ? Number(minPrice) : undefined,
-    maxListPrice: maxPrice ? Number(maxPrice) : undefined,
-    limit: 50,
-  });
-
-  const applyFilters = (f: DistressFilters) => {
-    setState(f.state ?? "NY");
-    setCounty(f.county ?? "");
-    setCity(f.city ?? "");
-    setZip(f.zip ?? "");
-    setTypes(f.distressTypes ?? []);
-    setMinEquity(f.minEquity?.toString() ?? "");
-    setMinDom(f.minDaysOnMarket?.toString() ?? "");
-    setMinPrice(f.minListPrice?.toString() ?? "");
-    setMaxPrice(f.maxListPrice?.toString() ?? "");
   };
 
   const runMutation = useMutation({
-    mutationFn: (override?: DistressFilters) => search({ data: override ?? filters() }),
+    mutationFn: () => search({ data: buildFilters() }),
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const importMutation = useMutation({
-    mutationFn: async () => {
-      const records = runMutation.data?.records.filter((r) => selected.has(r.sourceRecordId)) ?? [];
-      if (!records.length) throw new Error("Select at least one property");
-      return importFn({ data: { records } });
-    },
-    onSuccess: (r) => {
-      toast.success(`Imported ${r.imported} properties to your workspace`);
-      setSelected(new Set());
-      qc.invalidateQueries({ queryKey: ["properties"] });
+  const importOne = useMutation({
+    mutationFn: async (r: ResultRow) => importFn({ data: { records: [r] } }),
+    onSuccess: (res) => {
+      const id = res.ids?.[0];
+      toast.success("Saved to your workspace");
+      if (id) navigate({ to: "/app/properties/$propertyId", params: { propertyId: id } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const saveMutation = useMutation({
-    mutationFn: () => {
-      if (!searchName.trim()) throw new Error("Name your search first");
-      return saveFn({ data: { name: searchName.trim(), filters: filters() } });
-    },
-    onSuccess: () => {
-      toast.success("Search saved");
-      setSearchName("");
-      qc.invalidateQueries({ queryKey: ["saved-searches"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  const toggleType = (t: SupportedType) =>
+    setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
-  const savedQuery = useQuery({
-    queryKey: ["saved-searches"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("saved_searches")
-        .select("id, name, filters, last_run_at, created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const toggleType = (t: DistressType) => {
-    setTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
-  };
-
-  const results = runMutation.data?.records ?? [];
-  const providerName = runMutation.data?.provider;
+  const results = (runMutation.data?.records ?? []) as ResultRow[];
+  const filteredResults = absenteeOnly ? results.filter((r) => r.isAbsentee) : results;
   const usedFallback = runMutation.data?.usedFallback;
-  const allSelected = results.length > 0 && results.every((r) => selected.has(r.sourceRecordId));
-  const toggleAll = () => {
-    if (allSelected) setSelected(new Set());
-    else setSelected(new Set(results.map((r) => r.sourceRecordId)));
-  };
 
   return (
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-wider text-[var(--w55)]">Properties</p>
         <h1 className="text-3xl font-bold mt-1">
-          Find <span className="h-italic">distressed</span> properties
+          Property <span className="h-italic">search</span>
         </h1>
         <p className="text-sm text-[var(--w55)] mt-2">
-          Search REO, pre-foreclosure, tax-lien, and stale FSBO listings. Save searches, import to your workspace, and add to lead lists.
+          Search distressed properties from free public data.
         </p>
         <p className="text-xs text-[var(--w55)] mt-2">
-          Currently using <Badge variant="outline">mock data</Badge> — swap in a paid provider (ATTOM / BatchData) without changing this UI.
+          Coverage: <Badge variant="outline">NYC</Badge> &amp; <Badge variant="outline">Philadelphia</Badge>. More markets coming soon.
         </p>
       </div>
-
-      {/* Quick search bar */}
-      <div className="border border-border rounded-lg p-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-        <Search className="h-4 w-4 text-[var(--w55)] ml-1 hidden sm:block" />
-        <Input
-          value={quickQuery}
-          onChange={(e) => setQuickQuery(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runQuickSearch(); } }}
-          placeholder="Search by address, city, or ZIP — e.g. 10001 or Brooklyn, NY"
-          className="flex-1 border-0 shadow-none focus-visible:ring-0 text-base"
-        />
-        <Button onClick={runQuickSearch} disabled={runMutation.isPending}>
-          {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
-          Search
-        </Button>
-      </div>
-
-      {validationError && (
-        <div
-          role="alert"
-          className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm flex items-start gap-3"
-        >
-          <div className="flex-1">
-            <div className="font-medium text-amber-300">Check your search</div>
-            <div className="text-xs text-[var(--w55)] mt-1">{validationError}</div>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => setValidationError(null)}>
-            Dismiss
-          </Button>
-        </div>
-      )}
-
-
 
       {/* Filters */}
       <div className="border border-border rounded-lg p-4 space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <Label>State</Label>
+            <Label>Market</Label>
             <Select
-              value={state}
-              onValueChange={(v) => { setState(v); setCounty(""); setZip(""); }}
+              value={marketId}
+              onValueChange={(v) => {
+                setMarketId(v as Market["id"]);
+                setBorough("");
+                setZip("");
+              }}
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-80">
-                <div className="px-2 py-1 text-xs uppercase tracking-wider text-[var(--w55)]">Featured markets</div>
-                {FEATURED_STATES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s} {s === "PA" ? "— incl. Philadelphia" : s === "NY" ? "— incl. NYC" : ""}
-                  </SelectItem>
+              <SelectContent>
+                {MARKETS.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
                 ))}
-                <div className="px-2 py-1 mt-1 text-xs uppercase tracking-wider text-[var(--w55)] border-t border-border">All states</div>
-                {OTHER_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>County</Label>
-            {counties.length > 0 ? (
-              <Select
-                value={county || "__all"}
-                onValueChange={(v) => { setCounty(v === "__all" ? "" : v); setZip(""); }}
-              >
-                <SelectTrigger><SelectValue placeholder="All counties" /></SelectTrigger>
-                <SelectContent className="max-h-80">
-                  <SelectItem value="__all">All counties</SelectItem>
-                  {counties.map((c) => (
-                    <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+
+          {marketId === "nyc" && (
+            <div>
+              <Label>Borough</Label>
+              <Select value={borough || "__all"} onValueChange={(v) => setBorough(v === "__all" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="All boroughs" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">All boroughs</SelectItem>
+                  {NYC_BOROUGHS.map((b) => (
+                    <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            ) : (
-              <Input value={county} onChange={(e) => setCounty(e.target.value)} placeholder="e.g. Harris" />
-            )}
-          </div>
-          <div><Label>City</Label><Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="optional" /></div>
+            </div>
+          )}
+
           <div>
-            <Label>ZIP {zipSuggestions.length > 0 && <span className="text-[var(--w55)] text-xs">(suggestions)</span>}</Label>
+            <Label>ZIP (optional)</Label>
             <Input
               value={zip}
               onChange={(e) => setZip(e.target.value)}
-              placeholder="optional"
-              list="zip-suggestions"
+              placeholder={marketId === "nyc" ? "e.g. 10001" : "e.g. 19121"}
+              inputMode="numeric"
             />
-            {zipSuggestions.length > 0 && (
-              <datalist id="zip-suggestions">
-                {zipSuggestions.map((z) => <option key={z} value={z} />)}
-              </datalist>
-            )}
           </div>
-          <div><Label>Min equity ($)</Label><Input type="number" value={minEquity} onChange={(e) => setMinEquity(e.target.value)} placeholder="50000" /></div>
-          <div><Label>Min days on market</Label><Input type="number" value={minDom} onChange={(e) => setMinDom(e.target.value)} placeholder="60" /></div>
-          <div><Label>Min price ($)</Label><Input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} /></div>
-          <div><Label>Max price ($)</Label><Input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} /></div>
+
+          <div>
+            <Label>Min assessed value ($)</Label>
+            <Input
+              type="number"
+              value={minValue}
+              onChange={(e) => setMinValue(e.target.value)}
+              placeholder="100000"
+            />
+          </div>
+
+          <div>
+            <Label>Max assessed value ($)</Label>
+            <Input
+              type="number"
+              value={maxValue}
+              onChange={(e) => setMaxValue(e.target.value)}
+              placeholder="2000000"
+            />
+          </div>
         </div>
 
         <div>
-          <Label>Distress types</Label>
+          <Label>Distress type</Label>
           <div className="flex flex-wrap gap-2 mt-2">
-            {TYPE_OPTIONS.map((o) => (
+            {availableTypes.map((o) => (
               <button
                 key={o.value}
                 type="button"
@@ -368,259 +216,137 @@ function PropertySearch() {
               </button>
             ))}
           </div>
+          <p className="text-xs text-[var(--w55)] mt-2">
+            Only filters supported by the current data sources are shown.
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-end gap-2 pt-2">
-          <Button
-            onClick={() => {
-              const err = validateFilters(filters());
-              if (err) { setValidationError(err); return; }
-              setValidationError(null);
-              runMutation.mutate(undefined);
-            }}
-            disabled={runMutation.isPending}
-          >
-            {runMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+        <div className="flex items-center gap-2">
+          <input
+            id="absentee-only"
+            type="checkbox"
+            checked={absenteeOnly}
+            onChange={(e) => setAbsenteeOnly(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <Label htmlFor="absentee-only" className="cursor-pointer">
+            Owner type: absentee / out-of-state only
+          </Label>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2">
+          <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>
+            {runMutation.isPending
+              ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              : <Search className="h-4 w-4 mr-2" />}
             Search
           </Button>
-
-          <div className="flex items-end gap-2 ml-auto">
-            <div>
-              <Label>Save this search</Label>
-              <Input value={searchName} onChange={(e) => setSearchName(e.target.value)} placeholder="e.g. Houston preforeclosures" className="w-56" />
-            </div>
-            <Button variant="outline" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-              <Save className="h-4 w-4 mr-2" />Save
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Results */}
-      {runMutation.isPending && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="border border-cyan/30 bg-cyan/5 rounded-lg p-4 text-sm flex items-center gap-3"
-        >
-          <RefreshCw className="h-4 w-4 animate-spin text-cyan" />
-          <div>
-            <div className="font-medium">Searching properties…</div>
-            <div className="text-xs text-[var(--w55)]">
-              Querying distress sources{state ? ` in ${state}` : ""}
-              {city ? `, ${city}` : ""}{zip ? ` ${zip}` : ""}. This usually takes a few seconds.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {runMutation.isError && (
-        <div
-          role="alert"
-          className="border border-destructive/40 bg-destructive/10 rounded-lg p-4 text-sm flex items-start gap-3"
-        >
-          <div className="flex-1">
-            <div className="font-medium text-destructive">We couldn't run that search</div>
-            <div className="text-xs text-[var(--w55)] mt-1">
-              {(runMutation.error as Error)?.message || "Something went wrong reaching the property data source."} Check your filters and try again, or widen the location.
-            </div>
-          </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => runMutation.mutate(undefined)}
-            disabled={runMutation.isPending}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      )}
-
-      {usedFallback && results.length > 0 && (
-        <div
-          role="note"
-          className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm flex items-start gap-3"
-        >
-          <div className="flex-1">
-            <div className="font-medium text-amber-300">Showing sample data</div>
-            <div className="text-xs text-[var(--w55)] mt-1">
-              The live property data source returned no results for these filters{providerName ? ` (provider: ${providerName})` : ""}.
-              The rows below are illustrative samples, not real listings — don't import them as live leads.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {runMutation.isSuccess && results.length === 0 && (
-        <div className="border border-border rounded-lg p-6 text-sm text-[var(--w55)]">
-          No properties matched those filters. Try widening the location, price, equity, or distress-type filters.
-        </div>
-      )}
-
-      {results.length > 0 && (
-        <div className="border border-border rounded-lg">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div className="text-sm">
-              <span className="font-medium">{results.length}</span>
-              <span className="text-[var(--w55)]"> properties found</span>
-              {providerName && providerName !== "mock" && !usedFallback && (
-                <span className="ml-3 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                  Live · {providerName.replace("_", " ")}
-                </span>
-              )}
-              {usedFallback && (
-                <span className="ml-3 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  Sample data · live source returned 0
-                </span>
-              )}
-              {selected.size > 0 && <span className="text-cyan ml-3">{selected.size} selected</span>}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="inline-flex border border-border rounded-md p-0.5">
-                <button
-                  onClick={() => setView("list")}
-                  className={`px-2.5 py-1 text-xs rounded inline-flex items-center gap-1 ${view === "list" ? "bg-cyan text-black" : "text-[var(--w55)] hover:text-white"}`}
-                >
-                  <List className="h-3.5 w-3.5" /> List
-                </button>
-                <button
-                  onClick={() => setView("map")}
-                  className={`px-2.5 py-1 text-xs rounded inline-flex items-center gap-1 ${view === "map" ? "bg-cyan text-black" : "text-[var(--w55)] hover:text-white"}`}
-                >
-                  <MapIcon className="h-3.5 w-3.5" /> Map
-                </button>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => importMutation.mutate()}
-                disabled={importMutation.isPending || selected.size === 0}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Import selected
-              </Button>
-            </div>
-          </div>
-
-          {view === "map" ? (
-            <div className="p-4">
-              <Suspense fallback={<div className="h-[520px] grid place-items-center text-sm text-[var(--w55)]">Loading map…</div>}>
-                <DistressMap
-                  state={state}
-                  pins={
-                    results
-                      .filter((r) => r.lat != null && r.lng != null)
-                      .map<MapPin>((r) => ({
-                        id: r.sourceRecordId,
-                        lat: r.lat as number,
-                        lng: r.lng as number,
-                        address: r.address,
-                        city: r.city,
-                        state: r.state,
-                        zip: r.zip,
-                        county: r.county,
-                        distressType: r.distressType,
-                        estimatedValue: r.estimatedValue,
-                        equity: r.equity,
-                        listPrice: r.listPrice,
-                        daysOnMarket: r.daysOnMarket,
-                        leadScore: r.leadScore,
-                      }))
-                  }
-                />
-              </Suspense>
-              <p className="text-xs text-[var(--w55)] mt-2">
-                Coordinates available for featured Northeast markets (NY / NJ / CT / PA). Other states render in the list view.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[rgba(255,255,255,.03)] text-left text-xs uppercase tracking-wider text-[var(--w55)]">
-                  <tr>
-                    <th className="px-4 py-3"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></th>
-                    <th className="px-4 py-3">Address</th>
-                    <th className="px-4 py-3">County</th>
-                    <th className="px-4 py-3">Distress</th>
-                    <th className="px-4 py-3">Value</th>
-                    <th className="px-4 py-3">Equity</th>
-                    <th className="px-4 py-3">List $</th>
-                    <th className="px-4 py-3">DOM</th>
-                    <th className="px-4 py-3">Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((r) => (
-                    <tr key={r.sourceRecordId} className="border-t border-border hover:bg-[rgba(255,255,255,.02)]">
-                      <td className="px-4 py-3">
-                        <Checkbox
-                          checked={selected.has(r.sourceRecordId)}
-                          onCheckedChange={(c) => {
-                            setSelected((prev) => {
-                              const next = new Set(prev);
-                              if (c) next.add(r.sourceRecordId); else next.delete(r.sourceRecordId);
-                              return next;
-                            });
-                          }}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{r.address}</div>
-                        <div className="text-xs text-[var(--w55)]">{r.city}, {r.state} {r.zip}</div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-[var(--w55)]">{r.county ?? "—"}</td>
-                      <td className="px-4 py-3"><Badge variant="secondary">{r.distressType.replace("_"," ")}</Badge></td>
-                      <td className="px-4 py-3">${r.estimatedValue?.toLocaleString()}</td>
-                      <td className="px-4 py-3">${r.equity?.toLocaleString()}</td>
-                      <td className="px-4 py-3">{r.listPrice ? `$${r.listPrice.toLocaleString()}` : "—"}</td>
-                      <td className="px-4 py-3">{r.daysOnMarket ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        <span className={`font-mono ${r.leadScore >= 70 ? "text-emerald-400" : r.leadScore >= 40 ? "text-yellow-400" : "text-[var(--w55)]"}`}>
-                          {r.leadScore}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          {runMutation.data && (
+            <span className="text-xs text-[var(--w55)]">
+              {filteredResults.length} result{filteredResults.length === 1 ? "" : "s"}
+            </span>
           )}
         </div>
+      </div>
+
+      {/* Provider-fallback banner */}
+      {runMutation.data && usedFallback && (
+        <div className="border border-amber-500/40 bg-amber-500/10 rounded-lg p-3 text-sm">
+          The live <strong>{market.label}</strong> source returned no matches for these filters.
+          Try widening the value range, clearing the ZIP, or switching distress types.
+        </div>
       )}
 
-      {/* Saved searches */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Saved searches</h2>
-        {savedQuery.isLoading ? (
-          <div className="text-sm text-[var(--w55)]">Loading…</div>
-        ) : !savedQuery.data?.length ? (
-          <div className="text-sm text-[var(--w55)]">No saved searches yet.</div>
-        ) : (
-          <ul className="space-y-2">
-            {savedQuery.data.map((s) => (
-              <li key={s.id} className="border border-border rounded-lg p-3 flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{s.name}</div>
-                  <div className="text-xs text-[var(--w55)]">
-                    {JSON.stringify(s.filters)}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const f = s.filters as DistressFilters;
-                    applyFilters(f);
-                    runMutation.mutate(f);
-                  }}
-                >
-                  <Search className="h-4 w-4 mr-2" />Run
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* Errors */}
+      {runMutation.isError && (
+        <div role="alert" className="border border-destructive/40 bg-destructive/10 rounded-lg p-3 text-sm">
+          {(runMutation.error as Error).message}
+        </div>
+      )}
+
+      {/* Results */}
+      {!runMutation.data && !runMutation.isPending && (
+        <div className="border border-dashed border-border rounded-lg p-8 text-center">
+          <MapPin className="h-8 w-8 mx-auto text-[var(--w55)]" />
+          <p className="mt-3 font-medium">Search to see distressed properties</p>
+          <p className="text-sm text-[var(--w55)] mt-1">
+            Pick a market, choose distress types, and hit Search.
+          </p>
+        </div>
+      )}
+
+      {runMutation.data && filteredResults.length === 0 && !usedFallback && (
+        <div className="border border-dashed border-border rounded-lg p-8 text-center">
+          <p className="font-medium">No properties match those filters</p>
+          <p className="text-sm text-[var(--w55)] mt-1">
+            Try clearing the ZIP, widening the value range, or selecting more distress types.
+          </p>
+        </div>
+      )}
+
+      {filteredResults.length > 0 && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-[var(--w05)] text-left text-xs uppercase tracking-wider text-[var(--w55)]">
+              <tr>
+                <th className="px-4 py-3">Address</th>
+                <th className="px-4 py-3">Distress</th>
+                <th className="px-4 py-3">Assessed value</th>
+                <th className="px-4 py-3">Owner</th>
+                <th className="px-4 py-3">Occupancy</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResults.map((r) => {
+                const label = TYPE_OPTIONS.find((t) => t.value === r.distressType)?.label ?? r.distressType;
+                const lookupHref = `/app/properties/lookup?address=${encodeURIComponent(
+                  [r.address, r.city, r.state, r.zip].filter(Boolean).join(", "),
+                )}`;
+                return (
+                  <tr key={r.sourceRecordId} className="border-t border-border align-top">
+                    <td className="px-4 py-3">
+                      <div className="font-medium">{r.address}</div>
+                      <div className="text-xs text-[var(--w55)]">
+                        {[r.city, r.state, r.zip].filter(Boolean).join(", ")}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline">{label}</Badge>
+                    </td>
+                    <td className="px-4 py-3">{fmtMoney(r.estimatedValue)}</td>
+                    <td className="px-4 py-3">{r.ownerName ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      {r.isAbsentee
+                        ? <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40">Absentee</Badge>
+                        : <Badge variant="outline">Owner-occupied</Badge>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => importOne.mutate(r)}
+                          disabled={importOne.isPending}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          Save to pipeline
+                        </Button>
+                        <Button asChild size="sm" variant="ghost">
+                          <Link to={lookupHref}>
+                            <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                            Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
