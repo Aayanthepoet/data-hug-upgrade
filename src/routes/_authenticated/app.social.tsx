@@ -242,6 +242,22 @@ function SocialHubPage() {
                   >
                     Choose accounts →
                   </button>
+                ) : p.id === "linkedin" ? (
+                  <button
+                    onClick={() => linkedInMut.mutate()}
+                    disabled={linkedInMut.isPending}
+                    className="text-xs text-cyan hover:underline disabled:opacity-50"
+                  >
+                    {linkedInMut.isPending ? "Connecting…" : "Connect LinkedIn →"}
+                  </button>
+                ) : p.id === "youtube" ? (
+                  <a href="/api/public/oauth/youtube/start" className="text-xs text-cyan hover:underline">
+                    Connect YouTube →
+                  </a>
+                ) : p.id === "x" ? (
+                  <a href="/api/public/oauth/x/start" className="text-xs text-cyan hover:underline">
+                    Connect X →
+                  </a>
                 ) : (
                   <span className="text-xs text-[var(--w35)]">Coming soon</span>
                 )}
