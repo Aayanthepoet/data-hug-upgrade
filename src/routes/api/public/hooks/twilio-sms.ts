@@ -5,6 +5,10 @@
 //
 // Configure in Twilio Console → Phone Numbers → your number → Messaging
 // → "A message comes in" → Webhook → this URL (HTTP POST).
+//
+// SECURITY: every request must carry a valid X-Twilio-Signature header
+// computed with the Twilio Auth Token (TWILIO_AUTH_TOKEN). Requests with a
+// missing or invalid signature are rejected with 403.
 
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
@@ -45,6 +49,7 @@ function verifyTwilioSignature(request: Request, form: FormData, authToken: stri
     return false;
   }
 }
+
 
 export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
   server: {
