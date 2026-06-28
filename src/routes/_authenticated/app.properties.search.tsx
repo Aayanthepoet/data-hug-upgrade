@@ -229,41 +229,66 @@ function PropertySearchPage() {
           </div>
         </div>
 
-        <div>
-          <Label>Distress type</Label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {availableTypes.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                onClick={() => toggleType(o.value)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition ${
-                  types.includes(o.value)
-                    ? "bg-cyan text-black border-cyan"
-                    : "border-border text-[var(--w55)] hover:text-white"
-                }`}
-              >
-                {o.label}
-              </button>
-            ))}
+        {(["foreclosure", "owner", "signals"] as const).map((group) => {
+          const opts = availableTypes.filter((o) => o.group === group);
+          if (opts.length === 0) return null;
+          const groupLabel =
+            group === "foreclosure" ? "Foreclosure-adjacent"
+            : group === "owner" ? "Owner type"
+            : "Distress Signals (independent indicators — not foreclosure)";
+          return (
+            <div key={group}>
+              <Label>{groupLabel}</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {opts.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => toggleType(o.value)}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                      types.includes(o.value)
+                        ? "bg-cyan text-black border-cyan"
+                        : "border-border text-[var(--w55)] hover:text-white"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <p className="text-xs text-[var(--w55)]">
+          NYC signal datasets require a ZIP. Tax-lien rows have no lat/lng — geocoded on demand only.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              id="absentee-only"
+              type="checkbox"
+              checked={absenteeOnly}
+              onChange={(e) => setAbsenteeOnly(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="absentee-only" className="cursor-pointer">
+              Absentee / out-of-state only
+            </Label>
           </div>
-          <p className="text-xs text-[var(--w55)] mt-2">
-            Only filters supported by the current data sources are shown.
-          </p>
+          <div className="flex items-center gap-2">
+            <input
+              id="active-vacates-only"
+              type="checkbox"
+              checked={activeVacatesOnly}
+              onChange={(e) => setActiveVacatesOnly(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="active-vacates-only" className="cursor-pointer">
+              Active DOB vacates only
+            </Label>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            id="absentee-only"
-            type="checkbox"
-            checked={absenteeOnly}
-            onChange={(e) => setAbsenteeOnly(e.target.checked)}
-            className="h-4 w-4"
-          />
-          <Label htmlFor="absentee-only" className="cursor-pointer">
-            Owner type: absentee / out-of-state only
-          </Label>
-        </div>
 
         <div className="flex items-center gap-2 pt-2">
           <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>
