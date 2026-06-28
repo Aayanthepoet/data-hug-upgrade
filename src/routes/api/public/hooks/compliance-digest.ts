@@ -1,5 +1,5 @@
 // Weekly compliance digest hook. Called by pg_cron every Monday at 09:00 UTC.
-// Authenticated via the Supabase publishable key in the `apikey` header.
+// Authenticated via the dedicated CRON_SECRET in the `apikey` header.
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { generateAndDispatchDigest } from '@/lib/compliance/digest.server'
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/api/public/hooks/compliance-digest')({
       POST: async ({ request }) => {
         const supabaseUrl = process.env.SUPABASE_URL
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-        const expectedApiKey = process.env.SUPABASE_PUBLISHABLE_KEY
+        const expectedApiKey = process.env.CRON_SECRET
         if (!supabaseUrl || !serviceKey) {
           return Response.json({ error: 'Server misconfigured' }, { status: 500 })
         }
