@@ -24,7 +24,7 @@ BASE_URL = os.environ.get("BASE_URL", "http://localhost:8080")
 STORAGE_KEY = os.environ.get("LOVABLE_BROWSER_SUPABASE_STORAGE_KEY")
 SESSION_JSON = os.environ.get("LOVABLE_BROWSER_SUPABASE_SESSION_JSON")
 
-DETAIL_RE = re.compile(r"/app/properties/([0-9a-f-]{36})$", re.I)
+DETAIL_RE = re.compile(r"/app/properties/([0-9a-f-]{36})(?:[/?#].*)?$", re.I)
 
 
 async def main() -> int:
