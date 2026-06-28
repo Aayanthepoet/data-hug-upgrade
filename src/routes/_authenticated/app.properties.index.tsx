@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Search, MapPin, DollarSign, Home, X, SlidersHorizontal } from "lucide-react";
+import { ImportLeadsDialog } from "@/components/properties/ImportLeadsDialog";
 
 type DistressFilter = "all" | "preforeclosure" | "reo" | "auction" | "tax_lien" | "tax_delinquent" | "fsbo_stale" | "vacant" | "absentee";
 type ScoreFilter = "all" | "hot" | "warm" | "cold";
@@ -363,6 +364,7 @@ function PropertiesPage() {
                 <Search className="w-4 h-4 text-cyan" /> Find & Import Properties
               </Button>
             </Link>
+            <ImportLeadsDialog />
             {createDialog}
           </div>
         }
@@ -395,14 +397,19 @@ function PropertiesPage() {
           </div>
           <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-2">Workspace</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Link to="/app/properties/search">
             <Button variant="outline" className="border-border text-white hover:bg-[rgba(255,255,255,0.05)] flex items-center gap-2">
               <Search className="w-4 h-4 text-cyan" /> Search Properties
             </Button>
           </Link>
+          <ImportLeadsDialog />
           {createDialog}
         </div>
+      </div>
+      <div className="-mt-4 mb-4 text-xs text-[var(--w55)]">
+        Importing your own list?{" "}
+        <a href="/sample-leads.csv" download className="text-cyan underline">Download sample CSV template</a>
       </div>
 
       {/* Search + filters */}
