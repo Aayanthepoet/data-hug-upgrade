@@ -32,6 +32,10 @@ export interface DistressSearchFilters {
 
 export interface DistressedPropertyRecord {
   sourceRecordId: string;
+  /** Optional: if a wrapper provider returns rows from multiple datasets,
+   * each row can carry its own source_provider name for accurate upserts. */
+  sourceProvider?: string;
+
   address: string;
   city: string | null;
   state: string | null;
