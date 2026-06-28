@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
-import { mapRow, type TargetField } from "./mapping";
+import { mapRow, type TargetField, type MappedRow } from "./mapping";
+
+type OkRecord = Extract<MappedRow, { ok: true }>["record"];
 
 const TARGET = z.enum([
   "address","city","state","zip","owner_name","owner_mailing_address",
@@ -31,7 +33,7 @@ export const importLeadsCsv = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ImportCsvResult> => {
     const mapping = data.mapping as Partial<Record<TargetField, string>>;
     const errors: { row: number; reason: string }[] = [];
-    const valid: { record: ReturnType<typeof mapRow> extends infer R ? Extract<R, { ok: true }>["record"] : never; rowIndex: number }[] = [];
+    const valid: { record: OkRecord; rowIndex: number }[] = [];
 
     data.rows.forEach((row, idx) => {
       const m = mapRow(row, mapping);
