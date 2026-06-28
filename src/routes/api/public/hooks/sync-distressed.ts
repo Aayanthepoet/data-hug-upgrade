@@ -1,5 +1,5 @@
 // Nightly cron endpoint for the free NYC/Philly distress sync.
-// pg_cron calls this with the project's anon key in the `apikey` header.
+// pg_cron calls this with the dedicated CRON_SECRET in the `apikey` header.
 // /api/public/* bypasses auth at the edge, so we verify the apikey here.
 
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,8 +8,7 @@ export const Route = createFileRoute("/api/public/hooks/sync-distressed")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected =
-          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "";
+        const expected = process.env.CRON_SECRET;
         const provided = request.headers.get("apikey") ?? "";
         if (!expected || provided !== expected) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
