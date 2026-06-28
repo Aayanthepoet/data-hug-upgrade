@@ -7,7 +7,9 @@ import type { DistressType } from "./provider";
 const distressTypeEnum = z.enum([
   "reo", "preforeclosure", "auction", "tax_lien",
   "tax_delinquent", "fsbo_stale", "vacant", "absentee",
+  "hpd_litigation", "eviction", "vacate_order",
 ]);
+
 
 const filtersSchema = z.object({
   state: z.string().trim().toUpperCase().length(2).optional(),
