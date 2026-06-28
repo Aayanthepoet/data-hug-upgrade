@@ -2201,6 +2201,9 @@ export type Database = {
         | "vacant"
         | "absentee"
         | "none"
+        | "hpd_litigation"
+        | "eviction"
+        | "vacate_order"
       listing_status:
         | "active"
         | "pending"
@@ -2369,6 +2372,9 @@ export const Constants = {
         "vacant",
         "absentee",
         "none",
+        "hpd_litigation",
+        "eviction",
+        "vacate_order",
       ],
       listing_status: [
         "active",
