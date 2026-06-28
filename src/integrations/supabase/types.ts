@@ -2184,6 +2184,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reschedule_distress_cron_jobs: {
+        Args: { _apikey: string }
+        Returns: Json
+      }
       seed_notify_vault: {
         Args: { _secret: string; _url: string }
         Returns: undefined
