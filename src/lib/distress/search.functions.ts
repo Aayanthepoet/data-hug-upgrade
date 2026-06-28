@@ -59,8 +59,9 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
       records: records.map((r) => ({
         ...r,
         leadScore: score(r),
-        sourceProvider: usedFallback ? "mock" : provider,
+        sourceProvider: r.sourceProvider ?? (usedFallback ? "mock" : provider),
       })),
+
       provider,
       usedFallback,
     };
