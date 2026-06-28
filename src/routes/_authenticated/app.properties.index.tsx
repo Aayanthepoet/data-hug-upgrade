@@ -507,9 +507,18 @@ function PropertiesPage() {
             </thead>
             <tbody>
               {data.map((p) => (
-                <tr key={p.id} className="border-t border-border hover:bg-[rgba(255,255,255,.02)] transition-colors">
+                <tr
+                  key={p.id}
+                  onClick={() => navigate({ to: "/app/properties/$propertyId", params: { propertyId: p.id } })}
+                  className="border-t border-border hover:bg-[rgba(255,255,255,.02)] transition-colors cursor-pointer"
+                >
                   <td className="p-4">
-                    <Link to="/app/properties/$propertyId" params={{ propertyId: p.id }} className="text-cyan hover:underline font-medium">
+                    <Link
+                      to="/app/properties/$propertyId"
+                      params={{ propertyId: p.id }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-cyan hover:underline font-medium"
+                    >
                       {p.address}
                     </Link>
                   </td>
