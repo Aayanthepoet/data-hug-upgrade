@@ -44,13 +44,30 @@ const NYC_BOROUGHS: { value: string; label: string }[] = [
 // pre-foreclosure -> NYC HPD dataset
 // tax delinquent  -> Philly real_estate_tax_balances (the closest thing to "tax lien")
 // absentee owner  -> both providers infer this from owner mailing address
-type SupportedType = "preforeclosure" | "tax_delinquent" | "absentee";
+type SupportedType =
+  | "preforeclosure"
+  | "tax_delinquent"
+  | "absentee"
+  | "tax_lien"
+  | "hpd_litigation"
+  | "eviction"
+  | "vacate_order";
 
-const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"][] }[] = [
-  { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"] },
-  { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"] },
-  { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"] },
+type TypeGroup = "foreclosure" | "owner" | "signals";
+
+const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"][]; group: TypeGroup }[] = [
+  // Foreclosure-adjacent
+  { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"], group: "foreclosure" },
+  { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"], group: "foreclosure" },
+  // Owner signals
+  { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"], group: "owner" },
+  // NYC Distress Signals (independent indicators — NOT foreclosure)
+  { value: "tax_lien",        label: "Tax lien (DOF sale list)",     markets: ["nyc"], group: "signals" },
+  { value: "hpd_litigation",  label: "HPD litigation",                markets: ["nyc"], group: "signals" },
+  { value: "eviction",        label: "Eviction (executed)",           markets: ["nyc"], group: "signals" },
+  { value: "vacate_order",    label: "DOB vacate order (active)",     markets: ["nyc"], group: "signals" },
 ];
+
 
 type ResultRow = Awaited<ReturnType<typeof searchDistressedProperties>>["records"][number];
 
