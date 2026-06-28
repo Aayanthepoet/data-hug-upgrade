@@ -63,6 +63,7 @@ async def main() -> int:
             url_path = re.sub(r"[?#].*$", "", page.url)
             m = re.search(r"/app/properties/([0-9a-f-]{36})$", url_path, re.I)
             assert m, f"URL did not match detail route: {page.url}"
+            prop_id = m.group(1)
 
             await page.wait_for_load_state("networkidle")
             await page.locator('[data-testid="property-detail"], h1, h2').first.wait_for(
