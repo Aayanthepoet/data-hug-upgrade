@@ -208,9 +208,7 @@ export class NYCOpenDataProvider implements PropertyProvider {
     );
 
     const tasks: Promise<DistressedPropertyRecord[]>[] = [];
-    // NYC Open Data does not publish a foreclosure dataset; preforeclosure
-    // requests return an empty list rather than substituting another source.
-    if (types.has("absentee") || types.size === 0) {
+    if (types.has("absentee")) {
       tasks.push(
         fetchAbsentee(
           county ? { code: county.code, borough: county.borough } : null,
@@ -224,6 +222,28 @@ export class NYCOpenDataProvider implements PropertyProvider {
       );
     }
 
+    // NYC Distress Signals — only fired when a signal type is explicitly
+    // requested and a ZIP is provided (every signal dataset filters by ZIP).
+    const signalMap: Record<string, "nyc_dof_tax_lien" | "nyc_hpd_litigation" | "nyc_marshal_eviction" | "nyc_dob_vacate"> = {
+      tax_lien: "nyc_dof_tax_lien",
+      hpd_litigation: "nyc_hpd_litigation",
+      eviction: "nyc_marshal_eviction",
+      vacate_order: "nyc_dob_vacate",
+    };
+    if (filters.zip) {
+      const { fetchNYCSignal } = await import("./nyc-signals-provider.server");
+      for (const [t, provider] of Object.entries(signalMap)) {
+        if (!types.has(t as DistressType)) continue;
+        tasks.push(
+          fetchNYCSignal(provider, filters.zip, limit)
+            .then((rows) => rows.map((r) => ({ ...r, sourceProvider: provider })))
+            .catch((e) => {
+              console.error(`[nyc-signals] ${provider} fetch failed:`, e);
+              return [];
+            }),
+        );
+      }
+    }
 
     const results = (await Promise.all(tasks)).flat();
 
@@ -238,3 +258,4 @@ export class NYCOpenDataProvider implements PropertyProvider {
       .slice(0, limit);
   }
 }
+
