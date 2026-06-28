@@ -110,9 +110,10 @@ type TaxLienRow = {
 };
 
 export async function fetchTaxLien(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
+  // DOF tax-lien sale list is published annually, so no date floor — we
+  // filter by ZIP and order by most-recent cycle/month, capped by `limit`.
   const where = [
     `zip_code = '${zip}'`,
-    `month >= '${TWELVE_MONTHS_AGO()}'`,
     "house_number IS NOT NULL",
     "street_name IS NOT NULL",
   ].join(" AND ");
