@@ -63,7 +63,6 @@ import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/pu
 import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
 import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
-import { Route as ApiPublicHooksRescheduleCronRouteImport } from './routes/api/public/hooks/_reschedule-cron'
 import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
 import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
@@ -374,12 +373,6 @@ const ApiPublicHooksCloseAuctionsRoute =
     path: '/api/public/hooks/close-auctions',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksRescheduleCronRoute =
-  ApiPublicHooksRescheduleCronRouteImport.update({
-    id: '/api/public/hooks/_reschedule-cron',
-    path: '/api/public/hooks',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AgentsSlugPPostSlugRoute = AgentsSlugPPostSlugRouteImport.update({
   id: '/p/$postSlug',
   path: '/p/$postSlug',
@@ -554,7 +547,6 @@ export interface FileRoutesByFullPath {
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
-  '/api/public/hooks': typeof ApiPublicHooksRescheduleCronRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -628,7 +620,6 @@ export interface FileRoutesByTo {
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
-  '/api/public/hooks': typeof ApiPublicHooksRescheduleCronRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -706,7 +697,6 @@ export interface FileRoutesById {
   '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
-  '/api/public/hooks/_reschedule-cron': typeof ApiPublicHooksRescheduleCronRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
   '/api/public/hooks/compliance-digest': typeof ApiPublicHooksComplianceDigestRoute
   '/api/public/hooks/notify-sms': typeof ApiPublicHooksNotifySmsRoute
@@ -784,7 +774,6 @@ export interface FileRouteTypes {
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
-    | '/api/public/hooks'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -858,7 +847,6 @@ export interface FileRouteTypes {
     | '/app/social/compose'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
-    | '/api/public/hooks'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -935,7 +923,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/social/compose'
     | '/_authenticated/app/vision/library'
     | '/agents/$slug/p/$postSlug'
-    | '/api/public/hooks/_reschedule-cron'
     | '/api/public/hooks/close-auctions'
     | '/api/public/hooks/compliance-digest'
     | '/api/public/hooks/notify-sms'
@@ -974,7 +961,6 @@ export interface RootRouteChildren {
   ApiPublicAttomHealthRoute: typeof ApiPublicAttomHealthRoute
   ApiPublicLeadNotifyRoute: typeof ApiPublicLeadNotifyRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
-  ApiPublicHooksRescheduleCronRoute: typeof ApiPublicHooksRescheduleCronRoute
   ApiPublicHooksCloseAuctionsRoute: typeof ApiPublicHooksCloseAuctionsRoute
   ApiPublicHooksComplianceDigestRoute: typeof ApiPublicHooksComplianceDigestRoute
   ApiPublicHooksNotifySmsRoute: typeof ApiPublicHooksNotifySmsRoute
@@ -1371,13 +1357,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/close-auctions'
       fullPath: '/api/public/hooks/close-auctions'
       preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/_reschedule-cron': {
-      id: '/api/public/hooks/_reschedule-cron'
-      path: '/api/public/hooks'
-      fullPath: '/api/public/hooks'
-      preLoaderRoute: typeof ApiPublicHooksRescheduleCronRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agents/$slug/p/$postSlug': {
@@ -1777,7 +1756,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAttomHealthRoute: ApiPublicAttomHealthRoute,
   ApiPublicLeadNotifyRoute: ApiPublicLeadNotifyRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
-  ApiPublicHooksRescheduleCronRoute: ApiPublicHooksRescheduleCronRoute,
   ApiPublicHooksCloseAuctionsRoute: ApiPublicHooksCloseAuctionsRoute,
   ApiPublicHooksComplianceDigestRoute: ApiPublicHooksComplianceDigestRoute,
   ApiPublicHooksNotifySmsRoute: ApiPublicHooksNotifySmsRoute,

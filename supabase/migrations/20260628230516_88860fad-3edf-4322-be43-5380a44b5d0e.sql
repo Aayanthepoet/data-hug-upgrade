@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.reschedule_distress_cron_jobs(text) FROM PUBLIC, anon, authenticated;
