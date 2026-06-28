@@ -8,8 +8,10 @@
 
 import { NYCOpenDataProvider } from "./nyc-provider.server";
 import { PhillyCartoProvider } from "./philly-provider.server";
+import { fetchNYCSignal } from "./nyc-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
+
 
 async function getAdminClient() {
   const mod = await import("@/integrations/supabase/client.server");
