@@ -87,8 +87,13 @@ function PropertySearchPage() {
   const [zip, setZip] = useState("");
   const [minValue, setMinValue] = useState("");
   const [maxValue, setMaxValue] = useState("");
-  const [types, setTypes] = useState<SupportedType[]>(["preforeclosure", "tax_delinquent", "absentee"]);
+  const [types, setTypes] = useState<SupportedType[]>([
+    "preforeclosure", "tax_delinquent", "absentee",
+    "tax_lien", "hpd_litigation", "eviction", "vacate_order",
+  ]);
   const [absenteeOnly, setAbsenteeOnly] = useState(false);
+  const [activeVacatesOnly, setActiveVacatesOnly] = useState(false);
+
 
   const availableTypes = useMemo(
     () => TYPE_OPTIONS.filter((t) => t.markets.includes(marketId)),
