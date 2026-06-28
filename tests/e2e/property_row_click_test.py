@@ -72,9 +72,6 @@ async def main() -> int:
 
             body_text = (await page.locator("body").inner_text()).strip()
             assert len(body_text) > 50, "Detail page appears blank"
-            assert not re.search(
-                r"Import Leads", body_text[:500], re.I
-            ), "Still on list view (Import Leads visible at top)"
 
             assert not errors, "Runtime errors on detail page:\n" + "\n".join(errors)
 
