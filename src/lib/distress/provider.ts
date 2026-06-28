@@ -10,7 +10,11 @@ export type DistressType =
   | "tax_delinquent"
   | "fsbo_stale"
   | "vacant"
-  | "absentee";
+  | "absentee"
+  | "hpd_litigation"
+  | "eviction"
+  | "vacate_order";
+
 
 export interface DistressSearchFilters {
   state?: string;
