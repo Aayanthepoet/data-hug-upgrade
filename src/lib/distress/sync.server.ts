@@ -8,8 +8,10 @@
 
 import { NYCOpenDataProvider } from "./nyc-provider.server";
 import { PhillyCartoProvider } from "./philly-provider.server";
+import { fetchNYCSignal } from "./nyc-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
+
 
 async function getAdminClient() {
   const mod = await import("@/integrations/supabase/client.server");
@@ -78,14 +80,19 @@ async function fetchForTarget(t: SyncTarget): Promise<DistressedPropertyRecord[]
       limit: PER_TARGET_LIMIT,
     });
   }
-  const provider = new PhillyCartoProvider();
-  return provider.searchDistressed({
-    state: "PA",
-    zip: t.zip,
-    city: "Philadelphia",
-    limit: PER_TARGET_LIMIT,
-  });
+  if (t.provider === "philly_carto") {
+    const provider = new PhillyCartoProvider();
+    return provider.searchDistressed({
+      state: "PA",
+      zip: t.zip,
+      city: "Philadelphia",
+      limit: PER_TARGET_LIMIT,
+    });
+  }
+  // NYC Distress Signals (tax_lien, hpd_litigation, eviction, vacate_order)
+  return fetchNYCSignal(t.provider, t.zip, PER_TARGET_LIMIT);
 }
+
 
 export type SyncSummary = {
   provider: string;

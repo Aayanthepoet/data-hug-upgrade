@@ -44,13 +44,30 @@ const NYC_BOROUGHS: { value: string; label: string }[] = [
 // pre-foreclosure -> NYC HPD dataset
 // tax delinquent  -> Philly real_estate_tax_balances (the closest thing to "tax lien")
 // absentee owner  -> both providers infer this from owner mailing address
-type SupportedType = "preforeclosure" | "tax_delinquent" | "absentee";
+type SupportedType =
+  | "preforeclosure"
+  | "tax_delinquent"
+  | "absentee"
+  | "tax_lien"
+  | "hpd_litigation"
+  | "eviction"
+  | "vacate_order";
 
-const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"][] }[] = [
-  { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"] },
-  { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"] },
-  { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"] },
+type TypeGroup = "foreclosure" | "owner" | "signals";
+
+const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"][]; group: TypeGroup }[] = [
+  // Foreclosure-adjacent
+  { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"], group: "foreclosure" },
+  { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"], group: "foreclosure" },
+  // Owner signals
+  { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"], group: "owner" },
+  // NYC Distress Signals (independent indicators — NOT foreclosure)
+  { value: "tax_lien",        label: "Tax lien (DOF sale list)",     markets: ["nyc"], group: "signals" },
+  { value: "hpd_litigation",  label: "HPD litigation",                markets: ["nyc"], group: "signals" },
+  { value: "eviction",        label: "Eviction (executed)",           markets: ["nyc"], group: "signals" },
+  { value: "vacate_order",    label: "DOB vacate order (active)",     markets: ["nyc"], group: "signals" },
 ];
+
 
 type ResultRow = Awaited<ReturnType<typeof searchDistressedProperties>>["records"][number];
 
@@ -70,8 +87,13 @@ function PropertySearchPage() {
   const [zip, setZip] = useState("");
   const [minValue, setMinValue] = useState("");
   const [maxValue, setMaxValue] = useState("");
-  const [types, setTypes] = useState<SupportedType[]>(["preforeclosure", "tax_delinquent", "absentee"]);
+  const [types, setTypes] = useState<SupportedType[]>([
+    "preforeclosure", "tax_delinquent", "absentee",
+    "tax_lien", "hpd_litigation", "eviction", "vacate_order",
+  ]);
   const [absenteeOnly, setAbsenteeOnly] = useState(false);
+  const [activeVacatesOnly, setActiveVacatesOnly] = useState(false);
+
 
   const availableTypes = useMemo(
     () => TYPE_OPTIONS.filter((t) => t.markets.includes(marketId)),
@@ -117,8 +139,12 @@ function PropertySearchPage() {
     setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
   const results = (runMutation.data?.records ?? []) as ResultRow[];
-  const filteredResults = absenteeOnly ? results.filter((r) => r.isAbsentee) : results;
+  let filteredResults = absenteeOnly ? results.filter((r) => r.isAbsentee) : results;
+  if (activeVacatesOnly) {
+    filteredResults = filteredResults.filter((r) => r.distressType === "vacate_order");
+  }
   const usedFallback = runMutation.data?.usedFallback;
+
 
   return (
     <div className="space-y-6">
@@ -203,41 +229,66 @@ function PropertySearchPage() {
           </div>
         </div>
 
-        <div>
-          <Label>Distress type</Label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {availableTypes.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                onClick={() => toggleType(o.value)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition ${
-                  types.includes(o.value)
-                    ? "bg-cyan text-black border-cyan"
-                    : "border-border text-[var(--w55)] hover:text-white"
-                }`}
-              >
-                {o.label}
-              </button>
-            ))}
+        {(["foreclosure", "owner", "signals"] as const).map((group) => {
+          const opts = availableTypes.filter((o) => o.group === group);
+          if (opts.length === 0) return null;
+          const groupLabel =
+            group === "foreclosure" ? "Foreclosure-adjacent"
+            : group === "owner" ? "Owner type"
+            : "Distress Signals (independent indicators — not foreclosure)";
+          return (
+            <div key={group}>
+              <Label>{groupLabel}</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {opts.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => toggleType(o.value)}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                      types.includes(o.value)
+                        ? "bg-cyan text-black border-cyan"
+                        : "border-border text-[var(--w55)] hover:text-white"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <p className="text-xs text-[var(--w55)]">
+          NYC signal datasets require a ZIP. Tax-lien rows have no lat/lng — geocoded on demand only.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              id="absentee-only"
+              type="checkbox"
+              checked={absenteeOnly}
+              onChange={(e) => setAbsenteeOnly(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="absentee-only" className="cursor-pointer">
+              Absentee / out-of-state only
+            </Label>
           </div>
-          <p className="text-xs text-[var(--w55)] mt-2">
-            Only filters supported by the current data sources are shown.
-          </p>
+          <div className="flex items-center gap-2">
+            <input
+              id="active-vacates-only"
+              type="checkbox"
+              checked={activeVacatesOnly}
+              onChange={(e) => setActiveVacatesOnly(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="active-vacates-only" className="cursor-pointer">
+              Active DOB vacates only
+            </Label>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            id="absentee-only"
-            type="checkbox"
-            checked={absenteeOnly}
-            onChange={(e) => setAbsenteeOnly(e.target.checked)}
-            className="h-4 w-4"
-          />
-          <Label htmlFor="absentee-only" className="cursor-pointer">
-            Owner type: absentee / out-of-state only
-          </Label>
-        </div>
 
         <div className="flex items-center gap-2 pt-2">
           <Button onClick={() => runMutation.mutate()} disabled={runMutation.isPending}>

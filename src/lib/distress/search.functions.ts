@@ -7,7 +7,9 @@ import type { DistressType } from "./provider";
 const distressTypeEnum = z.enum([
   "reo", "preforeclosure", "auction", "tax_lien",
   "tax_delinquent", "fsbo_stale", "vacant", "absentee",
+  "hpd_litigation", "eviction", "vacate_order",
 ]);
+
 
 const filtersSchema = z.object({
   state: z.string().trim().toUpperCase().length(2).optional(),
@@ -57,8 +59,9 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
       records: records.map((r) => ({
         ...r,
         leadScore: score(r),
-        sourceProvider: usedFallback ? "mock" : provider,
+        sourceProvider: r.sourceProvider ?? (usedFallback ? "mock" : provider),
       })),
+
       provider,
       usedFallback,
     };
