@@ -139,8 +139,12 @@ function PropertySearchPage() {
     setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
   const results = (runMutation.data?.records ?? []) as ResultRow[];
-  const filteredResults = absenteeOnly ? results.filter((r) => r.isAbsentee) : results;
+  let filteredResults = absenteeOnly ? results.filter((r) => r.isAbsentee) : results;
+  if (activeVacatesOnly) {
+    filteredResults = filteredResults.filter((r) => r.distressType === "vacate_order");
+  }
   const usedFallback = runMutation.data?.usedFallback;
+
 
   return (
     <div className="space-y-6">
