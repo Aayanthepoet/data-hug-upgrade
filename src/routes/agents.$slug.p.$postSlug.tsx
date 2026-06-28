@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { marked } from "marked";
+import Markdown from "react-markdown";
 import { getPublicPost } from "@/lib/social-public.functions";
 
 type PostResponse = Awaited<ReturnType<typeof getPublicPost>>;
@@ -83,7 +83,6 @@ function PostPage() {
   const { agent, post } = data as PostData;
   const property = (data as PostData).property as PropertyView;
   const fullName = agent.full_name || `Agent ${agent.public_slug}`;
-  const bodyHtml = marked.parse(post.body_md || "", { async: false }) as string;
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -175,10 +174,9 @@ function PostPage() {
           )}
         </div>
 
-        <div
-          className="prose prose-invert max-w-none [&_h2]:h-display [&_h2]:text-2xl [&_h2]:mt-8 [&_h2]:mb-3 [&_p]:leading-relaxed [&_p]:my-4 [&_ul]:my-4 [&_li]:my-1"
-          dangerouslySetInnerHTML={{ __html: bodyHtml }}
-        />
+        <div className="prose prose-invert max-w-none [&_h2]:h-display [&_h2]:text-2xl [&_h2]:mt-8 [&_h2]:mb-3 [&_p]:leading-relaxed [&_p]:my-4 [&_ul]:my-4 [&_li]:my-1">
+          <Markdown>{post.body_md || ""}</Markdown>
+        </div>
 
         {property && (
           <aside className="mt-10 p-6 border border-border rounded-xl bg-[var(--surface-2)]">

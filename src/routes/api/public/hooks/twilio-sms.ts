@@ -7,12 +7,65 @@
 // → "A message comes in" → Webhook → this URL (HTTP POST).
 
 import { createFileRoute } from "@tanstack/react-router";
+import { createHmac, timingSafeEqual } from "crypto";
+
+function getTwilioWebhookUrl(request: Request): string {
+  const envUrl = process.env.TWILIO_WEBHOOK_URL;
+  if (envUrl) return envUrl;
+
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const path = new URL(request.url).pathname;
+  if (forwardedProto && forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}${path}`;
+  }
+  return request.url;
+}
+
+function buildSignaturePayload(url: string, form: FormData): string {
+  const params = new URLSearchParams();
+  form.forEach((value, key) => {
+    params.append(key, String(value));
+  });
+  const sorted = Array.from(params.keys()).sort();
+  return url + sorted.map((key) => `${key}${params.get(key)}`).join("");
+}
+
+function verifyTwilioSignature(request: Request, form: FormData, authToken: string): boolean {
+  const signature = request.headers.get("X-Twilio-Signature") ?? request.headers.get("x-twilio-signature");
+  if (!signature || !authToken) return false;
+
+  const url = getTwilioWebhookUrl(request);
+  const payload = buildSignaturePayload(url, form);
+  const expected = createHmac("sha1", authToken).update(payload).digest("base64");
+
+  try {
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
 
 export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
         const form = await request.formData();
+
+        if (!authToken) {
+          console.error("[twilio-sms] TWILIO_AUTH_TOKEN is not configured");
+          return new Response("<Response/>", {
+            status: 200,
+            headers: { "Content-Type": "text/xml" },
+          });
+        }
+
+        if (!verifyTwilioSignature(request, form, authToken)) {
+          console.warn("[twilio-sms] Invalid signature");
+          return new Response("Forbidden", { status: 403 });
+        }
+
         const from = String(form.get("From") ?? "");
         const to = String(form.get("To") ?? "");
         const body = String(form.get("Body") ?? "");
