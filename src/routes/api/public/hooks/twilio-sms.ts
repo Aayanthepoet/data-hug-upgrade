@@ -60,10 +60,7 @@ export const Route = createFileRoute("/api/public/hooks/twilio-sms")({
 
         if (!authToken) {
           console.error("[twilio-sms] TWILIO_AUTH_TOKEN is not configured");
-          return new Response("<Response/>", {
-            status: 200,
-            headers: { "Content-Type": "text/xml" },
-          });
+          return new Response("Forbidden: Twilio auth token not configured", { status: 403 });
         }
 
         if (!verifyTwilioSignature(request, form, authToken)) {
