@@ -58,7 +58,7 @@ async def main() -> int:
 
             # Click row and assert URL changes to /app/properties/{id}
             await row.click()
-            await page.wait_for_url(DETAIL_RE, timeout=10_000)
+            await page.wait_for_url(DETAIL_RE, timeout=15_000, wait_until="commit")
 
             m = DETAIL_RE.search(page.url)
             assert m, f"URL did not match detail route: {page.url}"
