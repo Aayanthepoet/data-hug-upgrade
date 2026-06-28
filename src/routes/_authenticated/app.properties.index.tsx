@@ -61,6 +61,7 @@ export const Route = createFileRoute("/_authenticated/app/properties/")({
 
 function PropertiesPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsLoading] = useState(false);
 
