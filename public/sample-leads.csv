@@ -1,0 +1,4 @@
+Property Address,City,State,Zip,Owner Name,Owner Mailing Address,Status,Estimated Value,Beds,Baths,Notes
+123 Main St,Albany,NY,12203,Jane Doe,"PO Box 12, Albany NY 12201",Pre-foreclosure,325000,3,2,NOD filed 2025-09
+4421 Oak Ave,Philadelphia,PA,19143,John Smith,"4421 Oak Ave, Philadelphia PA 19143",REO,189000,4,1.5,Bank owned since 2025-06
+77 Pine St,Brooklyn,NY,11221,"Acme Holdings LLC","500 5th Ave, New York NY 10110",Auction,540000,2,1,Sheriff sale 2026-01-15
