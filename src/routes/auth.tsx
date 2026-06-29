@@ -137,9 +137,25 @@ function AuthPage() {
                    className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
             <input name="password" type="password" required placeholder="Password (min 8 chars)" minLength={8}
                    className="bg-[var(--s1)] border border-border rounded-md px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan" />
+            {isSignup && (
+              <label className="flex items-start gap-2 text-xs text-[var(--w55)] leading-relaxed pt-1">
+                <input
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => setSmsConsent(e.target.checked)}
+                  className="mt-0.5 accent-cyan"
+                />
+                <span>
+                  I agree to receive SMS notifications from PropAI related to my account, property alerts, and service updates. Message &amp; data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of purchase. See our{" "}
+                  <Link to="/terms" className="text-cyan hover:underline">Terms</Link> and{" "}
+                  <Link to="/privacy" className="text-cyan hover:underline">Privacy Policy</Link>.
+                </span>
+              </label>
+            )}
             <button disabled={loading} className="btn-primary w-full disabled:opacity-60">
               {loading ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
             </button>
+
           </form>
 
           <p className="mt-6 text-sm text-[var(--w55)] text-center">
