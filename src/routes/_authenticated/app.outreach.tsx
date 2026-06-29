@@ -180,6 +180,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [smsAck, setSmsAck] = useState(false);
 
   const { data: owners } = useQuery({
     queryKey: ["reachable-owners"],
