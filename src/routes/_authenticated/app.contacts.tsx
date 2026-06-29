@@ -66,7 +66,7 @@ function ContactsPage() {
     setPending({ id: ownerId, kind: "skip" });
     try {
       const res = await skipTrace({ data: { owner_id: ownerId } });
-      toast.success(`Skip trace (${res.provider}): ${res.inserted} contact(s) · ${res.status}`);
+      toast.warning(`Generated ${res.inserted} SAMPLE contact(s) via ${res.provider} — DO NOT CONTACT (no real skip-trace provider connected)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
