@@ -180,6 +180,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [contactId, setContactId] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [smsAck, setSmsAck] = useState(false);
 
   const { data: owners } = useQuery({
     queryKey: ["reachable-owners"],
@@ -251,6 +252,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           setErr(null);
           if (!to.trim() || !body.trim()) { setErr("Recipient and body are required."); return; }
           if (isDnc) { setErr("This recipient is flagged Do Not Contact. Remove the DNC flag in Contacts before sending."); return; }
+          if (channel === "sms" && !smsAck) { setErr("Acknowledge TCPA consent before sending SMS."); return; }
           mut.mutate();
         }}
         className="bg-[#0a0f17] border border-border rounded-lg w-full max-w-lg p-5 space-y-4"
@@ -274,7 +276,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
               <button
                 key={c}
                 type="button"
-                onClick={() => { setChannel(c); setContactId(null); setTo(""); }}
+                onClick={() => { setChannel(c); setContactId(null); setTo(""); if (c !== "sms") setSmsAck(false); }}
                 className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded border transition-colors ${
                   channel === c ? "bg-cyan/15 text-cyan border-cyan/40" : "border-border text-[var(--w55)] hover:bg-white/5"
                 }`}
@@ -284,6 +286,22 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
             );
           })}
         </div>
+
+        {channel === "sms" && (
+          <div className="border border-amber-500/40 bg-amber-500/10 rounded p-3 space-y-2 text-[11px] text-amber-100">
+            <div className="font-semibold uppercase tracking-wider text-amber-300">⚠ TCPA / cold-SMS warning</div>
+            <p className="opacity-90">
+              Property owners in PropAI have not opted in to receive texts. Cold SMS to non-consenting recipients can violate
+              the TCPA, state laws, and carrier policy. Prefer email or direct mail for owner outreach. Only send SMS where
+              you have prior express written consent from the recipient.
+            </p>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" checked={smsAck} onChange={(e) => setSmsAck(e.target.checked)} className="mt-0.5" />
+              <span>I confirm I have prior express written consent from this recipient and accept full responsibility for TCPA/state/carrier compliance.</span>
+            </label>
+          </div>
+        )}
+
 
         {(channel === "sms" || channel === "email") && (
           <div className="space-y-2 border border-border rounded p-3 bg-[rgba(255,255,255,.02)]">
@@ -437,11 +455,11 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           </button>
           <button
             type="submit"
-            disabled={mut.isPending || isDnc}
-            title={isDnc ? "Recipient is flagged Do Not Contact" : undefined}
+            disabled={mut.isPending || isDnc || (channel === "sms" && !smsAck)}
+            title={isDnc ? "Recipient is flagged Do Not Contact" : channel === "sms" && !smsAck ? "Acknowledge TCPA consent to enable SMS send" : undefined}
             className="px-4 py-1.5 text-xs rounded bg-cyan text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {mut.isPending ? "Sending…" : isDnc ? "Blocked (DNC)" : "Send"}
+            {mut.isPending ? "Sending…" : isDnc ? "Blocked (DNC)" : channel === "sms" && !smsAck ? "Acknowledge consent" : "Send"}
           </button>
         </div>
       </form>
