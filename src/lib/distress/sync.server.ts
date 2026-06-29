@@ -292,72 +292,99 @@ export async function runDistressSync(
   }
 
   const url = `${STABLE_BASE_URL}/api/public/hooks/sync-distressed-one`;
-  const results: SyncSummary[] = [];
+  const results: Array<SyncSummary & { ranVia: "hook" | "fallback" }> = [];
   const queue = [...providers];
+
+  const RETRY_DELAYS_MS = [2000, 5000]; // 3 attempts total
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  async function callHookOnce(p: string): Promise<
+    | { ok: true; summary: SyncSummary }
+    | { ok: false; retriable: boolean; error: string }
+  > {
+    try {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: secret! },
+        body: JSON.stringify({ provider: p, triggeredBy }),
+      });
+      const text = await resp.text();
+      if (resp.status === 404) {
+        return { ok: false, retriable: true, error: `HTTP 404: ${text.slice(0, 200)}` };
+      }
+      if (!resp.ok) {
+        return {
+          ok: false,
+          retriable: false,
+          error: `fan-out HTTP ${resp.status}: ${text.slice(0, 300)}`,
+        };
+      }
+      try {
+        const json = JSON.parse(text) as { summary?: SyncSummary };
+        if (json.summary) return { ok: true, summary: json.summary };
+        return { ok: false, retriable: false, error: "fan-out: missing summary" };
+      } catch {
+        return {
+          ok: false,
+          retriable: false,
+          error: `fan-out: invalid JSON: ${text.slice(0, 200)}`,
+        };
+      }
+    } catch (e) {
+      return { ok: false, retriable: true, error: `network: ${errMessage(e)}` };
+    }
+  }
 
   async function worker() {
     while (queue.length) {
       const p = queue.shift();
       if (!p) return;
       const startedAt = new Date().toISOString();
+
+      let lastError = "";
+      let hookSummary: SyncSummary | null = null;
+      for (let attempt = 0; attempt < 1 + RETRY_DELAYS_MS.length; attempt++) {
+        const res = await callHookOnce(p);
+        if (res.ok) {
+          hookSummary = res.summary;
+          break;
+        }
+        lastError = res.error;
+        if (!res.retriable) break;
+        const delay = RETRY_DELAYS_MS[attempt];
+        if (delay == null) break;
+        console.warn(`[sync] hook ${p} attempt ${attempt + 1} failed (${res.error}); retrying in ${delay}ms`);
+        await sleep(delay);
+      }
+
+      if (hookSummary) {
+        results.push({ ...hookSummary, ranVia: "hook" });
+        continue;
+      }
+
+      // Fallback: run in-process so the provider still completes.
+      console.warn(`[sync] hook ${p} failed after retries (${lastError}); running in-process fallback`);
       try {
-        const resp = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", apikey: secret! },
-          body: JSON.stringify({ provider: p, triggeredBy }),
-        });
-        const text = await resp.text();
-        if (!resp.ok) {
-          results.push({
-            provider: p,
-            inserted: 0,
-            updated: 0,
-            skipped: 0,
-            error: `fan-out HTTP ${resp.status}: ${text.slice(0, 300)}`,
-            startedAt,
-            finishedAt: new Date().toISOString(),
-          });
-          continue;
-        }
-        try {
-          const json = JSON.parse(text) as { summary?: SyncSummary };
-          if (json.summary) {
-            results.push(json.summary);
-          } else {
-            results.push({
-              provider: p,
-              inserted: 0,
-              updated: 0,
-              skipped: 0,
-              error: "fan-out: missing summary",
-              startedAt,
-              finishedAt: new Date().toISOString(),
-            });
-          }
-        } catch {
-          results.push({
-            provider: p,
-            inserted: 0,
-            updated: 0,
-            skipped: 0,
-            error: `fan-out: invalid JSON: ${text.slice(0, 200)}`,
-            startedAt,
-            finishedAt: new Date().toISOString(),
-          });
-        }
+        const summary = await runDistressSyncForProvider(p, triggeredBy);
+        const mergedError = summary.error
+          ? `${summary.error} | hook fallback after: ${lastError}`
+          : `ran via in-process fallback after hook error: ${lastError}`;
+        results.push({ ...summary, error: mergedError, ranVia: "fallback" });
       } catch (e) {
         results.push({
           provider: p,
           inserted: 0,
           updated: 0,
           skipped: 0,
-          error: `fan-out network error: ${errMessage(e)}`,
+          error: `fallback failed: ${errMessage(e)} | hook error: ${lastError}`,
           startedAt,
           finishedAt: new Date().toISOString(),
+          ranVia: "fallback",
         });
       }
     }
   }
+
 
   const workers = Array.from({ length: Math.min(FANOUT_CONCURRENCY, providers.length) }, () => worker());
   await Promise.all(workers);
