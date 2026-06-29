@@ -183,6 +183,28 @@ export class PhillyCartoProvider implements PropertyProvider {
       );
     }
 
+    // Philly Distress Signals — only when a ZIP is provided (all signal
+    // datasets filter by ZIP). Mirrors the NYC signals dispatch pattern.
+    if (filters.zip) {
+      const signalMap: Record<string, "phl_li_violation" | "phl_unsafe" | "phl_sheriff_deed"> = {
+        code_violation: "phl_li_violation",
+        unsafe_structure: "phl_unsafe",
+        sheriff_sale: "phl_sheriff_deed",
+      };
+      const { fetchPhillySignal } = await import("./philly-signals-provider.server");
+      for (const [t, provider] of Object.entries(signalMap)) {
+        if (!types.has(t as DistressType)) continue;
+        tasks.push(
+          fetchPhillySignal(provider, filters.zip, limit)
+            .then((rows) => rows.map((r) => ({ ...r, sourceProvider: provider })))
+            .catch((e) => {
+              console.error(`[philly-signals] ${provider} fetch failed:`, e);
+              return [];
+            }),
+        );
+      }
+    }
+
     const results = (await Promise.all(tasks)).flat();
 
     return results

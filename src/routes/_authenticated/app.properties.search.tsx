@@ -51,7 +51,10 @@ type SupportedType =
   | "tax_lien"
   | "hpd_litigation"
   | "eviction"
-  | "vacate_order";
+  | "vacate_order"
+  | "code_violation"
+  | "unsafe_structure"
+  | "sheriff_sale";
 
 type TypeGroup = "foreclosure" | "owner" | "signals";
 
@@ -59,13 +62,17 @@ const TYPE_OPTIONS: { value: SupportedType; label: string; markets: Market["id"]
   // Foreclosure-adjacent
   { value: "preforeclosure", label: "Pre-foreclosure", markets: ["nyc"], group: "foreclosure" },
   { value: "tax_delinquent", label: "Tax delinquent", markets: ["philly"], group: "foreclosure" },
+  { value: "sheriff_sale",   label: "Sheriff's deed (completed)",  markets: ["philly"], group: "foreclosure" },
   // Owner signals
   { value: "absentee",       label: "Absentee / out-of-state owner", markets: ["nyc", "philly"], group: "owner" },
-  // NYC Distress Signals (independent indicators — NOT foreclosure)
+  // NYC Distress Signals
   { value: "tax_lien",        label: "Tax lien (DOF sale list)",     markets: ["nyc"], group: "signals" },
   { value: "hpd_litigation",  label: "HPD litigation",                markets: ["nyc"], group: "signals" },
   { value: "eviction",        label: "Eviction (executed)",           markets: ["nyc"], group: "signals" },
   { value: "vacate_order",    label: "DOB vacate order (active)",     markets: ["nyc"], group: "signals" },
+  // Philadelphia Distress Signals
+  { value: "code_violation",  label: "L&I code violation (open)",     markets: ["philly"], group: "signals" },
+  { value: "unsafe_structure",label: "Unsafe structure (open)",       markets: ["philly"], group: "signals" },
 ];
 
 
@@ -90,6 +97,7 @@ function PropertySearchPage() {
   const [types, setTypes] = useState<SupportedType[]>([
     "preforeclosure", "tax_delinquent", "absentee",
     "tax_lien", "hpd_litigation", "eviction", "vacate_order",
+    "code_violation", "unsafe_structure", "sheriff_sale",
   ]);
   const [absenteeOnly, setAbsenteeOnly] = useState(false);
   const [activeVacatesOnly, setActiveVacatesOnly] = useState(false);

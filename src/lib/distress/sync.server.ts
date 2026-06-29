@@ -7,7 +7,6 @@
 // - Records a row in public.sync_runs per provider per run.
 
 import { NYCOpenDataProvider } from "./nyc-provider.server";
-import { PhillyCartoProvider } from "./philly-provider.server";
 import { fetchNYCSignal } from "./nyc-signals-provider.server";
 import { fetchPhillySignal } from "./philly-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
