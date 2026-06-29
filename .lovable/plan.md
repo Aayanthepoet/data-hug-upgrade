@@ -1,68 +1,37 @@
-# CSV Lead Import for Properties
+# Fix distress sync timeout — per-provider execution
 
-A new "Import Leads (CSV)" flow on `/app/properties` that lets users upload their own foreclosure/REO/distress lists, map columns, and push them into the existing `properties` table so they immediately work with scoring, contacts, outreach, and Vision.
+## Problem
 
-## User flow
+`runDistressSync()` loops all 10 providers inside one Worker request. HPD Litigations hangs, the Worker hits its execution budget, and the 4 Philly providers never run.
 
-1. On `/app/properties`, a new **Import Leads (CSV)** button sits next to **Add Property** and **Search Properties**, plus a small **Download sample CSV template** link.
-2. Click → dialog opens.
-   - Step 1 — Upload: drag/drop or pick a `.csv` (≤ 5 MB, ≤ 5,000 rows).
-   - Step 2 — Map columns: detected headers on the left, our fields on the right with auto-guessed mappings the user can change. Preview first 5 rows.
-   - Step 3 — Import: progress, then a summary card.
-3. Summary shows: total rows, imported (new), updated (existing), skipped, and a scrollable list of failed rows with the reason. A "Download error report" button exports the failed rows + reasons as CSV.
+## Approach
 
-## Our fields + auto-detect aliases
+Split the run into one Worker request per provider, with a hard per-provider timeout. The orchestrator fans out HTTP calls to a new single-provider hook and aggregates results. Each provider gets its own execution context, so a hang in one can't kill the others.
 
-| Field | Required | Common aliases auto-mapped |
-|---|---|---|
-| address | ✅ | "address", "property address", "site address", "street", "street address", "property" |
-| city | (city+state OR zip) | "city", "town", "municipality" |
-| state | (city+state OR zip) | "state", "st", "province" |
-| zip | (city+state OR zip) | "zip", "zipcode", "postal code", "postal" |
-| owner_name | – | "owner", "owner 1", "owner name", "owner1", "current owner" |
-| owner_mailing_address | – | "mailing address", "owner address", "owner mailing" |
-| distress_type | – | "status", "distress", "distress type", "type", "stage" |
-| estimated_value | – | "value", "estimated value", "list price", "price", "avm", "market value" |
-| beds | – | "beds", "bedrooms", "br" |
-| baths | – | "baths", "bathrooms", "ba" |
-| notes | – | "notes", "comments", "remarks" |
+## Changes (scope-locked: sync execution only)
 
-Distress normalization (case-insensitive):
-- `reo`, `bank owned`, `foreclosed` → `reo`
-- `pre-foreclosure`, `preforeclosure`, `nod`, `lis pendens` → `preforeclosure`
-- `auction`, `sheriff sale`, `trustee sale` → `auction`
-- `tax lien` → `tax_lien`
-- `tax delinquent` → `tax_delinquent`
-- `vacant` → `vacant`
-- `absentee` → `absentee`
-- anything else / missing → `unknown` (honest default — not guessed)
+1. **`src/lib/distress/sync.server.ts`**
+   - Extract a new exported `runDistressSyncForProvider(provider, triggeredBy)` that contains the existing per-provider loop body (fetch targets → dedupe → existence check → chunked upsert → write `sync_runs` row). No changes to provider query logic.
+   - Wrap the provider's fetch+upsert work in a `Promise.race` against a 50s timeout. On timeout, mark the `sync_runs` row with `error = 'timeout after 50s'` and return a summary so the orchestrator keeps going.
+   - Keep `runDistressSync()` as the orchestrator but change its body to fan out: for each provider in `SYNC_TARGETS`, POST to the new single-provider hook in parallel (with a small concurrency cap, e.g. 4) and collect summaries. Each HTTP call is a separate Worker invocation.
 
-## Dedupe + upsert
+2. **New route `src/routes/api/public/hooks/sync-distressed-one.ts`**
+   - POST handler, same `CRON_SECRET` `apikey` check as `sync-distressed.ts`.
+   - Body: `{ provider: string }`. Calls `runDistressSyncForProvider(provider, 'cron'|'manual')` and returns its summary.
 
-- `source_provider = 'user_csv'`
-- `source_record_id = normalize(address) + '|' + zip` (lowercase, collapse whitespace, strip punctuation).
-- Reuses the existing unique key `(user_id, source_provider, source_record_id)` → same list re-uploaded = updates, not duplicates.
-- Because `source_provider` is part of the conflict key, rows from `nyc_opendata`, `philly_carto`, `attom`, or null (manual) are never touched.
+3. **`src/routes/api/public/hooks/sync-distressed.ts`** — unchanged interface; now just calls the orchestrator which fans out.
 
-## Implementation
+4. **`src/lib/distress/sync.functions.ts`** — `runDistressSyncNow` unchanged signature; internally calls the orchestrator (which now fans out via HTTP). Admin "Run sync now" button keeps working.
 
-**New files**
-- `src/lib/csv/parse.ts` — tiny pure CSV parser (RFC 4180-ish: quoted fields, escaped quotes, CRLF, BOM strip, trim). No new dependency.
-- `src/lib/csv/mapping.ts` — header aliases, distress normalization, address normalization for dedupe key, row → record transform, validation (`address` required, `zip` OR (`city`+`state`) required).
-- `src/lib/csv/import-csv.functions.ts` — `importLeadsCsv` server fn (subscription-gated). Accepts `{ rows, mapping }`, validates each row, builds upsert rows with `source_provider='user_csv'`, chunks (200/batch), returns `{ total, imported, updated, skipped, errors: [{row, reason}] }`. Uses `count: 'exact'` on a pre-check to distinguish imported vs updated.
-- `src/components/properties/ImportLeadsDialog.tsx` — 3-step dialog (Upload → Map → Result). Uses `<Dialog>`, `<Select>` per field, preview table, summary view.
-- `public/sample-leads.csv` — small example template.
+## Per-provider timeout
 
-**Edits**
-- `src/routes/_authenticated/app.properties.index.tsx` — add the button + sample link in the header row; mount `<ImportLeadsDialog>`.
+`Promise.race([work, sleep(50_000).then(() => { throw new Error('timeout after 50s') })])`. The 50s budget keeps each fan-out request well under the Worker limit. Any provider that exceeds it is recorded with `error='timeout after 50s'`, `inserted=0`, `updated=0`, and the orchestrator moves on.
 
-**Reuse**
-- Same upsert shape and conflict key as `importDistressedProperties` → scoring, contacts, outreach, Vision all work automatically.
-- Subscription middleware already applied to the existing import path; the new server fn uses the same.
+## What does NOT change
 
-## Out of scope
+- Provider query code (`nyc-signals-provider.server.ts`, `philly-signals-provider.server.ts`, `nyc-provider.server.ts`) — untouched.
+- `SYNC_TARGETS`, `PER_TARGET_LIMIT`, schema, RLS, cron schedule, search/detail UI, billing, auth, scorer.
 
-- No new tables, RLS, or migrations (existing `properties` schema + unique key already covers it).
-- No billing / auth changes.
-- `ENABLE_ATTOM` stays false.
-- No background job — synchronous import is fine at 5k-row cap; we can add a queue later if needed.
+## After applying
+
+Run `runDistressSyncNow` and report per-provider `inserted/updated/error` for all 10 providers (5 NYC + 4 Philly + nyc_opendata).
