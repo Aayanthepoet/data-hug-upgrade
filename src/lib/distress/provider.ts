@@ -13,7 +13,10 @@ export type DistressType =
   | "absentee"
   | "hpd_litigation"
   | "eviction"
-  | "vacate_order";
+  | "vacate_order"
+  | "code_violation"
+  | "unsafe_structure"
+  | "sheriff_sale";
 
 
 export interface DistressSearchFilters {
