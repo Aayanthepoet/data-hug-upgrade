@@ -53,7 +53,7 @@ function ContactsPage() {
     setPending({ id: ownerId, kind: "ai" });
     try {
       const res = await resolve({ data: { owner_id: ownerId } });
-      toast.success(`AI resolver: ${res.resolved} candidate(s)`);
+      toast.warning(`Generated ${res.resolved} SAMPLE candidate(s) — DO NOT CONTACT (unverified AI guesses)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
