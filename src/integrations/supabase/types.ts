@@ -2208,6 +2208,9 @@ export type Database = {
         | "hpd_litigation"
         | "eviction"
         | "vacate_order"
+        | "code_violation"
+        | "unsafe_structure"
+        | "sheriff_sale"
       listing_status:
         | "active"
         | "pending"
@@ -2379,6 +2382,9 @@ export const Constants = {
         "hpd_litigation",
         "eviction",
         "vacate_order",
+        "code_violation",
+        "unsafe_structure",
+        "sheriff_sale",
       ],
       listing_status: [
         "active",
