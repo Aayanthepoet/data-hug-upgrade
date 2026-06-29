@@ -274,22 +274,26 @@ export async function runDistressSyncForProvider(
   return { provider, inserted, updated, skipped, error: errorMsg, startedAt, finishedAt };
 }
 
+export type SyncSummaryWithSource = SyncSummary & { ranVia: "hook" | "fallback" | "inline" };
+
 /** Orchestrator: fan out one Worker request per provider. */
 export async function runDistressSync(
   triggeredBy: "cron" | "manual",
-): Promise<SyncSummary[]> {
+): Promise<SyncSummaryWithSource[]> {
   const secret = process.env.CRON_SECRET;
   const providers = listProviders();
 
   // If we can't fan out (missing secret), fall back to inline sequential
   // execution so the call still works in any environment.
   if (!secret) {
-    const out: SyncSummary[] = [];
+    const out: SyncSummaryWithSource[] = [];
     for (const p of providers) {
-      out.push(await runDistressSyncForProvider(p, triggeredBy));
+      const s = await runDistressSyncForProvider(p, triggeredBy);
+      out.push({ ...s, ranVia: "inline" });
     }
     return out;
   }
+
 
   const url = `${STABLE_BASE_URL}/api/public/hooks/sync-distressed-one`;
   const results: Array<SyncSummary & { ranVia: "hook" | "fallback" }> = [];
