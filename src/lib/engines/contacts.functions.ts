@@ -37,14 +37,18 @@ export const resolveOwnerContacts = createServerFn({ method: "POST" })
       prompt: `Owner: ${JSON.stringify(owner, null, 2)}\n\nReturn up to 6 plausible contact candidates ordered by confidence.`,
     });
 
-    // Persist to contacts table for the owner
+    // These are LLM-guessed, NOT verified contacts. Flag every row as SAMPLE
+    // and set do_not_contact=true so outreach/exports cannot dial or email
+    // them. Until a real skip-trace provider is wired, this output is for
+    // research/research-only display.
     const rows = output.contacts.map((c) => ({
       owner_id: data.owner_id,
       contact_type: c.contact_type,
-      value: c.value,
-      confidence: Math.round(c.confidence),
+      value: `[SAMPLE — NOT VERIFIED] ${c.value}`,
+      confidence: 0,
       user_id: context.userId,
-      notes: `AI Contact Resolver: ${c.rationale}`,
+      do_not_contact: true,
+      notes: `AI Contact Resolver (UNVERIFIED guess): ${c.rationale} · DO NOT CONTACT — connect a real skip-trace data provider for verified contacts.`,
     }));
     if (rows.length) {
       await supabase.from("contacts").insert(rows as never);
