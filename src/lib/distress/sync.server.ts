@@ -5,6 +5,12 @@
 //   WHERE source_provider IS NOT NULL AND source_record_id IS NOT NULL, so
 //   manually-entered rows (source_provider NULL) are NEVER touched by upserts.
 // - Records a row in public.sync_runs per provider per run.
+//
+// Execution model:
+//   Each provider runs in its OWN Worker request via the
+//   /api/public/hooks/sync-distressed-one fan-out hook. One slow/hung provider
+//   (e.g. HPD Litigations) cannot block the others. Per-provider wall-clock
+//   budget is enforced with PROVIDER_TIMEOUT_MS.
 
 import { NYCOpenDataProvider } from "./nyc-provider.server";
 import { fetchNYCSignal } from "./nyc-signals-provider.server";
@@ -12,6 +18,11 @@ import { fetchPhillySignal } from "./philly-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
 
+const PROVIDER_TIMEOUT_MS = 50_000;
+const FANOUT_CONCURRENCY = 4;
+
+const STABLE_BASE_URL =
+  "https://project--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app";
 
 async function getAdminClient() {
   const mod = await import("@/integrations/supabase/client.server");
@@ -87,14 +98,13 @@ async function fetchForTarget(t: SyncTarget): Promise<DistressedPropertyRecord[]
       PER_TARGET_LIMIT,
     );
   }
-  // NYC Distress Signals (tax_lien, hpd_litigation, eviction, vacate_order)
+  // NYC Distress Signals
   return fetchNYCSignal(
     t.provider as Parameters<typeof fetchNYCSignal>[0],
     t.zip,
     PER_TARGET_LIMIT,
   );
 }
-
 
 export type SyncSummary = {
   provider: string;
@@ -106,133 +116,250 @@ export type SyncSummary = {
   finishedAt: string;
 };
 
+function listProviders(): string[] {
+  const set = new Set<string>();
+  for (const t of SYNC_TARGETS) set.add(t.provider);
+  return Array.from(set);
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const id = setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(id);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(id);
+        reject(e);
+      },
+    );
+  });
+}
+
+function errMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === "object") {
+    const o = e as Record<string, unknown>;
+    return (
+      [o.message, o.details, o.hint, o.code].filter(Boolean).join(" | ") ||
+      JSON.stringify(o)
+    );
+  }
+  return String(e);
+}
+
+/** Run a SINGLE provider end-to-end in this Worker request. */
+export async function runDistressSyncForProvider(
+  provider: string,
+  triggeredBy: "cron" | "manual",
+): Promise<SyncSummary> {
+  const admin = await getAdminClient();
+  const ownerId = await resolveSyncOwnerId(admin);
+  const targets = SYNC_TARGETS.filter((t) => t.provider === provider);
+  if (targets.length === 0) {
+    const now = new Date().toISOString();
+    return {
+      provider,
+      inserted: 0,
+      updated: 0,
+      skipped: 0,
+      error: "unknown provider",
+      startedAt: now,
+      finishedAt: now,
+    };
+  }
+
+  const startedAt = new Date().toISOString();
+  const { data: runRow, error: runErr } = await admin
+    .from("sync_runs")
+    .insert({ provider, started_at: startedAt, triggered_by: triggeredBy })
+    .select("id")
+    .single();
+  if (runErr) {
+    return {
+      provider,
+      inserted: 0,
+      updated: 0,
+      skipped: 0,
+      error: `Could not record run: ${runErr.message}`,
+      startedAt,
+      finishedAt: new Date().toISOString(),
+    };
+  }
+
+  let inserted = 0;
+  let updated = 0;
+  let skipped = 0;
+  let errorMsg: string | null = null;
+
+  const work = (async () => {
+    const rows = new Map<string, DistressedPropertyRecord>();
+    for (const t of targets) {
+      try {
+        const records = await withTimeout(
+          fetchForTarget(t),
+          PROVIDER_TIMEOUT_MS - 5_000,
+          `${provider}/${t.zip} fetch`,
+        );
+        for (const r of records) {
+          if (!r.sourceRecordId || !r.address) {
+            skipped++;
+            continue;
+          }
+          if (!rows.has(r.sourceRecordId)) rows.set(r.sourceRecordId, r);
+        }
+      } catch (e) {
+        console.error(`[sync] fetch failed for ${provider} ${t.zip}:`, e);
+      }
+    }
+
+    const allIds = Array.from(rows.keys());
+
+    const existingSet = new Set<string>();
+    const ID_CHUNK = 100;
+    for (let i = 0; i < allIds.length; i += ID_CHUNK) {
+      const idSlice = allIds.slice(i, i + ID_CHUNK);
+      const { data: existing, error: existErr } = await admin
+        .from("properties")
+        .select("source_record_id")
+        .eq("user_id", ownerId)
+        .eq("source_provider", provider)
+        .in("source_record_id", idSlice);
+      if (existErr) throw existErr;
+      for (const r of existing ?? []) {
+        if (r.source_record_id) existingSet.add(r.source_record_id);
+      }
+    }
+
+    const payload = Array.from(rows.values()).map((r) => recordToRow(ownerId, provider, r));
+    const CHUNK = 200;
+    for (let i = 0; i < payload.length; i += CHUNK) {
+      const slice = payload.slice(i, i + CHUNK);
+      const { error: upErr } = await admin
+        .from("properties")
+        .upsert(slice, {
+          onConflict: "user_id,source_provider,source_record_id",
+          ignoreDuplicates: false,
+        });
+      if (upErr) throw upErr;
+    }
+
+    for (const id of allIds) {
+      if (existingSet.has(id)) updated++;
+      else inserted++;
+    }
+  })();
+
+  try {
+    await withTimeout(work, PROVIDER_TIMEOUT_MS, `${provider} run`);
+  } catch (e) {
+    errorMsg = errMessage(e);
+    console.error(`[sync] provider ${provider} failed:`, e);
+  }
+
+  const finishedAt = new Date().toISOString();
+  await admin
+    .from("sync_runs")
+    .update({
+      finished_at: finishedAt,
+      inserted,
+      updated,
+      skipped,
+      error: errorMsg,
+    })
+    .eq("id", runRow.id);
+
+  return { provider, inserted, updated, skipped, error: errorMsg, startedAt, finishedAt };
+}
+
+/** Orchestrator: fan out one Worker request per provider. */
 export async function runDistressSync(
   triggeredBy: "cron" | "manual",
 ): Promise<SyncSummary[]> {
-  const admin = await getAdminClient();
-  const ownerId = await resolveSyncOwnerId(admin);
+  const secret = process.env.CRON_SECRET;
+  const providers = listProviders();
 
-  // Group targets by provider so we get one sync_runs row per provider per run.
-  const byProvider = new Map<string, SyncTarget[]>();
-  for (const t of SYNC_TARGETS) {
-    const arr = byProvider.get(t.provider) ?? [];
-    arr.push(t);
-    byProvider.set(t.provider, arr);
+  // If we can't fan out (missing secret), fall back to inline sequential
+  // execution so the call still works in any environment.
+  if (!secret) {
+    const out: SyncSummary[] = [];
+    for (const p of providers) {
+      out.push(await runDistressSyncForProvider(p, triggeredBy));
+    }
+    return out;
   }
 
-  const summaries: SyncSummary[] = [];
+  const url = `${STABLE_BASE_URL}/api/public/hooks/sync-distressed-one`;
+  const results: SyncSummary[] = [];
+  const queue = [...providers];
 
-  for (const [provider, targets] of byProvider) {
-    const startedAt = new Date().toISOString();
-    const { data: runRow, error: runErr } = await admin
-      .from("sync_runs")
-      .insert({ provider, started_at: startedAt, triggered_by: triggeredBy })
-      .select("id")
-      .single();
-    if (runErr) {
-      summaries.push({
-        provider,
-        inserted: 0,
-        updated: 0,
-        skipped: 0,
-        error: `Could not record run: ${runErr.message}`,
-        startedAt,
-        finishedAt: new Date().toISOString(),
-      });
-      continue;
-    }
-
-    let inserted = 0;
-    let updated = 0;
-    let skipped = 0;
-    let errorMsg: string | null = null;
-
-    try {
-      // Collect all records, dedupe by sourceRecordId.
-      const rows = new Map<string, DistressedPropertyRecord>();
-      for (const t of targets) {
-        try {
-          const records = await fetchForTarget(t);
-          for (const r of records) {
-            if (!r.sourceRecordId || !r.address) {
-              skipped++;
-              continue;
-            }
-            if (!rows.has(r.sourceRecordId)) rows.set(r.sourceRecordId, r);
-          }
-        } catch (e) {
-          console.error(`[sync] fetch failed for ${provider} ${t.zip}:`, e);
-          // partial failure — keep going
-        }
-      }
-
-      const allIds = Array.from(rows.keys());
-
-      // Batch the existence query — a single .in() with hundreds of IDs blows
-      // past PostgREST's URL length limit and returns an opaque error object.
-      const existingSet = new Set<string>();
-      const ID_CHUNK = 100;
-      for (let i = 0; i < allIds.length; i += ID_CHUNK) {
-        const idSlice = allIds.slice(i, i + ID_CHUNK);
-        const { data: existing, error: existErr } = await admin
-          .from("properties")
-          .select("source_record_id")
-          .eq("user_id", ownerId)
-          .eq("source_provider", provider)
-          .in("source_record_id", idSlice);
-        if (existErr) throw existErr;
-        for (const r of existing ?? []) {
-          if (r.source_record_id) existingSet.add(r.source_record_id);
-        }
-      }
-
-      const payload = Array.from(rows.values()).map((r) => recordToRow(ownerId, provider, r));
-
-      // Chunk upserts to keep payloads small.
-      const CHUNK = 200;
-      for (let i = 0; i < payload.length; i += CHUNK) {
-        const slice = payload.slice(i, i + CHUNK);
-        const { error: upErr } = await admin
-          .from("properties")
-          .upsert(slice, {
-            onConflict: "user_id,source_provider,source_record_id",
-            ignoreDuplicates: false,
+  async function worker() {
+    while (queue.length) {
+      const p = queue.shift();
+      if (!p) return;
+      const startedAt = new Date().toISOString();
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: secret! },
+          body: JSON.stringify({ provider: p, triggeredBy }),
+        });
+        const text = await resp.text();
+        if (!resp.ok) {
+          results.push({
+            provider: p,
+            inserted: 0,
+            updated: 0,
+            skipped: 0,
+            error: `fan-out HTTP ${resp.status}: ${text.slice(0, 300)}`,
+            startedAt,
+            finishedAt: new Date().toISOString(),
           });
-        if (upErr) throw upErr;
+          continue;
+        }
+        try {
+          const json = JSON.parse(text) as { summary?: SyncSummary };
+          if (json.summary) {
+            results.push(json.summary);
+          } else {
+            results.push({
+              provider: p,
+              inserted: 0,
+              updated: 0,
+              skipped: 0,
+              error: "fan-out: missing summary",
+              startedAt,
+              finishedAt: new Date().toISOString(),
+            });
+          }
+        } catch {
+          results.push({
+            provider: p,
+            inserted: 0,
+            updated: 0,
+            skipped: 0,
+            error: `fan-out: invalid JSON: ${text.slice(0, 200)}`,
+            startedAt,
+            finishedAt: new Date().toISOString(),
+          });
+        }
+      } catch (e) {
+        results.push({
+          provider: p,
+          inserted: 0,
+          updated: 0,
+          skipped: 0,
+          error: `fan-out network error: ${errMessage(e)}`,
+          startedAt,
+          finishedAt: new Date().toISOString(),
+        });
       }
-
-      for (const id of allIds) {
-        if (existingSet.has(id)) updated++;
-        else inserted++;
-      }
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        errorMsg = e.message;
-      } else if (e && typeof e === "object") {
-        const o = e as Record<string, unknown>;
-        errorMsg = [o.message, o.details, o.hint, o.code]
-          .filter(Boolean)
-          .join(" | ") || JSON.stringify(o);
-      } else {
-        errorMsg = String(e);
-      }
-      console.error(`[sync] provider ${provider} failed:`, e);
     }
-
-    const finishedAt = new Date().toISOString();
-    await admin
-      .from("sync_runs")
-      .update({
-        finished_at: finishedAt,
-        inserted,
-        updated,
-        skipped,
-        error: errorMsg,
-      })
-      .eq("id", runRow.id);
-
-    summaries.push({ provider, inserted, updated, skipped, error: errorMsg, startedAt, finishedAt });
   }
 
-  return summaries;
+  const workers = Array.from({ length: Math.min(FANOUT_CONCURRENCY, providers.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
 }
