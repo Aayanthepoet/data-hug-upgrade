@@ -96,7 +96,7 @@ export async function fetchPhlTaxDelinquent(zip: string, limit: number): Promise
            p.market_value, t.total AS tax_owed,
            ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng
       FROM opa_properties_public p
-      JOIN real_estate_tax_balances t ON t.opa_number = p.parcel_number
+      JOIN real_estate_tax_balances t ON t.parcel_number::text = p.parcel_number
      WHERE p.zip_code LIKE '${zip}%'
        AND p.location IS NOT NULL
        AND p.the_geom IS NOT NULL
@@ -179,7 +179,8 @@ type UnsafeRow = {
 };
 
 export async function fetchPhlUnsafe(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
-  const since = monthsAgoIso(24);
+  // li_unsafe is a historical/frozen dataset (max violationdate ~2020-03-12).
+  // Filter on ZIP + open case only; order by most recent violation.
   const sql = `
     SELECT casenumber, opa_account_num, address, zip, ownername,
            violationdate, caseresolutiondate, violationtype,
@@ -187,7 +188,6 @@ export async function fetchPhlUnsafe(zip: string, limit: number): Promise<Distre
       FROM li_unsafe
      WHERE zip LIKE '${zip}%'
        AND caseresolutiondate IS NULL
-       AND violationdate >= '${since}'
        AND address IS NOT NULL
      ORDER BY violationdate DESC
      LIMIT ${limit}`;
