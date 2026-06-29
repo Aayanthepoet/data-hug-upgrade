@@ -8,6 +8,7 @@ const distressTypeEnum = z.enum([
   "reo", "preforeclosure", "auction", "tax_lien",
   "tax_delinquent", "fsbo_stale", "vacant", "absentee",
   "hpd_litigation", "eviction", "vacate_order",
+  "code_violation", "unsafe_structure", "sheriff_sale",
 ]);
 
 

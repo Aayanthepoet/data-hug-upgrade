@@ -7,8 +7,8 @@
 // - Records a row in public.sync_runs per provider per run.
 
 import { NYCOpenDataProvider } from "./nyc-provider.server";
-import { PhillyCartoProvider } from "./philly-provider.server";
 import { fetchNYCSignal } from "./nyc-signals-provider.server";
+import { fetchPhillySignal } from "./philly-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
 
@@ -80,17 +80,19 @@ async function fetchForTarget(t: SyncTarget): Promise<DistressedPropertyRecord[]
       limit: PER_TARGET_LIMIT,
     });
   }
-  if (t.provider === "philly_carto") {
-    const provider = new PhillyCartoProvider();
-    return provider.searchDistressed({
-      state: "PA",
-      zip: t.zip,
-      city: "Philadelphia",
-      limit: PER_TARGET_LIMIT,
-    });
+  if (t.provider.startsWith("phl_")) {
+    return fetchPhillySignal(
+      t.provider as Parameters<typeof fetchPhillySignal>[0],
+      t.zip,
+      PER_TARGET_LIMIT,
+    );
   }
   // NYC Distress Signals (tax_lien, hpd_litigation, eviction, vacate_order)
-  return fetchNYCSignal(t.provider, t.zip, PER_TARGET_LIMIT);
+  return fetchNYCSignal(
+    t.provider as Parameters<typeof fetchNYCSignal>[0],
+    t.zip,
+    PER_TARGET_LIMIT,
+  );
 }
 
 
