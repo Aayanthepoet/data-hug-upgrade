@@ -53,7 +53,95 @@ function score(rec: {
 export const searchDistressedProperties = createServerFn({ method: "POST" })
   .middleware([requireActiveSubscription])
   .inputValidator((data: unknown) => filtersSchema.parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    // Primary source: the synced `properties` table. The nightly distress
+    // sync already pulls NYC/Philly rows here, and the Properties list
+    // reads from it — Search must read from the same place so users see
+    // what they actually have.
+    let q = context.supabase
+      .from("properties")
+      .select(
+        "id, source_record_id, source_provider, address, city, state, zip, county, " +
+        "property_type, beds, baths, sqft, year_built, estimated_value, equity, " +
+        "list_price, list_date, days_on_market, auction_date, tax_owed, lien_amount, " +
+        "distress_type, listing_status, is_absentee, is_vacant",
+      )
+      .eq("user_id", context.userId)
+      .limit(data.limit ?? 50);
+
+    if (data.state) q = q.eq("state", data.state);
+    if (data.zip) q = q.eq("zip", data.zip);
+    if (data.county) q = q.eq("county", data.county);
+    if (data.city) q = q.eq("city", data.city);
+    if (data.distressTypes && data.distressTypes.length) {
+      q = q.in("distress_type", data.distressTypes);
+    }
+    // Only apply value bounds when the user supplied them. Many signal rows
+    // (tax lien, code violation, eviction, vacate, sheriff deed) carry NULL
+    // estimated_value — never silently exclude them.
+    if (typeof data.minListPrice === "number") {
+      q = q.gte("estimated_value", data.minListPrice);
+    }
+    if (typeof data.maxListPrice === "number") {
+      q = q.lte("estimated_value", data.maxListPrice);
+    }
+    if (typeof data.minBeds === "number") q = q.gte("beds", data.minBeds);
+    if (typeof data.minDaysOnMarket === "number") {
+      q = q.gte("days_on_market", data.minDaysOnMarket);
+    }
+    if (typeof data.minEquity === "number") q = q.gte("equity", data.minEquity);
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const dbRecords = (rows ?? []).map((r) => {
+      const rec = {
+        sourceRecordId: r.source_record_id ?? r.id,
+        sourceProvider: r.source_provider ?? "synced",
+        address: r.address,
+        city: r.city,
+        state: r.state,
+        zip: r.zip,
+        county: r.county,
+        propertyType: r.property_type,
+        beds: r.beds,
+        baths: r.baths,
+        sqft: r.sqft,
+        yearBuilt: r.year_built,
+        estimatedValue: r.estimated_value,
+        equity: r.equity,
+        listPrice: r.list_price,
+        listDate: r.list_date,
+        daysOnMarket: r.days_on_market,
+        auctionDate: r.auction_date,
+        taxOwed: r.tax_owed,
+        lienAmount: r.lien_amount,
+        distressType: (r.distress_type ?? "none") as DistressType,
+        listingStatus: r.listing_status,
+        ownerName: null as string | null,
+        isAbsentee: !!r.is_absentee,
+        isVacant: !!r.is_vacant,
+        lat: null as number | null,
+        lng: null as number | null,
+      };
+      return {
+        ...rec,
+        leadScore: score({
+          equity: rec.equity,
+          estimatedValue: rec.estimatedValue,
+          distressType: rec.distressType,
+          daysOnMarket: rec.daysOnMarket,
+          isVacant: rec.isVacant,
+          isAbsentee: rec.isAbsentee,
+        }),
+      };
+    });
+
+    if (dbRecords.length > 0) {
+      return { records: dbRecords, provider: "synced", usedFallback: false };
+    }
+
+    // No synced rows match → fall back to a live provider call (NYC / Philly).
     const { searchDistressedViaRouter } = await import("./router.server");
     const { records, provider, usedFallback } = await searchDistressedViaRouter(data);
     return {
@@ -62,7 +150,6 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
         leadScore: score(r),
         sourceProvider: r.sourceProvider ?? (usedFallback ? "mock" : provider),
       })),
-
       provider,
       usedFallback,
     };
