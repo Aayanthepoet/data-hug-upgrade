@@ -252,6 +252,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
           setErr(null);
           if (!to.trim() || !body.trim()) { setErr("Recipient and body are required."); return; }
           if (isDnc) { setErr("This recipient is flagged Do Not Contact. Remove the DNC flag in Contacts before sending."); return; }
+          if (channel === "sms" && !smsAck) { setErr("Acknowledge TCPA consent before sending SMS."); return; }
           mut.mutate();
         }}
         className="bg-[#0a0f17] border border-border rounded-lg w-full max-w-lg p-5 space-y-4"
