@@ -20,11 +20,15 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const SMS_CONSENT_TEXT =
+  "I agree to receive SMS notifications from PropAI related to my account, property alerts, and service updates. Message & data rates may apply. Message frequency varies. Reply STOP to opt out, HELP for help. Consent is not a condition of purchase.";
+
 function AuthPage() {
   const navigate = useNavigate();
   const { mode } = Route.useSearch();
   const isSignup = mode === "signup";
   const [loading, setLoading] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,16 +46,28 @@ function AuthPage() {
     if (!parsed.success) { toast.error(parsed.error.issues[0]!.message); return; }
     setLoading(true);
     if (isSignup) {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/app`,
-          data: { full_name: parsed.data.full_name },
+          data: { full_name: parsed.data.full_name, sms_consent: smsConsent },
         },
       });
+      if (error) { setLoading(false); toast.error(error.message); return; }
+      if (smsConsent && signUpData.user?.id) {
+        try {
+          await supabase.from("sms_consents").insert({
+            user_id: signUpData.user.id,
+            consent_text: SMS_CONSENT_TEXT,
+            source: "signup",
+            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+          });
+        } catch {
+          // non-blocking; consent record best-effort
+        }
+      }
       setLoading(false);
-      if (error) { toast.error(error.message); return; }
       toast.success("Account created!");
       navigate({ to: "/app" });
     } else {
@@ -63,6 +79,7 @@ function AuthPage() {
       navigate({ to: "/app" });
     }
   }
+
 
   async function signInGoogle() {
     setLoading(true);
