@@ -19,11 +19,15 @@ function CampaignsPage() {
   const compose = useServerFn(composeWithLanguageEngine);
   const [task, setTask] = useState<Task>("outreach_letter");
   const [tone, setTone] = useState<"warm" | "professional" | "casual" | "urgent">("warm");
+  const [smsAck, setSmsAck] = useState(false);
   const [context, setContext] = useState(
     "Owner: Jane Doe\nProperty: 123 Maple St, Newark NJ\nEquity: ~62%\nDistress: 90+ days preforeclosure",
   );
   const [variations, setVariations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const isSms = task === "outreach_sms";
+  const blocked = isSms && !smsAck;
 
   async function run() {
     setLoading(true);
