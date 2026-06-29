@@ -2,11 +2,12 @@
 // Sources are NYC Socrata + Philadelphia Carto. No paid APIs.
 
 import type { NYCSignalProvider } from "./nyc-signals-provider.server";
+import type { PhillySignalProvider } from "./philly-signals-provider.server";
 
 export type SyncTarget =
   | { provider: "nyc_opendata"; zip: string; borough?: string }
-  | { provider: "philly_carto"; zip: string }
-  | { provider: NYCSignalProvider; zip: string };
+  | { provider: NYCSignalProvider; zip: string }
+  | { provider: PhillySignalProvider; zip: string };
 
 const NYC_ZIPS: { zip: string; borough: string }[] = [
   // Brooklyn
@@ -29,14 +30,23 @@ const NYC_SIGNAL_PROVIDERS: NYCSignalProvider[] = [
   "nyc_dob_vacate",
 ];
 
+const PHILLY_SIGNAL_PROVIDERS: PhillySignalProvider[] = [
+  "phl_tax_delinquent",
+  "phl_li_violation",
+  "phl_unsafe",
+  "phl_sheriff_deed",
+];
+
 export const SYNC_TARGETS: SyncTarget[] = [
-  // PLUTO absentee
+  // NYC PLUTO absentee
   ...NYC_ZIPS.map(({ zip, borough }) => ({ provider: "nyc_opendata" as const, zip, borough })),
-  // Philly OPA / tax-delinquent
-  ...PHILLY_ZIPS.map((zip) => ({ provider: "philly_carto" as const, zip })),
   // NYC Distress Signals (one target per (provider, zip))
   ...NYC_SIGNAL_PROVIDERS.flatMap((provider) =>
     NYC_ZIPS.map(({ zip }) => ({ provider, zip })),
+  ),
+  // Philadelphia Distress Signals (one target per (provider, zip))
+  ...PHILLY_SIGNAL_PROVIDERS.flatMap((provider) =>
+    PHILLY_ZIPS.map((zip) => ({ provider, zip })),
   ),
 ];
 
