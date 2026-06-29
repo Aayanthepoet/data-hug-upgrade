@@ -54,15 +54,15 @@ function CampaignsPage() {
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-[var(--w55)]">Task</label>
-            <Select value={task} onValueChange={(v) => setTask(v as Task)}>
+            <Select value={task} onValueChange={(v) => { setTask(v as Task); if (v !== "outreach_sms") setSmsAck(false); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="outreach_letter">Seller letter</SelectItem>
-                <SelectItem value="outreach_sms">SMS (160 char)</SelectItem>
-                <SelectItem value="outreach_email">Email + subject</SelectItem>
+                <SelectItem value="outreach_letter">Seller letter (direct mail) — recommended</SelectItem>
+                <SelectItem value="outreach_email">Email + subject — recommended</SelectItem>
                 <SelectItem value="negotiation_reply">Negotiation reply</SelectItem>
                 <SelectItem value="listing_description">Listing description</SelectItem>
                 <SelectItem value="cma_summary">CMA summary</SelectItem>
+                <SelectItem value="outreach_sms">SMS — consent required (TCPA)</SelectItem>
               </SelectContent>
             </Select>
           </div>
