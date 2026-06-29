@@ -126,14 +126,14 @@ function ContactsPage() {
                   <div className="text-xs text-[var(--w55)]">{o.entity_type ?? "individual"} · {o.mailing_address ?? ""}</div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runSkip(o.id)}>
-                    {isPending && pending?.kind === "skip" ? "Tracing…" : "Skip trace"}
+                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runSkip(o.id)} title="Generates sample (unverified) contacts — DNC enforced">
+                    {isPending && pending?.kind === "skip" ? "Tracing…" : "Generate sample (skip trace)"}
                   </Button>
-                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runAi(o.id)}>
-                    {isPending && pending?.kind === "ai" ? "Resolving…" : "AI resolve"}
+                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runAi(o.id)} title="LLM-guessed candidates — DNC enforced">
+                    {isPending && pending?.kind === "ai" ? "Resolving…" : "Generate sample (AI guess)"}
                   </Button>
                   <Button size="sm" disabled={isPending} onClick={() => runBoth(o.id)}>
-                    {isPending && pending?.kind === "both" ? "Running…" : "Run both"}
+                    {isPending && pending?.kind === "both" ? "Running…" : "Run both (sample)"}
                   </Button>
                 </div>
               </div>
@@ -142,13 +142,17 @@ function ContactsPage() {
                   {o.contacts.map((c) => {
                     const isSkip = typeof c.notes === "string" && c.notes.startsWith("Skip trace");
                     const dnc = Boolean(c.do_not_contact);
+                    const isSample = typeof c.value === "string" && c.value.startsWith("[SAMPLE");
                     const isToggling = togglingId === c.id;
                     return (
                       <div
                         key={c.id}
-                        className={`text-xs flex items-center gap-2 border border-border rounded p-2 ${dnc ? "opacity-60 bg-red-500/5" : ""}`}
+                        className={`text-xs flex items-center gap-2 border rounded p-2 ${isSample ? "border-amber-400/40 bg-amber-400/5" : "border-border"} ${dnc ? "opacity-70" : ""}`}
                       >
                         <Badge variant="outline">{c.contact_type}</Badge>
+                        {isSample && (
+                          <Badge className="text-[10px] bg-amber-500/20 text-amber-200 border border-amber-400/40" title="Fabricated sample — do not contact">SAMPLE</Badge>
+                        )}
                         <span className={`font-mono truncate ${dnc ? "line-through" : ""}`}>{c.value}</span>
                         <span className="ml-auto flex items-center gap-1.5">
                           <Badge variant="secondary" className="text-[10px]">{isSkip ? "skip-trace" : "AI"}</Badge>
@@ -157,11 +161,11 @@ function ContactsPage() {
                             size="sm"
                             variant={dnc ? "destructive" : "ghost"}
                             className="h-6 px-2 text-[10px]"
-                            disabled={isToggling}
+                            disabled={isToggling || isSample}
                             onClick={() => onToggleDnc(c.id, !dnc)}
-                            title={dnc ? "Allow outreach again" : "Exclude from outreach & exports"}
+                            title={isSample ? "Sample data is locked to Do Not Contact" : dnc ? "Allow outreach again" : "Exclude from outreach & exports"}
                           >
-                            {isToggling ? "…" : dnc ? "DNC" : "Allow"}
+                            {isToggling ? "…" : isSample ? "DNC (locked)" : dnc ? "DNC" : "Allow"}
                           </Button>
                         </span>
                       </div>
@@ -176,3 +180,4 @@ function ContactsPage() {
     </div>
   );
 }
+
