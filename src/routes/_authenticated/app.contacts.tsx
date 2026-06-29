@@ -96,8 +96,18 @@ function ContactsPage() {
       <div>
         <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Contact Resolver · skip-trace</div>
         <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">Skip-traced <span className="h-italic">contacts</span></h1>
-        <p className="text-[var(--w55)] mt-3 max-w-xl">Resolve phones, emails, and socials from your owner records. Skip-trace provider returns verified-style hits; the AI resolver adds inferred candidates. All scores are pending verification.</p>
+        <p className="text-[var(--w55)] mt-3 max-w-xl">Resolve phones, emails, and socials from your owner records. No real skip-trace data provider is connected yet — output below is sample data for UI testing only.</p>
       </div>
+
+      <div className="surface p-4 border border-amber-400/40 bg-amber-400/10">
+        <div className="flex items-start gap-3">
+          <div className="text-amber-300 font-semibold text-sm">⚠ Sample data only — do not contact</div>
+        </div>
+        <p className="text-xs text-[var(--w70)] mt-2 max-w-2xl">
+          No real skip-trace data provider (BatchData, IDI, TLO, etc.) is wired. Any phones, emails, or relatives produced by <em>Skip trace</em> or <em>AI resolve</em> are <strong>fabricated / LLM-guessed</strong>, automatically prefixed with <code className="font-mono">[SAMPLE — NOT VERIFIED]</code>, and forced to <strong>Do Not Contact</strong> so outreach and exports cannot dial or email them. To get real verified contacts, connect a skip-trace provider in Settings → Integrations.
+        </p>
+      </div>
+
 
       <div className="space-y-3">
         {(owners ?? []).length === 0 && (
