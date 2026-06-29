@@ -275,7 +275,7 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
               <button
                 key={c}
                 type="button"
-                onClick={() => { setChannel(c); setContactId(null); setTo(""); }}
+                onClick={() => { setChannel(c); setContactId(null); setTo(""); if (c !== "sms") setSmsAck(false); }}
                 className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded border transition-colors ${
                   channel === c ? "bg-cyan/15 text-cyan border-cyan/40" : "border-border text-[var(--w55)] hover:bg-white/5"
                 }`}
@@ -285,6 +285,22 @@ function SendMessageDialog({ onSent }: { onSent: () => void }) {
             );
           })}
         </div>
+
+        {channel === "sms" && (
+          <div className="border border-amber-500/40 bg-amber-500/10 rounded p-3 space-y-2 text-[11px] text-amber-100">
+            <div className="font-semibold uppercase tracking-wider text-amber-300">⚠ TCPA / cold-SMS warning</div>
+            <p className="opacity-90">
+              Property owners in PropAI have not opted in to receive texts. Cold SMS to non-consenting recipients can violate
+              the TCPA, state laws, and carrier policy. Prefer email or direct mail for owner outreach. Only send SMS where
+              you have prior express written consent from the recipient.
+            </p>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" checked={smsAck} onChange={(e) => setSmsAck(e.target.checked)} className="mt-0.5" />
+              <span>I confirm I have prior express written consent from this recipient and accept full responsibility for TCPA/state/carrier compliance.</span>
+            </label>
+          </div>
+        )}
+
 
         {(channel === "sms" || channel === "email") && (
           <div className="space-y-2 border border-border rounded p-3 bg-[rgba(255,255,255,.02)]">
