@@ -1508,6 +1508,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_consents: {
+        Row: {
+          consent_text: string
+          consented_at: string
+          id: string
+          ip: string | null
+          source: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_text: string
+          consented_at?: string
+          id?: string
+          ip?: string | null
+          source?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_text?: string
+          consented_at?: string
+          id?: string
+          ip?: string | null
+          source?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       sms_opt_outs: {
         Row: {
           created_at: string
