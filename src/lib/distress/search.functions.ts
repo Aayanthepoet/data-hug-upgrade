@@ -60,12 +60,7 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
     // what they actually have.
     let q = context.supabase
       .from("properties")
-      .select(
-        "id, source_record_id, source_provider, address, city, state, zip, county, " +
-        "property_type, beds, baths, sqft, year_built, estimated_value, equity, " +
-        "list_price, list_date, days_on_market, auction_date, tax_owed, lien_amount, " +
-        "distress_type, listing_status, is_absentee, is_vacant",
-      )
+      .select("id, source_record_id, source_provider, address, city, state, zip, county, property_type, beds, baths, sqft, year_built, estimated_value, equity, list_price, list_date, days_on_market, auction_date, tax_owed, lien_amount, distress_type, listing_status, is_absentee, is_vacant")
       .eq("user_id", context.userId)
       .limit(data.limit ?? 50);
 
