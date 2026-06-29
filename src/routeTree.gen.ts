@@ -57,6 +57,7 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
 import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
+import { Route as ApiPublicHooksSyncDistressedOneRouteImport } from './routes/api/public/hooks/sync-distressed-one'
 import { Route as ApiPublicHooksSyncDistressedRouteImport } from './routes/api/public/hooks/sync-distressed'
 import { Route as ApiPublicHooksSignwellRouteImport } from './routes/api/public/hooks/signwell'
 import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
@@ -339,6 +340,12 @@ const ApiPublicHooksTwilioSmsRoute = ApiPublicHooksTwilioSmsRouteImport.update({
   path: '/api/public/hooks/twilio-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSyncDistressedOneRoute =
+  ApiPublicHooksSyncDistressedOneRouteImport.update({
+    id: '/api/public/hooks/sync-distressed-one',
+    path: '/api/public/hooks/sync-distressed-one',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSyncDistressedRoute =
   ApiPublicHooksSyncDistressedRouteImport.update({
     id: '/api/public/hooks/sync-distressed',
@@ -553,6 +560,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/sync-distressed': typeof ApiPublicHooksSyncDistressedRoute
+  '/api/public/hooks/sync-distressed-one': typeof ApiPublicHooksSyncDistressedOneRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -626,6 +634,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/sync-distressed': typeof ApiPublicHooksSyncDistressedRoute
+  '/api/public/hooks/sync-distressed-one': typeof ApiPublicHooksSyncDistressedOneRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -703,6 +712,7 @@ export interface FileRoutesById {
   '/api/public/hooks/outreach-reply': typeof ApiPublicHooksOutreachReplyRoute
   '/api/public/hooks/signwell': typeof ApiPublicHooksSignwellRoute
   '/api/public/hooks/sync-distressed': typeof ApiPublicHooksSyncDistressedRoute
+  '/api/public/hooks/sync-distressed-one': typeof ApiPublicHooksSyncDistressedOneRoute
   '/api/public/hooks/twilio-sms': typeof ApiPublicHooksTwilioSmsRoute
   '/api/public/hooks/twilio-voice': typeof ApiPublicHooksTwilioVoiceRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -780,6 +790,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/sync-distressed'
+    | '/api/public/hooks/sync-distressed-one'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/api/public/webhooks/stripe'
@@ -853,6 +864,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/sync-distressed'
+    | '/api/public/hooks/sync-distressed-one'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/api/public/webhooks/stripe'
@@ -929,6 +941,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/outreach-reply'
     | '/api/public/hooks/signwell'
     | '/api/public/hooks/sync-distressed'
+    | '/api/public/hooks/sync-distressed-one'
     | '/api/public/hooks/twilio-sms'
     | '/api/public/hooks/twilio-voice'
     | '/api/public/webhooks/stripe'
@@ -967,6 +980,7 @@ export interface RootRouteChildren {
   ApiPublicHooksOutreachReplyRoute: typeof ApiPublicHooksOutreachReplyRoute
   ApiPublicHooksSignwellRoute: typeof ApiPublicHooksSignwellRoute
   ApiPublicHooksSyncDistressedRoute: typeof ApiPublicHooksSyncDistressedRoute
+  ApiPublicHooksSyncDistressedOneRoute: typeof ApiPublicHooksSyncDistressedOneRoute
   ApiPublicHooksTwilioSmsRoute: typeof ApiPublicHooksTwilioSmsRoute
   ApiPublicHooksTwilioVoiceRoute: typeof ApiPublicHooksTwilioVoiceRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
@@ -1315,6 +1329,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/twilio-sms'
       fullPath: '/api/public/hooks/twilio-sms'
       preLoaderRoute: typeof ApiPublicHooksTwilioSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/sync-distressed-one': {
+      id: '/api/public/hooks/sync-distressed-one'
+      path: '/api/public/hooks/sync-distressed-one'
+      fullPath: '/api/public/hooks/sync-distressed-one'
+      preLoaderRoute: typeof ApiPublicHooksSyncDistressedOneRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/sync-distressed': {
@@ -1762,6 +1783,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksOutreachReplyRoute: ApiPublicHooksOutreachReplyRoute,
   ApiPublicHooksSignwellRoute: ApiPublicHooksSignwellRoute,
   ApiPublicHooksSyncDistressedRoute: ApiPublicHooksSyncDistressedRoute,
+  ApiPublicHooksSyncDistressedOneRoute: ApiPublicHooksSyncDistressedOneRoute,
   ApiPublicHooksTwilioSmsRoute: ApiPublicHooksTwilioSmsRoute,
   ApiPublicHooksTwilioVoiceRoute: ApiPublicHooksTwilioVoiceRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
