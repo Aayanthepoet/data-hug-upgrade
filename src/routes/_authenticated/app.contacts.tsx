@@ -53,7 +53,7 @@ function ContactsPage() {
     setPending({ id: ownerId, kind: "ai" });
     try {
       const res = await resolve({ data: { owner_id: ownerId } });
-      toast.success(`AI resolver: ${res.resolved} candidate(s)`);
+      toast.warning(`Generated ${res.resolved} SAMPLE candidate(s) — DO NOT CONTACT (unverified AI guesses)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -66,7 +66,7 @@ function ContactsPage() {
     setPending({ id: ownerId, kind: "skip" });
     try {
       const res = await skipTrace({ data: { owner_id: ownerId } });
-      toast.success(`Skip trace (${res.provider}): ${res.inserted} contact(s) · ${res.status}`);
+      toast.warning(`Generated ${res.inserted} SAMPLE contact(s) via ${res.provider} — DO NOT CONTACT (no real skip-trace provider connected)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -82,7 +82,7 @@ function ContactsPage() {
         skipTrace({ data: { owner_id: ownerId } }),
         resolve({ data: { owner_id: ownerId } }),
       ]);
-      toast.success(`Resolved ${skipRes.inserted} skip-trace + ${aiRes.resolved} AI candidate(s)`);
+      toast.warning(`Generated ${skipRes.inserted + aiRes.resolved} SAMPLE contact(s) — DO NOT CONTACT (unverified)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -96,8 +96,18 @@ function ContactsPage() {
       <div>
         <div className="eyebrow inline-flex"><span className="eyebrow-dot" />Contact Resolver · skip-trace</div>
         <h1 className="h-display text-[clamp(28px,4vw,44px)] mt-4">Skip-traced <span className="h-italic">contacts</span></h1>
-        <p className="text-[var(--w55)] mt-3 max-w-xl">Resolve phones, emails, and socials from your owner records. Skip-trace provider returns verified-style hits; the AI resolver adds inferred candidates. All scores are pending verification.</p>
+        <p className="text-[var(--w55)] mt-3 max-w-xl">Resolve phones, emails, and socials from your owner records. No real skip-trace data provider is connected yet — output below is sample data for UI testing only.</p>
       </div>
+
+      <div className="surface p-4 border border-amber-400/40 bg-amber-400/10">
+        <div className="flex items-start gap-3">
+          <div className="text-amber-300 font-semibold text-sm">⚠ Sample data only — do not contact</div>
+        </div>
+        <p className="text-xs text-[var(--w70)] mt-2 max-w-2xl">
+          No real skip-trace data provider (BatchData, IDI, TLO, etc.) is wired. Any phones, emails, or relatives produced by <em>Skip trace</em> or <em>AI resolve</em> are <strong>fabricated / LLM-guessed</strong>, automatically prefixed with <code className="font-mono">[SAMPLE — NOT VERIFIED]</code>, and forced to <strong>Do Not Contact</strong> so outreach and exports cannot dial or email them. To get real verified contacts, connect a skip-trace provider in Settings → Integrations.
+        </p>
+      </div>
+
 
       <div className="space-y-3">
         {(owners ?? []).length === 0 && (
@@ -116,14 +126,14 @@ function ContactsPage() {
                   <div className="text-xs text-[var(--w55)]">{o.entity_type ?? "individual"} · {o.mailing_address ?? ""}</div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runSkip(o.id)}>
-                    {isPending && pending?.kind === "skip" ? "Tracing…" : "Skip trace"}
+                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runSkip(o.id)} title="Generates sample (unverified) contacts — DNC enforced">
+                    {isPending && pending?.kind === "skip" ? "Tracing…" : "Generate sample (skip trace)"}
                   </Button>
-                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runAi(o.id)}>
-                    {isPending && pending?.kind === "ai" ? "Resolving…" : "AI resolve"}
+                  <Button size="sm" variant="outline" disabled={isPending} onClick={() => runAi(o.id)} title="LLM-guessed candidates — DNC enforced">
+                    {isPending && pending?.kind === "ai" ? "Resolving…" : "Generate sample (AI guess)"}
                   </Button>
                   <Button size="sm" disabled={isPending} onClick={() => runBoth(o.id)}>
-                    {isPending && pending?.kind === "both" ? "Running…" : "Run both"}
+                    {isPending && pending?.kind === "both" ? "Running…" : "Run both (sample)"}
                   </Button>
                 </div>
               </div>
@@ -132,13 +142,17 @@ function ContactsPage() {
                   {o.contacts.map((c) => {
                     const isSkip = typeof c.notes === "string" && c.notes.startsWith("Skip trace");
                     const dnc = Boolean(c.do_not_contact);
+                    const isSample = typeof c.value === "string" && c.value.startsWith("[SAMPLE");
                     const isToggling = togglingId === c.id;
                     return (
                       <div
                         key={c.id}
-                        className={`text-xs flex items-center gap-2 border border-border rounded p-2 ${dnc ? "opacity-60 bg-red-500/5" : ""}`}
+                        className={`text-xs flex items-center gap-2 border rounded p-2 ${isSample ? "border-amber-400/40 bg-amber-400/5" : "border-border"} ${dnc ? "opacity-70" : ""}`}
                       >
                         <Badge variant="outline">{c.contact_type}</Badge>
+                        {isSample && (
+                          <Badge className="text-[10px] bg-amber-500/20 text-amber-200 border border-amber-400/40" title="Fabricated sample — do not contact">SAMPLE</Badge>
+                        )}
                         <span className={`font-mono truncate ${dnc ? "line-through" : ""}`}>{c.value}</span>
                         <span className="ml-auto flex items-center gap-1.5">
                           <Badge variant="secondary" className="text-[10px]">{isSkip ? "skip-trace" : "AI"}</Badge>
@@ -147,11 +161,11 @@ function ContactsPage() {
                             size="sm"
                             variant={dnc ? "destructive" : "ghost"}
                             className="h-6 px-2 text-[10px]"
-                            disabled={isToggling}
+                            disabled={isToggling || isSample}
                             onClick={() => onToggleDnc(c.id, !dnc)}
-                            title={dnc ? "Allow outreach again" : "Exclude from outreach & exports"}
+                            title={isSample ? "Sample data is locked to Do Not Contact" : dnc ? "Allow outreach again" : "Exclude from outreach & exports"}
                           >
-                            {isToggling ? "…" : dnc ? "DNC" : "Allow"}
+                            {isToggling ? "…" : isSample ? "DNC (locked)" : dnc ? "DNC" : "Allow"}
                           </Button>
                         </span>
                       </div>
@@ -166,3 +180,4 @@ function ContactsPage() {
     </div>
   );
 }
+
