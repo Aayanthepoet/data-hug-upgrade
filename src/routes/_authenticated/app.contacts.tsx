@@ -82,7 +82,7 @@ function ContactsPage() {
         skipTrace({ data: { owner_id: ownerId } }),
         resolve({ data: { owner_id: ownerId } }),
       ]);
-      toast.success(`Resolved ${skipRes.inserted} skip-trace + ${aiRes.resolved} AI candidate(s)`);
+      toast.warning(`Generated ${skipRes.inserted + aiRes.resolved} SAMPLE contact(s) — DO NOT CONTACT (unverified)`);
       await refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
