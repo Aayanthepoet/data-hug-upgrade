@@ -109,17 +109,6 @@ function Index() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="container-x">
-        <div className="surface grid grid-cols-2 md:grid-cols-4 overflow-hidden">
-          {stats.map(s => (
-            <div key={s.l} className="text-center p-8 border-r border-border last:border-r-0">
-              <div className="h-display text-[44px] text-cyan">{s.n}</div>
-              <div className="text-xs uppercase tracking-widest text-[var(--w45)] mt-1">{s.l}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* MODULES */}
       <section id="modules" className="container-x mt-32">
