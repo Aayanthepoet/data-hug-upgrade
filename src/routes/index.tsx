@@ -87,7 +87,7 @@ function Index() {
               </div>
               <div className="p-4 space-y-3">
                 <div className="grid grid-cols-4 gap-2">
-                  {[["247","Leads","white"],["8","Closed","var(--gold)"],["34","Listings","white"],["68%","Open","var(--cyan)"]].map(([v,l,c]) => (
+                  {[["247","Leads","white"],["8","Closed","var(--gold)"],["34","Listings","white"],["12","Sent","var(--cyan)"]].map(([v,l,c]) => (
                     <div key={l} className="bg-[var(--s1)] border border-border rounded p-2.5">
                       <div className="text-lg font-bold" style={{ color: c }}>{v}</div>
                       <div className="text-[10px] text-[var(--w35)] uppercase tracking-wider">{l}</div>
