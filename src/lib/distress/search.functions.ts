@@ -86,6 +86,11 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
       q = q.gte("days_on_market", data.minDaysOnMarket);
     }
     if (typeof data.minEquity === "number") q = q.gte("equity", data.minEquity);
+    if (data.zoningCategory === "two_plus") {
+      q = q.in("zoning_code", PHL_ZONING_TWO_PLUS);
+    } else if (data.zoningCategory === "single_only") {
+      q = q.in("zoning_code", PHL_ZONING_SINGLE);
+    }
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
