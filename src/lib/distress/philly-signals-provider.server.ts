@@ -88,15 +88,19 @@ type TaxDelinqRow = {
   tax_owed: number | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlTaxDelinquent(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   const sql = `
     SELECT p.parcel_number AS opa_account_num, p.location, p.zip_code, p.owner_1,
            p.market_value, t.total AS tax_owed,
-           ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng
+           ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
       FROM opa_properties_public p
       JOIN real_estate_tax_balances t ON t.parcel_number::text = p.parcel_number
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, p.the_geom)
      WHERE p.zip_code LIKE '${zip}%'
        AND p.location IS NOT NULL
        AND p.the_geom IS NOT NULL
@@ -119,6 +123,8 @@ export async function fetchPhlTaxDelinquent(zip: string, limit: number): Promise
     ownerName: titleCase(r.owner_1 ?? ""),
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
