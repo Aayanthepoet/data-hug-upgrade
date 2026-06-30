@@ -19,6 +19,8 @@ export type DistressType =
   | "sheriff_sale";
 
 
+export type ZoningCategory = "two_plus" | "single_only" | "any";
+
 export interface DistressSearchFilters {
   state?: string;
   county?: string;
@@ -30,8 +32,24 @@ export interface DistressSearchFilters {
   minListPrice?: number;
   maxListPrice?: number;
   minBeds?: number;
+  /** Philadelphia only — filter by base zoning permitted-use category. */
+  zoningCategory?: ZoningCategory;
   limit?: number;
 }
+
+// Philadelphia base-zoning code buckets — see https://www.phila.gov/CityPlanning/
+// Two-family / multi-family permitted by right:
+export const PHL_ZONING_TWO_PLUS = [
+  "RTA1",
+  "RM1", "RM2", "RM3", "RM4",
+  "RMX1", "RMX2", "RMX3",
+  "CMX1", "CMX2", "CMX2.5", "CMX3", "CMX4", "CMX5",
+];
+// Single-family only (baseline / for comparison):
+export const PHL_ZONING_SINGLE = [
+  "RSD1", "RSD2", "RSD3",
+  "RSA1", "RSA2", "RSA3", "RSA4", "RSA5", "RSA6",
+];
 
 export interface DistressedPropertyRecord {
   sourceRecordId: string;
