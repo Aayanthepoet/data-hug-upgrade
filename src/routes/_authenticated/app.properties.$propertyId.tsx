@@ -992,28 +992,56 @@ function VisionGallerySection({ propertyId }: { propertyId: string }) {
 }
 
 function DistressSignals({
-  isVacant, isAbsentee, isPreforeclosure, auctionDate, lienAmount, taxOwed, daysOnMarket,
+  distressType, isVacant, isAbsentee, isPreforeclosure, auctionDate, lienAmount, taxOwed, daysOnMarket,
 }: {
+  distressType: string | null;
   isVacant: boolean; isAbsentee: boolean; isPreforeclosure: boolean;
   auctionDate: string | null; lienAmount: number | null; taxOwed: number | null;
   daysOnMarket: number | null;
 }) {
   const signals: { label: string; tone: "red" | "amber" | "slate"; detail?: string }[] = [];
-  if (isPreforeclosure) signals.push({ label: "Pre-foreclosure / NOD", tone: "red" });
+
+  // Originating distress signal from the source dataset (always shown when present).
+  const DISTRESS_LABELS: Record<string, { label: string; tone: "red" | "amber" | "slate" }> = {
+    reo:               { label: "REO / Bank-owned", tone: "red" },
+    preforeclosure:    { label: "Pre-foreclosure / NOD", tone: "red" },
+    auction:           { label: "Auction scheduled", tone: "red" },
+    sheriff_sale:      { label: "Sheriff sale", tone: "red" },
+    tax_lien:          { label: "Tax lien", tone: "red" },
+    tax_delinquent:    { label: "Tax delinquent", tone: "amber" },
+    hpd_litigation:    { label: "HPD litigation", tone: "amber" },
+    eviction:          { label: "Eviction filed/executed", tone: "amber" },
+    vacate_order:      { label: "DOB vacate order", tone: "red" },
+    code_violation:    { label: "Code violation", tone: "amber" },
+    unsafe_structure:  { label: "Unsafe structure", tone: "red" },
+    fsbo_stale:        { label: "Stale FSBO", tone: "slate" },
+    vacant:            { label: "Vacant", tone: "amber" },
+    absentee:          { label: "Absentee owner", tone: "amber" },
+  };
+  const dt = (distressType ?? "").toLowerCase();
+  const originating = DISTRESS_LABELS[dt];
+  if (originating) signals.push(originating);
+
+  if (isPreforeclosure && dt !== "preforeclosure") signals.push({ label: "Pre-foreclosure / NOD", tone: "red" });
   if (auctionDate) signals.push({ label: "Auction scheduled", tone: "red", detail: auctionDate });
-  if (isVacant) signals.push({ label: "Vacant", tone: "amber" });
-  if (isAbsentee) signals.push({ label: "Absentee owner", tone: "amber" });
+  if (isVacant && dt !== "vacant") signals.push({ label: "Vacant", tone: "amber" });
+  if (isAbsentee && dt !== "absentee") signals.push({ label: "Absentee owner", tone: "amber" });
   if (taxOwed && taxOwed > 0) signals.push({ label: "Tax delinquent", tone: "amber", detail: `$${taxOwed.toLocaleString()}` });
   if (lienAmount && lienAmount > 0) signals.push({ label: "Lien", tone: "amber", detail: `$${lienAmount.toLocaleString()}` });
   if (daysOnMarket && daysOnMarket > 120) signals.push({ label: "Stale listing", tone: "slate", detail: `${daysOnMarket} days` });
+
+  // Dedupe by label
+  const seen = new Set<string>();
+  const unique = signals.filter((s) => (seen.has(s.label) ? false : (seen.add(s.label), true)));
 
   return (
     <section className="border border-border rounded-lg">
       <header className="flex items-center gap-2 p-4 border-b border-border">
         <AlertTriangle className="h-4 w-4 text-amber-400" />
         <h2 className="font-medium">Distress signals</h2>
-        <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">{signals.length} active</span>
+        <span className="text-[10px] uppercase tracking-wider text-[var(--w55)]">{unique.length} active</span>
       </header>
+
       <div className="p-4">
         {signals.length === 0 ? (
           <p className="text-sm text-[var(--w55)]">No distress signals flagged on this record.</p>
