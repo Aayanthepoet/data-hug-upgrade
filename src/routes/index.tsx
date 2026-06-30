@@ -57,27 +57,10 @@ function Index() {
               </Link>
               <Link to="/features" className="btn-ghost text-base px-6 py-4">{t("common.explorePlatform")}</Link>
             </div>
-            <div className="mt-12 pt-8 border-t border-border flex flex-wrap items-center gap-4 fu fu-4">
-              <div className="flex">
-                {["JM","SR","MC","DK","LR"].map((i, idx) => (
-                  <div key={i} className={`w-8 h-8 rounded-full border-2 border-[var(--bg)] flex items-center justify-center text-[10px] font-bold ${idx > 0 ? "-ml-2" : ""}`}
-                       style={{ background: `linear-gradient(135deg, ${["#00C8FF","#FFB800","#9B87F5","#00D68F","#FF4D6A"][idx]}, #091526)` }}>
-                    {i}
-                  </div>
-                ))}
-              </div>
-              <div className="w-px h-6 bg-border" />
-              <div>
-                <div className="text-xs tracking-widest text-gold">★★★★★</div>
-                <div className="text-xs text-[var(--w45)]">
-                  <Trans i18nKey="landing.ratingLine" components={{ b: <span className="text-white font-semibold" /> }} />
-                </div>
-              </div>
-              <div className="w-px h-6 bg-border hidden sm:block" />
-              <div className="text-xs text-[var(--w45)]">
-                <Trans i18nKey="landing.dealsLine" components={{ b: <span className="text-white font-semibold" /> }} />
-              </div>
+            <div className="mt-12 pt-8 border-t border-border text-xs text-[var(--w45)] fu fu-4">
+              7-day free trial · No credit card required · Built by AI Network Agency
             </div>
+
           </div>
 
           {/* Dashboard preview */}
