@@ -1043,11 +1043,11 @@ function DistressSignals({
       </header>
 
       <div className="p-4">
-        {signals.length === 0 ? (
+        {unique.length === 0 ? (
           <p className="text-sm text-[var(--w55)]">No distress signals flagged on this record.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
-            {signals.map((s) => {
+            {unique.map((s) => {
               const cls =
                 s.tone === "red"   ? "bg-red-500/15 text-red-300 border-red-500/30" :
                 s.tone === "amber" ? "bg-amber-500/15 text-amber-300 border-amber-500/30" :
