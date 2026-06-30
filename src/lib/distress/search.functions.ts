@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
-import type { DistressType } from "./provider";
+import { PHL_ZONING_SINGLE, PHL_ZONING_TWO_PLUS, type DistressType } from "./provider";
 
 const distressTypeEnum = z.enum([
   "reo", "preforeclosure", "auction", "tax_lien",
@@ -23,6 +23,7 @@ const filtersSchema = z.object({
   minListPrice: z.number().int().nonnegative().optional(),
   maxListPrice: z.number().int().nonnegative().optional(),
   minBeds: z.number().int().nonnegative().optional(),
+  zoningCategory: z.enum(["two_plus", "single_only", "any"]).optional(),
   limit: z.number().int().min(1).max(200).optional(),
 });
 
