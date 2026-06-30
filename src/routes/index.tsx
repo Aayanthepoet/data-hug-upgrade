@@ -29,12 +29,8 @@ const workflowKeys = ["1", "2", "3", "4", "5", "6"] as const;
 
 function Index() {
   const { t } = useTranslation();
-  const stats: { n: string; l: string }[] = [
-    { n: "2,400+", l: t("landing.stats.activeAgents") },
-    { n: "18,000+", l: t("landing.stats.dealsFacilitated") },
-    { n: "94%", l: t("landing.stats.skipTraceAccuracy") },
-    { n: "68%", l: t("landing.stats.avgOpenRate") },
-  ];
+
+
 
   return (
     <>
