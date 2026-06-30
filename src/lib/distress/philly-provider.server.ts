@@ -222,6 +222,11 @@ export class PhillyCartoProvider implements PropertyProvider {
       .filter((r) => {
         if (filters.minEquity != null && (r.equity ?? 0) < filters.minEquity) return false;
         if (filters.minBeds != null && (r.beds ?? 0) < filters.minBeds) return false;
+        if (filters.zoningCategory === "two_plus") {
+          if (!r.zoningCode || !PHL_ZONING_TWO_PLUS.includes(r.zoningCode)) return false;
+        } else if (filters.zoningCategory === "single_only") {
+          if (!r.zoningCode || !PHL_ZONING_SINGLE.includes(r.zoningCode)) return false;
+        }
         return true;
       })
       .slice(0, limit);
