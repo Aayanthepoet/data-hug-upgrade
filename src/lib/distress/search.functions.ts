@@ -124,6 +124,8 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
         isVacant: !!r.is_vacant,
         lat: null as number | null,
         lng: null as number | null,
+        zoningCode: (r as { zoning_code?: string | null }).zoning_code ?? null,
+        zoningLongCode: (r as { zoning_long_code?: string | null }).zoning_long_code ?? null,
       };
       return {
         ...rec,
