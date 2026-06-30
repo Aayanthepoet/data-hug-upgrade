@@ -47,8 +47,8 @@ export const runSkipTrace = createServerFn({ method: "POST" })
       : null;
 
     const phoneEmailRows = result.contacts
-      .filter((c) => c.contact_type === "phone" || c.contact_type === "email")
-      .map((c) => ({
+      .filter((c: import("./provider").SkipTraceContact) => c.contact_type === "phone" || c.contact_type === "email")
+      .map((c: import("./provider").SkipTraceContact) => ({
         owner_id: data.owner_id,
         contact_type: c.contact_type,
         value: `${samplePrefix}${c.value}`,
@@ -59,8 +59,8 @@ export const runSkipTrace = createServerFn({ method: "POST" })
       }));
 
     const otherRows = result.contacts
-      .filter((c) => c.contact_type !== "phone" && c.contact_type !== "email")
-      .map((c) => ({
+      .filter((c: import("./provider").SkipTraceContact) => c.contact_type !== "phone" && c.contact_type !== "email")
+      .map((c: import("./provider").SkipTraceContact) => ({
         owner_id: data.owner_id,
         // Park relatives + addresses as "linkedin" type for now (already in the
         // contact_type enum) with a clearly labelled note, until the schema
