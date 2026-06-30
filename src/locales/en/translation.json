@@ -69,7 +69,7 @@
     },
     "02": {
       "title": "Contact Resolver",
-      "desc": "Skip-trace phone, email, and social profiles for 94% of US property owners. Verified, deliverable, fast.",
+      "desc": "Skip-trace phone, email, and social profiles via your connected provider. Bring your own BatchData key; results route through your account.",
       "powered": "PropAI Contact Resolver"
     },
     "03": {
@@ -79,7 +79,7 @@
     },
     "04": {
       "title": "Outreach Engine",
-      "desc": "Personalized seller letters in your voice. 68% open rate vs 22% industry standard. Launch in one click.",
+      "desc": "Personalized seller letters in your voice. Generate multiple variations in one click — letter, email, or consent-gated SMS — tailored to each owner and distress signal.",
       "powered": "PropAI Outreach Engine"
     },
     "05": {
@@ -101,7 +101,7 @@
     },
     "2": {
       "t": "Skip-Trace Contact Info",
-      "d": "Contact Resolver traces phone, email, social from 94% of US owners.",
+      "d": "Contact Resolver looks up phone, email, and social profiles via your connected skip-trace provider.",
       "tag": "Contact Resolver"
     },
     "3": {

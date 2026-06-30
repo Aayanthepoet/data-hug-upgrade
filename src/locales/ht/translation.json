@@ -69,7 +69,7 @@
     },
     "02": {
       "title": "Contact Resolver",
-      "desc": "Skip tracing telefòn, imèl ak rezo sosyal pou 94% mèt pwopriyete nan Etazini. Verifye, fyab, rapid.",
+      "desc": "Skip tracing telefòn, imèl ak rezo sosyal atravè founisè ou konekte (BYO kle BatchData).",
       "powered": "PropAI Contact Resolver"
     },
     "03": {
@@ -79,7 +79,7 @@
     },
     "04": {
       "title": "Outreach Engine",
-      "desc": "Lèt pèsonalize pou vandè nan vwa pa w. Open rate 68% kont 22% pou rès endistri a. Voye yo ak yon klik.",
+      "desc": "Lèt pèsonalize pou vandè nan vwa pa w. Jenere plizyè vèsyon ak yon klik — lèt, imèl, oswa SMS ak konsantman — adapte pou chak mèt ak chak siyal distrès.",
       "powered": "PropAI Outreach Engine"
     },
     "05": {
@@ -101,7 +101,7 @@
     },
     "2": {
       "t": "Skip Tracing kontak",
-      "d": "Contact Resolver jwenn telefòn, imèl, rezo sosyal pou 94% mèt pwopriyete Etazini.",
+      "d": "Contact Resolver chèche telefòn, imèl ak rezo sosyal atravè founisè skip tracing ou konekte.",
       "tag": "Contact Resolver"
     },
     "3": {

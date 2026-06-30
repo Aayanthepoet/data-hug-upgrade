@@ -69,7 +69,7 @@
     },
     "02": {
       "title": "联系方式解析",
-      "desc": "为 94% 的美国房产业主提供电话、邮箱和社交账号的 skip tracing,验证准确、可达性高。",
+      "desc": "通过您连接的 skip trace 服务商(自带 BatchData API 密钥)查询业主的电话、邮箱和社交账号。",
       "powered": "PropAI Contact Resolver"
     },
     "03": {
@@ -79,7 +79,7 @@
     },
     "04": {
       "title": "触达引擎",
-      "desc": "用您的口吻为卖家定制信函。打开率 68%,远高于行业平均 22%。一键发送。",
+      "desc": "用您的口吻为卖家生成个性化信函。一键生成多种变体——信函、邮件或经同意的短信——针对每位业主和具体的违约/困境信号定制。",
       "powered": "PropAI Outreach Engine"
     },
     "05": {
@@ -101,7 +101,7 @@
     },
     "2": {
       "t": "Skip Tracing 联系方式",
-      "d": "Contact Resolver 从 94% 的美国业主中获取电话、邮箱和社交账号。",
+      "d": "Contact Resolver 通过您连接的 skip trace 服务商查询业主的电话、邮箱和社交账号。",
       "tag": "Contact Resolver"
     },
     "3": {
