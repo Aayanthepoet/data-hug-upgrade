@@ -49,6 +49,8 @@ type OpaRow = {
   category_code_description: string | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 async function fetchOpaProperties(
@@ -59,40 +61,45 @@ async function fetchOpaProperties(
   delinquentOnly: boolean,
 ): Promise<DistressedPropertyRecord[]> {
   const where: string[] = [
-    "location IS NOT NULL",
-    "owner_1 IS NOT NULL",
-    "market_value > 0",
-    "the_geom IS NOT NULL",
+    "p.location IS NOT NULL",
+    "p.owner_1 IS NOT NULL",
+    "p.market_value > 0",
+    "p.the_geom IS NOT NULL",
     // residential only
-    "category_code_description ILIKE '%residential%'",
+    "p.category_code_description ILIKE '%residential%'",
   ];
-  if (zip) where.push(`zip_code LIKE '${zip.slice(0, 5)}%'`);
-  if (minValue) where.push(`market_value >= ${minValue}`);
-  if (maxValue) where.push(`market_value <= ${maxValue}`);
+  if (zip) where.push(`p.zip_code LIKE '${zip.slice(0, 5)}%'`);
+  if (minValue) where.push(`p.market_value >= ${minValue}`);
+  if (maxValue) where.push(`p.market_value <= ${maxValue}`);
 
-  // Join via parcel_number when looking for tax-delinquent.
+  // LEFT JOIN base-zoning (spatial — no parcel key on the zoning table) to
+  // attach zoning_code per parcel. Scoped to the same ZIP filter as the
+  // parent query so we don't pull city-wide zoning.
+  const selectCols = `
+    p.parcel_number, p.location, p.zip_code, p.owner_1, p.owner_2,
+    p.mailing_street, p.mailing_city_state, p.market_value,
+    p.total_livable_area, p.year_built, p.number_of_bedrooms,
+    p.number_of_bathrooms, p.category_code_description,
+    ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng,
+    z.code AS zoning_code, z.long_code AS zoning_long_code`;
+
+  const fromJoin = `
+    FROM opa_properties_public p
+    LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, p.the_geom)`;
+
   const sql = delinquentOnly
     ? `
-      SELECT p.parcel_number, p.location, p.zip_code, p.owner_1, p.owner_2,
-             p.mailing_street, p.mailing_city_state, p.market_value,
-             p.total_livable_area, p.year_built, p.number_of_bedrooms,
-             p.number_of_bathrooms, p.category_code_description,
-             ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng,
-             t.total AS tax_owed
-        FROM opa_properties_public p
+      SELECT ${selectCols}, t.total AS tax_owed
+        ${fromJoin}
         JOIN real_estate_tax_balances t ON t.opa_number = p.parcel_number
        WHERE ${where.join(" AND ")} AND t.total > 1000
        ORDER BY t.total DESC
        LIMIT ${limit}`
     : `
-      SELECT parcel_number, location, zip_code, owner_1, owner_2,
-             mailing_street, mailing_city_state, market_value,
-             total_livable_area, year_built, number_of_bedrooms,
-             number_of_bathrooms, category_code_description,
-             ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-        FROM opa_properties_public
+      SELECT ${selectCols}
+        ${fromJoin}
        WHERE ${where.join(" AND ")}
-       ORDER BY market_value DESC
+       ORDER BY p.market_value DESC
        LIMIT ${limit}`;
 
   type Row = OpaRow & { tax_owed?: number };
