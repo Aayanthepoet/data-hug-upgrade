@@ -1,37 +1,47 @@
-# Fix distress sync timeout — per-provider execution
+## Goal
 
-## Problem
+Attach `zoning_code` / `zoning_long_code` to rows produced by the 4 Philadelphia signal providers (`phl_tax_delinquent`, `phl_li_violation`, `phl_unsafe`, `phl_sheriff_deed`), then refresh existing rows by re-running the sync (the upsert path replaces zoning fields on each matched row).
 
-`runDistressSync()` loops all 10 providers inside one Worker request. HPD Litigations hangs, the Worker hits its execution budget, and the 4 Philly providers never run.
+## Verified against live Carto API (ZIP 19140)
 
-## Approach
+| Provider table | Geometry column | `LEFT JOIN zoning_basedistricts ON ST_Intersects(z.the_geom, x.the_geom)` |
+|---|---|---|
+| `opa_properties_public` (used by tax_delinquent) | `the_geom` (polygon) | already verified for OPA path |
+| `violations` | `the_geom` (point) | sample → `ICMX`, `ICMX`, `ICMX` |
+| `li_unsafe` | `the_geom` (point) | sample → `RSA5`, `RM1`, `RM1` |
+| `rtt_summary` | `the_geom` (point) | sample → `RM1`, `RSA5`, `RSA5` |
 
-Split the run into one Worker request per provider, with a hard per-provider timeout. The orchestrator fans out HTTP calls to a new single-provider hook and aggregates results. Each provider gets its own execution context, so a hang in one can't kill the others.
+Same join shape as the OPA path. ZIP filter stays as the existing `LIKE '<zip>%'` form (we keep that for `li_unsafe`/`rtt_summary` because their `zip` is `19140-1411` style, not exact `19140`).
 
-## Changes (scope-locked: sync execution only)
+## Changes (only `src/lib/distress/philly-signals-provider.server.ts`)
 
-1. **`src/lib/distress/sync.server.ts`**
-   - Extract a new exported `runDistressSyncForProvider(provider, triggeredBy)` that contains the existing per-provider loop body (fetch targets → dedupe → existence check → chunked upsert → write `sync_runs` row). No changes to provider query logic.
-   - Wrap the provider's fetch+upsert work in a `Promise.race` against a 50s timeout. On timeout, mark the `sync_runs` row with `error = 'timeout after 50s'` and return a summary so the orchestrator keeps going.
-   - Keep `runDistressSync()` as the orchestrator but change its body to fan out: for each provider in `SYNC_TARGETS`, POST to the new single-provider hook in parallel (with a small concurrency cap, e.g. 4) and collect summaries. Each HTTP call is a separate Worker invocation.
+For each of the 4 fetchers:
 
-2. **New route `src/routes/api/public/hooks/sync-distressed-one.ts`**
-   - POST handler, same `CRON_SECRET` `apikey` check as `sync-distressed.ts`.
-   - Body: `{ provider: string }`. Calls `runDistressSyncForProvider(provider, 'cron'|'manual')` and returns its summary.
+1. Add `z.code AS zoning_code, z.long_code AS zoning_long_code` to the SELECT.
+2. Add `LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, <table>.the_geom)`.
+3. Extend the row type with `zoning_code` / `zoning_long_code`.
+4. Map them onto the returned record as `zoningCode` / `zoningLongCode`.
 
-3. **`src/routes/api/public/hooks/sync-distressed.ts`** — unchanged interface; now just calls the orchestrator which fans out.
+Existing WHERE clauses, ORDER BY, LIMIT, distress-type mappings, `sourceRecordId` shape, address/owner cleanup — all unchanged.
 
-4. **`src/lib/distress/sync.functions.ts`** — `runDistressSyncNow` unchanged signature; internally calls the orchestrator (which now fans out via HTTP). Admin "Run sync now" button keeps working.
+`tax_delinquent` already joins `opa_properties_public p` so we can use `p.the_geom` directly (same as OPA path) — no extra table.
 
-## Per-provider timeout
+`fetchPhillySignal` switch, `PHILLY_SIGNAL_DISTRESS_TYPE`, `PHILLY_SIGNAL_PER_TARGET_LIMIT`, the cache layer, and `cartoQuery` — all untouched.
 
-`Promise.race([work, sleep(50_000).then(() => { throw new Error('timeout after 50s') })])`. The 50s budget keeps each fan-out request well under the Worker limit. Any provider that exceeds it is recorded with `error='timeout after 50s'`, `inserted=0`, `updated=0`, and the orchestrator moves on.
+## Backfill (no separate SQL)
 
-## What does NOT change
+The 1,937 existing Philly rows are keyed on `(user_id, source_provider, source_record_id)`. Re-running the sync calls the same upsert path; every row that comes back with a populated `zoning_code` will overwrite the current null. A standalone DB backfill is not possible — the zoning data lives only on the Carto API, not in our DB — so re-syncing is the backfill.
 
-- Provider query code (`nyc-signals-provider.server.ts`, `philly-signals-provider.server.ts`, `nyc-provider.server.ts`) — untouched.
-- `SYNC_TARGETS`, `PER_TARGET_LIMIT`, schema, RLS, cron schedule, search/detail UI, billing, auth, scorer.
+## Not touched
+
+`philly-provider.server.ts` (OPA path), NYC providers, NYC signals, search, CSV import, scorer, billing, auth, sync orchestrator / fan-out / retry, cron schedule, schema, RLS, `sync-config`, UI filter chips.
 
 ## After applying
 
-Run `runDistressSyncNow` and report per-provider `inserted/updated/error` for all 10 providers (5 NYC + 4 Philly + nyc_opendata).
+1. Trigger the sync via the existing fan-out hook (no code change to the orchestrator).
+2. Confirm `count(zoning_code)` is > 0 across the 4 `phl_*` providers in `public.properties`.
+3. Sample a "Two+ permitted" search (RM*/RTA*/RMX*/CMX*) over Philly ZIPs and confirm it returns rows.
+
+## Risk
+
+Spatial join cost: ~200 rows per (provider, zip) with one `ST_Intersects` lookup each — already proven on the OPA path with the same `LEFT JOIN zoning_basedistricts` clause, well under the 50 s per-provider budget. If any individual provider goes over budget the existing per-provider timeout + fallback handles it; we are not changing that.

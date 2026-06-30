@@ -88,15 +88,19 @@ type TaxDelinqRow = {
   tax_owed: number | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlTaxDelinquent(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   const sql = `
     SELECT p.parcel_number AS opa_account_num, p.location, p.zip_code, p.owner_1,
            p.market_value, t.total AS tax_owed,
-           ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng
+           ST_Y(p.the_geom) AS lat, ST_X(p.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
       FROM opa_properties_public p
       JOIN real_estate_tax_balances t ON t.parcel_number::text = p.parcel_number
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, p.the_geom)
      WHERE p.zip_code LIKE '${zip}%'
        AND p.location IS NOT NULL
        AND p.the_geom IS NOT NULL
@@ -119,6 +123,8 @@ export async function fetchPhlTaxDelinquent(zip: string, limit: number): Promise
     ownerName: titleCase(r.owner_1 ?? ""),
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
@@ -135,20 +141,24 @@ type ViolationRow = {
   casestatus: string | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlViolations(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   const since = monthsAgoIso(12);
   const sql = `
-    SELECT violationnumber, casenumber, parcel_id_num, address, zip,
-           violationdate, violationcode, violationcodetitle, casestatus,
-           ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-      FROM violations
-     WHERE zip LIKE '${zip}%'
-       AND casestatus = 'IN VIOLATION'
-       AND violationdate >= '${since}'
-       AND address IS NOT NULL
-     ORDER BY violationdate DESC
+    SELECT v.violationnumber, v.casenumber, v.parcel_id_num, v.address, v.zip,
+           v.violationdate, v.violationcode, v.violationcodetitle, v.casestatus,
+           ST_Y(v.the_geom) AS lat, ST_X(v.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
+      FROM violations v
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, v.the_geom)
+     WHERE v.zip LIKE '${zip}%'
+       AND v.casestatus = 'IN VIOLATION'
+       AND v.violationdate >= '${since}'
+       AND v.address IS NOT NULL
+     ORDER BY v.violationdate DESC
      LIMIT ${limit}`;
   const rows = await cartoQuery<ViolationRow>(sql);
   return rows.map((r) => ({
@@ -161,6 +171,8 @@ export async function fetchPhlViolations(zip: string, limit: number): Promise<Di
     ownerName: null,
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
@@ -176,20 +188,24 @@ type UnsafeRow = {
   violationtype: string | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlUnsafe(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   // li_unsafe is a historical/frozen dataset (max violationdate ~2020-03-12).
   // Filter on ZIP + open case only; order by most recent violation.
   const sql = `
-    SELECT casenumber, opa_account_num, address, zip, ownername,
-           violationdate, caseresolutiondate, violationtype,
-           ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-      FROM li_unsafe
-     WHERE zip LIKE '${zip}%'
-       AND caseresolutiondate IS NULL
-       AND address IS NOT NULL
-     ORDER BY violationdate DESC
+    SELECT u.casenumber, u.opa_account_num, u.address, u.zip, u.ownername,
+           u.violationdate, u.caseresolutiondate, u.violationtype,
+           ST_Y(u.the_geom) AS lat, ST_X(u.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
+      FROM li_unsafe u
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, u.the_geom)
+     WHERE u.zip LIKE '${zip}%'
+       AND u.caseresolutiondate IS NULL
+       AND u.address IS NOT NULL
+     ORDER BY u.violationdate DESC
      LIMIT ${limit}`;
   const rows = await cartoQuery<UnsafeRow>(sql);
   return rows.map((r) => ({
@@ -202,6 +218,8 @@ export async function fetchPhlUnsafe(zip: string, limit: number): Promise<Distre
     ownerName: r.ownername ? titleCase(r.ownername.split(/\s{2,}/)[0]) : null,
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
@@ -217,20 +235,24 @@ type SheriffRow = {
   cash_consideration: number | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlSheriffDeeds(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   const since = monthsAgoIso(24);
   const sql = `
-    SELECT document_id, document_type, display_date, street_address, zip_code,
-           grantors, grantees, cash_consideration,
-           ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-      FROM rtt_summary
-     WHERE document_type IN ('SHERIFF''S DEED', 'DEED SHERIFF')
-       AND zip_code LIKE '${zip}%'
-       AND display_date >= '${since}'
-       AND street_address IS NOT NULL
-     ORDER BY display_date DESC
+    SELECT s.document_id, s.document_type, s.display_date, s.street_address, s.zip_code,
+           s.grantors, s.grantees, s.cash_consideration,
+           ST_Y(s.the_geom) AS lat, ST_X(s.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
+      FROM rtt_summary s
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, s.the_geom)
+     WHERE s.document_type IN ('SHERIFF''S DEED', 'DEED SHERIFF')
+       AND s.zip_code LIKE '${zip}%'
+       AND s.display_date >= '${since}'
+       AND s.street_address IS NOT NULL
+     ORDER BY s.display_date DESC
      LIMIT ${limit}`;
   const rows = await cartoQuery<SheriffRow>(sql);
   return rows.map((r) => ({
@@ -245,6 +267,8 @@ export async function fetchPhlSheriffDeeds(zip: string, limit: number): Promise<
     ownerName: r.grantees ? titleCase(r.grantees.split(",")[0]) : null,
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
