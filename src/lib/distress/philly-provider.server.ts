@@ -148,6 +148,8 @@ async function fetchOpaProperties(
       isVacant: false,
       lat: r.lat,
       lng: r.lng,
+      zoningCode: r.zoning_code ?? null,
+      zoningLongCode: r.zoning_long_code ?? null,
     } satisfies DistressedPropertyRecord;
   });
 }
