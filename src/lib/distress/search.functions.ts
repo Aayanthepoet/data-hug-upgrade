@@ -187,6 +187,8 @@ const importSchema = z.object({
     leadScore: z.number().nullable().optional(),
     lat: z.number().nullable().optional(),
     lng: z.number().nullable().optional(),
+    zoningCode: z.string().nullable().optional(),
+    zoningLongCode: z.string().nullable().optional(),
   })).min(1).max(200),
 });
 
