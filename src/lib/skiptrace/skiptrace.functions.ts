@@ -24,7 +24,7 @@ export const runSkipTrace = createServerFn({ method: "POST" })
     if (oErr) throw new Error(oErr.message);
     if (!owner) throw new Error("Owner not found");
 
-    const provider = getSkipTraceProvider();
+    const provider = await getSkipTraceProviderForUser(userId);
     const result = await provider.trace({
       fullName: owner.full_name,
       mailingAddress: owner.mailing_address,
