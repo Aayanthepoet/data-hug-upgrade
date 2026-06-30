@@ -120,6 +120,7 @@ function PropertySearchPage() {
       distressTypes: activeTypes.length ? activeTypes : undefined,
       minListPrice: minValue ? Number(minValue) : undefined,
       maxListPrice: maxValue ? Number(maxValue) : undefined,
+      zoningCategory: marketId === "philly" && zoningCategory !== "any" ? zoningCategory : undefined,
       limit: 50,
     };
   };
