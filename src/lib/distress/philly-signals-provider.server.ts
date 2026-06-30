@@ -235,20 +235,24 @@ type SheriffRow = {
   cash_consideration: number | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlSheriffDeeds(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   const since = monthsAgoIso(24);
   const sql = `
-    SELECT document_id, document_type, display_date, street_address, zip_code,
-           grantors, grantees, cash_consideration,
-           ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-      FROM rtt_summary
-     WHERE document_type IN ('SHERIFF''S DEED', 'DEED SHERIFF')
-       AND zip_code LIKE '${zip}%'
-       AND display_date >= '${since}'
-       AND street_address IS NOT NULL
-     ORDER BY display_date DESC
+    SELECT s.document_id, s.document_type, s.display_date, s.street_address, s.zip_code,
+           s.grantors, s.grantees, s.cash_consideration,
+           ST_Y(s.the_geom) AS lat, ST_X(s.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
+      FROM rtt_summary s
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, s.the_geom)
+     WHERE s.document_type IN ('SHERIFF''S DEED', 'DEED SHERIFF')
+       AND s.zip_code LIKE '${zip}%'
+       AND s.display_date >= '${since}'
+       AND s.street_address IS NOT NULL
+     ORDER BY s.display_date DESC
      LIMIT ${limit}`;
   const rows = await cartoQuery<SheriffRow>(sql);
   return rows.map((r) => ({
@@ -263,6 +267,8 @@ export async function fetchPhlSheriffDeeds(zip: string, limit: number): Promise<
     ownerName: r.grantees ? titleCase(r.grantees.split(",")[0]) : null,
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
