@@ -1,47 +1,104 @@
-## Goal
+## Scope lock
 
-Attach `zoning_code` / `zoning_long_code` to rows produced by the 4 Philadelphia signal providers (`phl_tax_delinquent`, `phl_li_violation`, `phl_unsafe`, `phl_sheriff_deed`), then refresh existing rows by re-running the sync (the upsert path replaces zoning fields on each matched row).
+Adds per-user, encrypted, RLS-scoped skip-trace provider credentials and a pluggable adapter layer. Does NOT modify sync, scoring, billing, auth, search, distress providers, or any other feature. Keeps the existing SAMPLE / Do-Not-Contact safety labeling on stub output exactly as-is.
 
-## Verified against live Carto API (ZIP 19140)
+## What gets built
 
-| Provider table | Geometry column | `LEFT JOIN zoning_basedistricts ON ST_Intersects(z.the_geom, x.the_geom)` |
-|---|---|---|
-| `opa_properties_public` (used by tax_delinquent) | `the_geom` (polygon) | already verified for OPA path |
-| `violations` | `the_geom` (point) | sample → `ICMX`, `ICMX`, `ICMX` |
-| `li_unsafe` | `the_geom` (point) | sample → `RSA5`, `RM1`, `RM1` |
-| `rtt_summary` | `the_geom` (point) | sample → `RM1`, `RSA5`, `RSA5` |
+### 1. Database (migration)
 
-Same join shape as the OPA path. ZIP filter stays as the existing `LIKE '<zip>%'` form (we keep that for `li_unsafe`/`rtt_summary` because their `zip` is `19140-1411` style, not exact `19140`).
+New table `public.user_skiptrace_credentials`:
 
-## Changes (only `src/lib/distress/philly-signals-provider.server.ts`)
+- `id uuid pk`
+- `user_id uuid not null references auth.users(id) on delete cascade`
+- `provider text not null check (provider in ('batchdata','idi','tlo','reiskip','whitepages'))`
+- `api_key_encrypted bytea not null` — encrypted via `pgsodium`/`vault` style (reuses the same `SOCIAL_TOKEN_ENCRYPTION_KEY` AES-GCM helper already in `src/lib/social-token-crypto.server.ts`)
+- `api_key_last4 text` — for UI display only
+- `label text` — optional user label
+- `is_active boolean default true`
+- `created_at`, `updated_at` timestamps
+- `unique (user_id, provider)`
 
-For each of the 4 fetchers:
+GRANT + RLS:
 
-1. Add `z.code AS zoning_code, z.long_code AS zoning_long_code` to the SELECT.
-2. Add `LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, <table>.the_geom)`.
-3. Extend the row type with `zoning_code` / `zoning_long_code`.
-4. Map them onto the returned record as `zoningCode` / `zoningLongCode`.
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_skiptrace_credentials TO authenticated;
+GRANT ALL ON public.user_skiptrace_credentials TO service_role;
+ALTER TABLE public.user_skiptrace_credentials ENABLE ROW LEVEL SECURITY;
+-- Users can only see/modify their own rows
+CREATE POLICY "own_select" ON public.user_skiptrace_credentials FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE POLICY "own_insert" ON public.user_skiptrace_credentials FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+CREATE POLICY "own_update" ON public.user_skiptrace_credentials FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "own_delete" ON public.user_skiptrace_credentials FOR DELETE TO authenticated USING (user_id = auth.uid());
+```
 
-Existing WHERE clauses, ORDER BY, LIMIT, distress-type mappings, `sourceRecordId` shape, address/owner cleanup — all unchanged.
+No `anon` grant. The encrypted column is server-side only; UI never selects `api_key_encrypted` — only `provider`, `api_key_last4`, `label`, `is_active`.
 
-`tax_delinquent` already joins `opa_properties_public p` so we can use `p.the_geom` directly (same as OPA path) — no extra table.
+### 2. Adapter architecture (`src/lib/skiptrace/`)
 
-`fetchPhillySignal` switch, `PHILLY_SIGNAL_DISTRESS_TYPE`, `PHILLY_SIGNAL_PER_TARGET_LIMIT`, the cache layer, and `cartoQuery` — all untouched.
+Existing `SkipTraceProvider` interface stays unchanged. Add:
 
-## Backfill (no separate SQL)
+- `adapters/batchdata.server.ts` — `BatchDataProvider` class implementing `SkipTraceProvider`. Hits `POST https://api.batchdata.com/api/v1/property/skip-trace` with `Authorization: Bearer <userKey>`, maps response (`persons[].phoneNumbers[]`, `emails[]`, `addresses[]`, relatives) to our `SkipTraceContact[]` shape.
+- `adapters/index.ts` — registry `{ batchdata: () => new BatchDataProvider(key), idi: ..., ... }` so adding IDI/TLO/REISkip/Whitepages later is one file + one registry line.
+- Rework `getSkipTraceProvider()` into `getSkipTraceProviderForUser(userId)` (server-only):
+  - Loads the user's active credential via `supabaseAdmin` (server-only decryption),
+  - Decrypts the key with the existing AES-GCM helper,
+  - Returns the matching adapter,
+  - If none → returns existing `MockSkipTraceProvider` (the SAMPLE stub).
 
-The 1,937 existing Philly rows are keyed on `(user_id, source_provider, source_record_id)`. Re-running the sync calls the same upsert path; every row that comes back with a populated `zoning_code` will overwrite the current null. A standalone DB backfill is not possible — the zoning data lives only on the Carto API, not in our DB — so re-syncing is the backfill.
+### 3. Server functions (`src/lib/skiptrace/credentials.functions.ts`)
 
-## Not touched
+- `listMySkiptraceCredentials` — returns `provider, label, api_key_last4, is_active, created_at` only.
+- `upsertSkiptraceCredential({ provider, apiKey, label })` — encrypts and stores.
+- `deleteSkiptraceCredential({ id })`.
+- `testSkiptraceCredential({ provider })` — adapter-level dry-run (no charged call where possible; for BatchData, hits an account/status endpoint).
 
-`philly-provider.server.ts` (OPA path), NYC providers, NYC signals, search, CSV import, scorer, billing, auth, sync orchestrator / fan-out / retry, cron schedule, schema, RLS, `sync-config`, UI filter chips.
+All use `requireSupabaseAuth`; rows are inserted with `user_id = context.userId`.
 
-## After applying
+### 4. `runSkipTrace` change (one call site only)
 
-1. Trigger the sync via the existing fan-out hook (no code change to the orchestrator).
-2. Confirm `count(zoning_code)` is > 0 across the 4 `phl_*` providers in `public.properties`.
-3. Sample a "Two+ permitted" search (RM*/RTA*/RMX*/CMX*) over Philly ZIPs and confirm it returns rows.
+In `src/lib/skiptrace/skiptrace.functions.ts`:
 
-## Risk
+- Replace `getSkipTraceProvider()` with `await getSkipTraceProviderForUser(context.userId)`.
+- Keep the existing `isSample = result.provider === "mock"` branch verbatim. Real providers return `provider !== "mock"` → contacts insert with `do_not_contact: false`, no `[SAMPLE …]` prefix, real confidence. Mock branch is untouched — SAMPLE labels stay locked on stub data.
 
-Spatial join cost: ~200 rows per (provider, zip) with one `ST_Intersects` lookup each — already proven on the OPA path with the same `LEFT JOIN zoning_basedistricts` clause, well under the 50 s per-provider budget. If any individual provider goes over budget the existing per-provider timeout + fallback handles it; we are not changing that.
+### 5. UI (`src/routes/_authenticated/app.settings.integrations.tsx`)
+
+New card modeled on the existing ATTOM card:
+
+- "Skip-Trace Providers" section.
+- Provider dropdown (BatchData active; IDI/TLO/REISkip/Whitepages listed as "Coming soon").
+- API key input (write-only; never displays the stored value, only last 4).
+- Save / Remove / Test buttons.
+- Status line: connected provider + last 4.
+- Notice: "Skip-trace lookups bill directly to your own provider account. PropAI does not proxy or surcharge."
+
+No changes to the ATTOM card, the sync card, or any other section.
+
+## Verification before applying
+
+- BatchData call shape verified against their public docs (`/api/v1/property/skip-trace`, `Authorization: Bearer`, JSON body with `requests: [{ propertyAddress: { street, city, state, zip } }]`). Response mapping documented in the adapter file as comments.
+- No real key is exercised. Adapter is structurally complete and unit-callable; the `testSkiptraceCredential` path validates auth against a non-billing endpoint.
+
+## Files touched (exhaustive)
+
+**New:**
+- `supabase` migration for `user_skiptrace_credentials`
+- `src/lib/skiptrace/adapters/batchdata.server.ts`
+- `src/lib/skiptrace/adapters/index.ts`
+- `src/lib/skiptrace/credentials.functions.ts`
+
+**Modified (minimal):**
+- `src/lib/skiptrace/mock-provider.server.ts` — add `getSkipTraceProviderForUser(userId)` alongside the existing `getSkipTraceProvider()` (kept for back-compat).
+- `src/lib/skiptrace/skiptrace.functions.ts` — swap the one provider lookup line; SAMPLE branch untouched.
+- `src/routes/_authenticated/app.settings.integrations.tsx` — add the new card only.
+
+**Not touched:** sync, scoring, billing, auth middleware, search, distress providers, contacts schema, owners schema, ATTOM code paths, mock provider output, SAMPLE labeling.
+
+## Security posture
+
+- Keys stored encrypted at rest using the existing AES-GCM helper (`SOCIAL_TOKEN_ENCRYPTION_KEY`).
+- RLS scopes every row to `auth.uid()`; no admin-readable cross-user policy.
+- Encrypted column never selected by client code; UI sees only `last4`.
+- Decryption happens only inside server handlers, after `requireSupabaseAuth`, for the calling user's own row.
+
+Reply "apply" to build it.

@@ -1,13 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle, Database, PlayCircle } from "lucide-react";
+import { CheckCircle2, XCircle, KeyRound, ExternalLink, Loader2, ShieldAlert, RefreshCw, MapPin, PauseCircle, Database, PlayCircle, UserCog, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { getAttomStatus, testAttomConnection } from "@/lib/distress/attom-status.functions";
 import { backfillLocations, type BackfillResult } from "@/lib/location-backfill.functions";
 import { runDistressSyncNow, getRecentSyncRuns, type SyncRunRow } from "@/lib/distress/sync.functions";
+import {
+  listMySkiptraceCredentials,
+  upsertSkiptraceCredential,
+  deleteSkiptraceCredential,
+  testSkiptraceCredential,
+} from "@/lib/skiptrace/credentials.functions";
 
 export const Route = createFileRoute("/_authenticated/app/settings/integrations")({
   head: () => ({ meta: [{ title: "Integrations — PropAI" }] }),
@@ -146,6 +153,8 @@ function IntegrationsPage() {
           <li>While ATTOM is disabled, no billable provider is called from search.</li>
         </ul>
       </section>
+
+      <SkiptraceProvidersSection />
 
       <DistressSyncSection />
 
@@ -399,5 +408,213 @@ function StatusPanel({
         </div>
       )}
     </div>
+  );
+}
+
+type SkiptraceProviderId = "batchdata" | "idi" | "tlo" | "reiskip" | "whitepages";
+
+type SkiptraceCredentialRow = {
+  id: string;
+  provider: SkiptraceProviderId;
+  label: string | null;
+  api_key_last4: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+function SkiptraceProvidersSection() {
+  const qc = useQueryClient();
+  const fetchList = useServerFn(listMySkiptraceCredentials);
+  const upsert = useServerFn(upsertSkiptraceCredential);
+  const remove = useServerFn(deleteSkiptraceCredential);
+  const test = useServerFn(testSkiptraceCredential);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["skiptrace-creds"],
+    queryFn: () => fetchList(),
+    staleTime: 60_000,
+  });
+
+  const [provider, setProvider] = useState<SkiptraceProviderId>("batchdata");
+  const [apiKey, setApiKey] = useState("");
+  const [label, setLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [testingId, setTestingId] = useState<string | null>(null);
+
+  const labels = data?.providerLabels ?? {};
+  const available = data?.providerAvailable ?? {};
+  const creds: SkiptraceCredentialRow[] = (data?.credentials ?? []) as SkiptraceCredentialRow[];
+
+  async function onSave() {
+    if (!apiKey.trim()) {
+      toast.error("Enter your provider API key");
+      return;
+    }
+    setBusy(true);
+    try {
+      await upsert({ data: { provider, apiKey: apiKey.trim(), label: label.trim() || null } });
+      toast.success(`${(labels as Record<string, string>)[provider] ?? provider} key saved`);
+      setApiKey("");
+      setLabel("");
+      qc.invalidateQueries({ queryKey: ["skiptrace-creds"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save key");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onDelete(id: string) {
+    if (!confirm("Remove this stored skip-trace key?")) return;
+    try {
+      await remove({ data: { id } });
+      toast.success("Key removed");
+      qc.invalidateQueries({ queryKey: ["skiptrace-creds"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not remove");
+    }
+  }
+
+  async function onTest(row: SkiptraceCredentialRow) {
+    setTestingId(row.id);
+    try {
+      const r = await test({ data: { provider: row.provider } });
+      if (r.ok) toast.success(`${(labels as Record<string, string>)[row.provider] ?? row.provider} key OK`);
+      else toast.error(r.error ?? "Test failed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Test failed");
+    } finally {
+      setTestingId(null);
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
+      <div>
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <UserCog className="h-4 w-4" /> Skip-Trace Providers
+        </h2>
+        <p className="text-sm text-[var(--w55)] mt-1">
+          Connect your own skip-trace account so contact lookups return real, verified
+          phones and emails. Without a key, PropAI uses a clearly-labeled{" "}
+          <span className="text-amber-300">SAMPLE / Do Not Contact</span> stub so you can
+          test the flow safely.
+        </p>
+        <p className="text-xs text-amber-300 mt-2">
+          Lookups bill directly to your own provider account. PropAI does not proxy or
+          surcharge skip-trace usage.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-sm text-[var(--w55)]">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : creds.length === 0 ? (
+        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 p-3 text-sm">
+          <XCircle className="h-4 w-4 text-[var(--w45)]" />
+          <span className="text-[var(--w55)]">
+            No skip-trace provider connected — using SAMPLE stub (results flagged
+            "Do Not Contact").
+          </span>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {creds.map((c) => (
+            <div
+              key={c.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-900/40 bg-emerald-950/20 p-3 text-sm"
+            >
+              <div className="flex items-center gap-2 text-emerald-300">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="font-medium">
+                  {(labels as Record<string, string>)[c.provider] ?? c.provider}
+                </span>
+                {c.label && <span className="text-[var(--w55)]">· {c.label}</span>}
+                {c.api_key_last4 && (
+                  <code className="text-xs text-[var(--w55)]">····{c.api_key_last4}</code>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onTest(c)}
+                  disabled={testingId === c.id}
+                >
+                  {testingId === c.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                  )}
+                  Test
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => onDelete(c.id)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-lg border border-border/60 bg-background/40 p-4 space-y-3">
+        <p className="text-sm font-medium">Connect a provider</p>
+        <div className="grid gap-3 md:grid-cols-3">
+          <div>
+            <label className="text-xs text-[var(--w55)] mb-1 block">Provider</label>
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value as SkiptraceProviderId)}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            >
+              {(["batchdata", "idi", "tlo", "reiskip", "whitepages"] as SkiptraceProviderId[]).map((p) => (
+                <option key={p} value={p} disabled={!(available as Record<string, boolean>)[p]}>
+                  {(labels as Record<string, string>)[p] ?? p}
+                  {!(available as Record<string, boolean>)[p] ? " (coming soon)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-[var(--w55)] mb-1 block">API key</label>
+            <Input
+              type="password"
+              autoComplete="off"
+              placeholder="paste your provider API key"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-[var(--w55)] mb-1 block">Label (optional)</label>
+            <Input
+              placeholder="e.g. Main account"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={onSave} disabled={busy}>
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <KeyRound className="h-3.5 w-3.5 mr-1.5" />}
+            Save key
+          </Button>
+          <a
+            href="https://docs.batchdata.com/reference/skip-trace"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-cyan-400 hover:underline inline-flex items-center gap-1"
+          >
+            BatchData API docs <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
+        <p className="text-xs text-[var(--w45)] flex items-center gap-1.5">
+          <ShieldAlert className="h-3 w-3" />
+          Keys are encrypted at rest and only readable by you. PropAI never logs the
+          plaintext value and never exposes it client-side.
+        </p>
+      </div>
+    </section>
   );
 }

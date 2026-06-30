@@ -6,7 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
-import { getSkipTraceProvider } from "./mock-provider.server";
+import { getSkipTraceProviderForUser } from "./mock-provider.server";
 
 const Input = z.object({ owner_id: z.string().uuid() });
 
@@ -24,7 +24,7 @@ export const runSkipTrace = createServerFn({ method: "POST" })
     if (oErr) throw new Error(oErr.message);
     if (!owner) throw new Error("Owner not found");
 
-    const provider = getSkipTraceProvider();
+    const provider = await getSkipTraceProviderForUser(userId);
     const result = await provider.trace({
       fullName: owner.full_name,
       mailingAddress: owner.mailing_address,
@@ -47,8 +47,8 @@ export const runSkipTrace = createServerFn({ method: "POST" })
       : null;
 
     const phoneEmailRows = result.contacts
-      .filter((c) => c.contact_type === "phone" || c.contact_type === "email")
-      .map((c) => ({
+      .filter((c: import("./provider").SkipTraceContact) => c.contact_type === "phone" || c.contact_type === "email")
+      .map((c: import("./provider").SkipTraceContact) => ({
         owner_id: data.owner_id,
         contact_type: c.contact_type,
         value: `${samplePrefix}${c.value}`,
@@ -59,8 +59,8 @@ export const runSkipTrace = createServerFn({ method: "POST" })
       }));
 
     const otherRows = result.contacts
-      .filter((c) => c.contact_type !== "phone" && c.contact_type !== "email")
-      .map((c) => ({
+      .filter((c: import("./provider").SkipTraceContact) => c.contact_type !== "phone" && c.contact_type !== "email")
+      .map((c: import("./provider").SkipTraceContact) => ({
         owner_id: data.owner_id,
         // Park relatives + addresses as "linkedin" type for now (already in the
         // contact_type enum) with a clearly labelled note, until the schema

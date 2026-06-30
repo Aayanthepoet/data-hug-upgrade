@@ -128,6 +128,43 @@ export class MockSkipTraceProvider implements SkipTraceProvider {
 }
 
 export function getSkipTraceProvider(): SkipTraceProvider {
-  // Future: if (process.env.SKIPTRACE_PROVIDER === "batchdata") return new BatchDataProvider(...);
   return new MockSkipTraceProvider();
 }
+
+/**
+ * Per-user provider resolver. Looks up the calling user's connected
+ * skip-trace provider credential, decrypts the key server-side, and
+ * returns the matching real adapter. Falls back to the SAMPLE mock
+ * when the user has not connected anything.
+ *
+ * SECURITY: Only call this from inside a server handler. The decrypted
+ * key never leaves this module — adapters receive it, the resolver
+ * does not return it.
+ */
+export async function getSkipTraceProviderForUser(
+  userId: string,
+): Promise<SkipTraceProvider> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("user_skiptrace_credentials")
+      .select("provider, api_key_encrypted, is_active")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    if (!data) return new MockSkipTraceProvider();
+
+    const { decryptToken } = await import("@/lib/social-token-crypto.server");
+    const apiKey = decryptToken(data.api_key_encrypted as string);
+    if (!apiKey) return new MockSkipTraceProvider();
+
+    const { buildAdapter } = await import("./adapters");
+    const adapter = buildAdapter(data.provider as never, apiKey);
+    return adapter ?? new MockSkipTraceProvider();
+  } catch (e) {
+    console.error("[skiptrace] provider resolver failed; falling back to mock", e);
+    return new MockSkipTraceProvider();
+  }
+}
+

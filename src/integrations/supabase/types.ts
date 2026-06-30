@@ -1974,6 +1974,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_skiptrace_credentials: {
+        Row: {
+          api_key_encrypted: string
+          api_key_last4: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string | null
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key_encrypted: string
+          api_key_last4?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          provider: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key_encrypted?: string
+          api_key_last4?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
