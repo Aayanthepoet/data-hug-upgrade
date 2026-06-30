@@ -98,12 +98,12 @@ function AuthPage() {
             The AI operating <span className="h-italic">system for real estate.</span>
           </h2>
           <p className="text-[var(--w55)] mt-6 leading-relaxed text-sm">
-            Join 2,400+ agents using PropAI to find hidden sellers, run AI outreach, and close more deals.
+            Find hidden sellers, run AI-personalized outreach, and manage your pipeline — all in one workspace.
           </p>
-          <div className="mt-8 flex items-center gap-2 text-xs text-[var(--w45)]">
-            <span className="text-gold tracking-widest">★★★★★</span>
-            Trusted across 47 states · 18,000+ deals facilitated
+          <div className="mt-8 text-xs text-[var(--w45)]">
+            7-day free trial · No credit card required · Built by AI Network Agency
           </div>
+
         </div>
         <div className="text-xs text-[var(--w35)]">© AI Network Agency</div>
       </div>

@@ -69,7 +69,7 @@
     },
     "02": {
       "title": "Resolución de contactos",
-      "desc": "Skip tracing de teléfono, correo y perfiles sociales para el 94% de los propietarios en EE. UU. Verificado y rápido.",
+      "desc": "Skip tracing de teléfono, correo y perfiles sociales mediante tu proveedor conectado (BYO API key de BatchData).",
       "powered": "PropAI Contact Resolver"
     },
     "03": {
@@ -79,7 +79,7 @@
     },
     "04": {
       "title": "Motor de contacto",
-      "desc": "Cartas a vendedores personalizadas con tu voz. 68% de apertura frente al 22% del promedio del sector. Lánzalo con un clic.",
+      "desc": "Cartas personalizadas con tu voz. Genera varias variantes con un clic — carta, correo o SMS con consentimiento — adaptadas a cada propietario y señal de distrés.",
       "powered": "PropAI Outreach Engine"
     },
     "05": {
@@ -101,7 +101,7 @@
     },
     "2": {
       "t": "Skip tracing de contacto",
-      "d": "Contact Resolver rastrea teléfono, correo y redes del 94% de los propietarios.",
+      "d": "Contact Resolver busca teléfono, correo y redes mediante tu proveedor de skip tracing conectado.",
       "tag": "Contact Resolver"
     },
     "3": {

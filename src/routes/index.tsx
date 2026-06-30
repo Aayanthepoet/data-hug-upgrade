@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { LeadForm } from "@/components/site/LeadForm";
@@ -29,12 +29,8 @@ const workflowKeys = ["1", "2", "3", "4", "5", "6"] as const;
 
 function Index() {
   const { t } = useTranslation();
-  const stats: { n: string; l: string }[] = [
-    { n: "2,400+", l: t("landing.stats.activeAgents") },
-    { n: "18,000+", l: t("landing.stats.dealsFacilitated") },
-    { n: "94%", l: t("landing.stats.skipTraceAccuracy") },
-    { n: "68%", l: t("landing.stats.avgOpenRate") },
-  ];
+
+
 
   return (
     <>
@@ -61,27 +57,10 @@ function Index() {
               </Link>
               <Link to="/features" className="btn-ghost text-base px-6 py-4">{t("common.explorePlatform")}</Link>
             </div>
-            <div className="mt-12 pt-8 border-t border-border flex flex-wrap items-center gap-4 fu fu-4">
-              <div className="flex">
-                {["JM","SR","MC","DK","LR"].map((i, idx) => (
-                  <div key={i} className={`w-8 h-8 rounded-full border-2 border-[var(--bg)] flex items-center justify-center text-[10px] font-bold ${idx > 0 ? "-ml-2" : ""}`}
-                       style={{ background: `linear-gradient(135deg, ${["#00C8FF","#FFB800","#9B87F5","#00D68F","#FF4D6A"][idx]}, #091526)` }}>
-                    {i}
-                  </div>
-                ))}
-              </div>
-              <div className="w-px h-6 bg-border" />
-              <div>
-                <div className="text-xs tracking-widest text-gold">★★★★★</div>
-                <div className="text-xs text-[var(--w45)]">
-                  <Trans i18nKey="landing.ratingLine" components={{ b: <span className="text-white font-semibold" /> }} />
-                </div>
-              </div>
-              <div className="w-px h-6 bg-border hidden sm:block" />
-              <div className="text-xs text-[var(--w45)]">
-                <Trans i18nKey="landing.dealsLine" components={{ b: <span className="text-white font-semibold" /> }} />
-              </div>
+            <div className="mt-12 pt-8 border-t border-border text-xs text-[var(--w45)] fu fu-4">
+              7-day free trial · No credit card required · Built by AI Network Agency
             </div>
+
           </div>
 
           {/* Dashboard preview */}
@@ -108,7 +87,7 @@ function Index() {
               </div>
               <div className="p-4 space-y-3">
                 <div className="grid grid-cols-4 gap-2">
-                  {[["247","Leads","white"],["8","Closed","var(--gold)"],["34","Listings","white"],["68%","Open","var(--cyan)"]].map(([v,l,c]) => (
+                  {[["247","Leads","white"],["8","Closed","var(--gold)"],["34","Listings","white"],["12","Sent","var(--cyan)"]].map(([v,l,c]) => (
                     <div key={l} className="bg-[var(--s1)] border border-border rounded p-2.5">
                       <div className="text-lg font-bold" style={{ color: c }}>{v}</div>
                       <div className="text-[10px] text-[var(--w35)] uppercase tracking-wider">{l}</div>
@@ -130,17 +109,6 @@ function Index() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="container-x">
-        <div className="surface grid grid-cols-2 md:grid-cols-4 overflow-hidden">
-          {stats.map(s => (
-            <div key={s.l} className="text-center p-8 border-r border-border last:border-r-0">
-              <div className="h-display text-[44px] text-cyan">{s.n}</div>
-              <div className="text-xs uppercase tracking-widest text-[var(--w45)] mt-1">{s.l}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* MODULES */}
       <section id="modules" className="container-x mt-32">
