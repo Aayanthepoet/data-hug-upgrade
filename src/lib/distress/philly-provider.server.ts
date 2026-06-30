@@ -5,11 +5,13 @@
 //
 // Triggered when state === "PA" and county/city matches Philadelphia.
 
-import type {
-  DistressSearchFilters,
-  DistressType,
-  DistressedPropertyRecord,
-  PropertyProvider,
+import {
+  PHL_ZONING_SINGLE,
+  PHL_ZONING_TWO_PLUS,
+  type DistressSearchFilters,
+  type DistressType,
+  type DistressedPropertyRecord,
+  type PropertyProvider,
 } from "./provider";
 
 export function isPhilly(filters: DistressSearchFilters): boolean {
