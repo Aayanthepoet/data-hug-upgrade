@@ -101,6 +101,7 @@ function PropertySearchPage() {
   ]);
   const [absenteeOnly, setAbsenteeOnly] = useState(false);
   const [activeVacatesOnly, setActiveVacatesOnly] = useState(false);
+  const [zoningCategory, setZoningCategory] = useState<"any" | "two_plus" | "single_only">("any");
 
 
   const availableTypes = useMemo(
