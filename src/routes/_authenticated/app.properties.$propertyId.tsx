@@ -148,6 +148,7 @@ function PropertyDetailPage() {
       )}
 
       <DistressSignals
+        distressType={p.distress_type}
         isVacant={p.is_vacant}
         isAbsentee={p.is_absentee}
         isPreforeclosure={p.is_preforeclosure}
@@ -156,6 +157,7 @@ function PropertyDetailPage() {
         taxOwed={p.tax_owed ? Number(p.tax_owed) : null}
         daysOnMarket={p.days_on_market}
       />
+
 
       <AiLeadScoreSection
         propertyId={propertyId}
