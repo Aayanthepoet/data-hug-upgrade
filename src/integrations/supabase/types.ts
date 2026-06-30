@@ -1395,6 +1395,8 @@ export type Database = {
           user_id: string
           year_built: number | null
           zip: string | null
+          zoning_code: string | null
+          zoning_long_code: string | null
         }
         Insert: {
           address: string
@@ -1432,6 +1434,8 @@ export type Database = {
           user_id: string
           year_built?: number | null
           zip?: string | null
+          zoning_code?: string | null
+          zoning_long_code?: string | null
         }
         Update: {
           address?: string
@@ -1469,6 +1473,8 @@ export type Database = {
           user_id?: string
           year_built?: number | null
           zip?: string | null
+          zoning_code?: string | null
+          zoning_long_code?: string | null
         }
         Relationships: []
       }
