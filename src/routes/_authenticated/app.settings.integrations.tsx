@@ -154,6 +154,8 @@ function IntegrationsPage() {
         </ul>
       </section>
 
+      <SkiptraceProvidersSection />
+
       <DistressSyncSection />
 
       <LocationBackfillSection />
