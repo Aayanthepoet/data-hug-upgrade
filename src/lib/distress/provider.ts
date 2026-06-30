@@ -75,6 +75,10 @@ export interface DistressedPropertyRecord {
   auctionDate: string | null;
   taxOwed: number | null;
   lienAmount: number | null;
+  /** Philadelphia base-zoning code (e.g. "RM1", "RSA5") when available. */
+  zoningCode?: string | null;
+  /** Philadelphia long zoning code (e.g. "RM-1"). */
+  zoningLongCode?: string | null;
   distressType: DistressType;
   listingStatus:
     | "active"
