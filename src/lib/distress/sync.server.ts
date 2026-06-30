@@ -77,6 +77,8 @@ function recordToRow(
     is_preforeclosure: r.distressType === "preforeclosure",
     is_vacant: r.isVacant,
     is_absentee: r.isAbsentee,
+    zoning_code: r.zoningCode ?? null,
+    zoning_long_code: r.zoningLongCode ?? null,
     last_synced_at: new Date().toISOString(),
   };
 }
