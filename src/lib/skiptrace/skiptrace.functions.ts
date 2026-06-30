@@ -6,7 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
-import { getSkipTraceProvider } from "./mock-provider.server";
+import { getSkipTraceProviderForUser } from "./mock-provider.server";
 
 const Input = z.object({ owner_id: z.string().uuid() });
 
