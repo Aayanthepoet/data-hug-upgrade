@@ -188,20 +188,24 @@ type UnsafeRow = {
   violationtype: string | null;
   lat: number | null;
   lng: number | null;
+  zoning_code: string | null;
+  zoning_long_code: string | null;
 };
 
 export async function fetchPhlUnsafe(zip: string, limit: number): Promise<DistressedPropertyRecord[]> {
   // li_unsafe is a historical/frozen dataset (max violationdate ~2020-03-12).
   // Filter on ZIP + open case only; order by most recent violation.
   const sql = `
-    SELECT casenumber, opa_account_num, address, zip, ownername,
-           violationdate, caseresolutiondate, violationtype,
-           ST_Y(the_geom) AS lat, ST_X(the_geom) AS lng
-      FROM li_unsafe
-     WHERE zip LIKE '${zip}%'
-       AND caseresolutiondate IS NULL
-       AND address IS NOT NULL
-     ORDER BY violationdate DESC
+    SELECT u.casenumber, u.opa_account_num, u.address, u.zip, u.ownername,
+           u.violationdate, u.caseresolutiondate, u.violationtype,
+           ST_Y(u.the_geom) AS lat, ST_X(u.the_geom) AS lng,
+           z.code AS zoning_code, z.long_code AS zoning_long_code
+      FROM li_unsafe u
+      LEFT JOIN zoning_basedistricts z ON ST_Intersects(z.the_geom, u.the_geom)
+     WHERE u.zip LIKE '${zip}%'
+       AND u.caseresolutiondate IS NULL
+       AND u.address IS NOT NULL
+     ORDER BY u.violationdate DESC
      LIMIT ${limit}`;
   const rows = await cartoQuery<UnsafeRow>(sql);
   return rows.map((r) => ({
@@ -214,6 +218,8 @@ export async function fetchPhlUnsafe(zip: string, limit: number): Promise<Distre
     ownerName: r.ownername ? titleCase(r.ownername.split(/\s{2,}/)[0]) : null,
     lat: num(r.lat),
     lng: num(r.lng),
+    zoningCode: r.zoning_code ?? null,
+    zoningLongCode: r.zoning_long_code ?? null,
   } satisfies DistressedPropertyRecord));
 }
 
