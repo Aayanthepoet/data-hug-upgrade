@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
-import type { DistressType } from "./provider";
+import { PHL_ZONING_SINGLE, PHL_ZONING_TWO_PLUS, type DistressType } from "./provider";
 
 const distressTypeEnum = z.enum([
   "reo", "preforeclosure", "auction", "tax_lien",
@@ -23,6 +23,7 @@ const filtersSchema = z.object({
   minListPrice: z.number().int().nonnegative().optional(),
   maxListPrice: z.number().int().nonnegative().optional(),
   minBeds: z.number().int().nonnegative().optional(),
+  zoningCategory: z.enum(["two_plus", "single_only", "any"]).optional(),
   limit: z.number().int().min(1).max(200).optional(),
 });
 
@@ -60,7 +61,7 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
     // what they actually have.
     let q = context.supabase
       .from("properties")
-      .select("id, source_record_id, source_provider, address, city, state, zip, county, property_type, beds, baths, sqft, year_built, estimated_value, equity, list_price, list_date, days_on_market, auction_date, tax_owed, lien_amount, distress_type, listing_status, is_absentee, is_vacant")
+      .select("id, source_record_id, source_provider, address, city, state, zip, county, property_type, beds, baths, sqft, year_built, estimated_value, equity, list_price, list_date, days_on_market, auction_date, tax_owed, lien_amount, distress_type, listing_status, is_absentee, is_vacant, zoning_code, zoning_long_code")
       .eq("user_id", context.userId)
       .limit(data.limit ?? 50);
 
@@ -85,6 +86,11 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
       q = q.gte("days_on_market", data.minDaysOnMarket);
     }
     if (typeof data.minEquity === "number") q = q.gte("equity", data.minEquity);
+    if (data.zoningCategory === "two_plus") {
+      q = q.in("zoning_code", PHL_ZONING_TWO_PLUS);
+    } else if (data.zoningCategory === "single_only") {
+      q = q.in("zoning_code", PHL_ZONING_SINGLE);
+    }
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -118,6 +124,8 @@ export const searchDistressedProperties = createServerFn({ method: "POST" })
         isVacant: !!r.is_vacant,
         lat: null as number | null,
         lng: null as number | null,
+        zoningCode: (r as { zoning_code?: string | null }).zoning_code ?? null,
+        zoningLongCode: (r as { zoning_long_code?: string | null }).zoning_long_code ?? null,
       };
       return {
         ...rec,
@@ -179,6 +187,8 @@ const importSchema = z.object({
     leadScore: z.number().nullable().optional(),
     lat: z.number().nullable().optional(),
     lng: z.number().nullable().optional(),
+    zoningCode: z.string().nullable().optional(),
+    zoningLongCode: z.string().nullable().optional(),
   })).min(1).max(200),
 });
 
@@ -216,6 +226,8 @@ export const importDistressedProperties = createServerFn({ method: "POST" })
       lead_score: r.leadScore ?? null,
       source_provider: r.sourceProvider,
       source_record_id: r.sourceRecordId,
+      zoning_code: r.zoningCode ?? null,
+      zoning_long_code: r.zoningLongCode ?? null,
       last_synced_at: new Date().toISOString(),
     }));
 

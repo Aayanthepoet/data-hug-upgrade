@@ -134,7 +134,18 @@ function PropertyDetailPage() {
         <Stat label="Sq ft" value={p.sqft ? Number(p.sqft).toLocaleString() : "—"} />
         <Stat label="Year built" value={p.year_built ?? "—"} />
         <Stat label="Days on market" value={p.days_on_market ?? "—"} />
+        {(p as { zoning_long_code?: string | null; zoning_code?: string | null }).zoning_long_code || (p as { zoning_code?: string | null }).zoning_code ? (
+          <Stat
+            label="Zoning (base)"
+            value={(p as { zoning_long_code?: string | null }).zoning_long_code ?? (p as { zoning_code?: string | null }).zoning_code ?? "—"}
+          />
+        ) : null}
       </section>
+      {(p as { zoning_code?: string | null }).zoning_code && (
+        <p className="text-xs text-[var(--w55)] -mt-3">
+          Zoning shows the <strong>base permitted use</strong>. Actual conversion (e.g. single-family → duplex) may require permits, variance, or ZBA approval — verify with the Philadelphia Department of Licenses &amp; Inspections.
+        </p>
+      )}
 
       <DistressSignals
         isVacant={p.is_vacant}

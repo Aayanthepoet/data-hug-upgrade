@@ -101,6 +101,7 @@ function PropertySearchPage() {
   ]);
   const [absenteeOnly, setAbsenteeOnly] = useState(false);
   const [activeVacatesOnly, setActiveVacatesOnly] = useState(false);
+  const [zoningCategory, setZoningCategory] = useState<"any" | "two_plus" | "single_only">("any");
 
 
   const availableTypes = useMemo(
@@ -119,6 +120,7 @@ function PropertySearchPage() {
       distressTypes: activeTypes.length ? activeTypes : undefined,
       minListPrice: minValue ? Number(minValue) : undefined,
       maxListPrice: maxValue ? Number(maxValue) : undefined,
+      zoningCategory: marketId === "philly" && zoningCategory !== "any" ? zoningCategory : undefined,
       limit: 50,
     };
   };
@@ -269,6 +271,36 @@ function PropertySearchPage() {
         <p className="text-xs text-[var(--w55)]">
           NYC signal datasets require a ZIP. Tax-lien rows have no lat/lng — geocoded on demand only.
         </p>
+
+        {marketId === "philly" && (
+          <div>
+            <Label>Multi-family / duplex potential (Philadelphia zoning)</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {([
+                { value: "any", label: "Any zoning" },
+                { value: "two_plus", label: "Two+ units permitted (RM, RTA, RMX, CMX)" },
+                { value: "single_only", label: "Single-family only (RSD, RSA)" },
+              ] as const).map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setZoningCategory(o.value)}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                    zoningCategory === o.value
+                      ? "bg-cyan text-black border-cyan"
+                      : "border-border text-[var(--w55)] hover:text-white"
+                  }`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-[var(--w55)] mt-1">
+              Shows <strong>base zoning</strong> (permitted use). Actual conversion may require permits, variance, or ZBA approval — verify with Philadelphia L&amp;I.
+            </p>
+          </div>
+        )}
+
 
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
