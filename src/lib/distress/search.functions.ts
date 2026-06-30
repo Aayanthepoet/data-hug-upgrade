@@ -226,6 +226,8 @@ export const importDistressedProperties = createServerFn({ method: "POST" })
       lead_score: r.leadScore ?? null,
       source_provider: r.sourceProvider,
       source_record_id: r.sourceRecordId,
+      zoning_code: r.zoningCode ?? null,
+      zoning_long_code: r.zoningLongCode ?? null,
       last_synced_at: new Date().toISOString(),
     }));
 
