@@ -78,10 +78,20 @@ export function LeadForm({ source = "landing" }: { source?: string }) {
 
   return (
     <form onSubmit={onSubmit} className="surface p-7 space-y-4">
-      {/* Honeypot — visually hidden, off-screen, not tab-reachable. */}
-      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
-        <label>Website (leave blank)
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+      {/* Honeypot — off-screen, hidden from AT and autofill. */}
+      <div
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", top: "-9999px", width: 1, height: 1, overflow: "hidden" }}
+      >
+        <label aria-hidden="true">
+          Website (leave blank)
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
         </label>
       </div>
       <div className="grid sm:grid-cols-2 gap-3">
