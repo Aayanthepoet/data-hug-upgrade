@@ -93,7 +93,7 @@ function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold text-white">Contact</h2>
             <p>
-              Questions? Email <a className="text-cyan hover:underline" href="mailto:support@propai.io">support@propai.io</a>.
+              Questions? Email <a className="text-cyan hover:underline" href="mailto:support@ainetworkagency.com">support@ainetworkagency.com</a>.
             </p>
           </section>
         </div>

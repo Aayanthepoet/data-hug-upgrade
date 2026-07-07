@@ -30,7 +30,7 @@ export function SiteFooter() {
           <div className="text-xs uppercase tracking-widest text-[var(--w35)] mb-4">{t("footer.company")}</div>
           <ul className="space-y-2 text-[var(--w65)]">
             <li><a href="/#contact" className="hover:text-white">{t("nav.contact")}</a></li>
-            <li><a href="mailto:hello@propai.io" className="hover:text-white">hello@propai.io</a></li>
+            <li><a href="mailto:hello@ainetworkagency.com" className="hover:text-white">hello@ainetworkagency.com</a></li>
             <li><Link to="/privacy" className="hover:text-white">{t("footer.privacy")}</Link></li>
             <li><Link to="/terms" className="hover:text-white">{t("footer.terms")}</Link></li>
           </ul>
