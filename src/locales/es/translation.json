@@ -46,9 +46,9 @@
       "avgOpenRate": "Tasa media de apertura"
     },
     "modulesEyebrow": "Módulos de la plataforma",
-    "modulesTitle1": "Siete motores de IA.",
+    "modulesTitle1": "Seis motores de IA.",
     "modulesTitle2": "Una sola plataforma.",
-    "modulesBody": "Las mismas capacidades por las que los inversores institucionales pagan más de 50.000 USD al año — integradas y diseñadas para profesionales inmobiliarios.",
+    "modulesBody": "Reemplaza tus herramientas separadas de skip-tracing, generación de leads, CRM y diseño — una sola plataforma, un solo precio.",
     "workflowEyebrow": "Proceso de principio a fin",
     "workflowTitle1": "De propietario desconocido a",
     "workflowTitle2": "trato cerrado",
@@ -64,7 +64,7 @@
   "modules": {
     "01": {
       "title": "Búsqueda de propietarios con IA",
-      "desc": "Consulta registros de propiedades a nivel nacional en segundos. Encuentra propietarios por dirección, código postal, equity, señal de distress o ausentismo.",
+      "desc": "Consulta registros de propiedades en segundos por dirección, código postal, equity, señal de distress o ausentismo. Cobertura profunda de datos de distress en NYC y Filadelfia — con más mercados en camino.",
       "powered": "PropAI Search Intelligence"
     },
     "02": {
@@ -96,7 +96,7 @@
   "workflow": {
     "1": {
       "t": "Encuentra al propietario",
-      "d": "PropAI Search Intelligence consulta registros de propiedades a nivel nacional.",
+      "d": "PropAI Search Intelligence consulta registros de propiedades en los mercados compatibles.",
       "tag": "Search Intelligence"
     },
     "2": {

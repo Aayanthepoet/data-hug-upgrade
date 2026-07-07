@@ -46,9 +46,9 @@
       "avgOpenRate": "Avg outreach open rate"
     },
     "modulesEyebrow": "Platform Modules",
-    "modulesTitle1": "Seven AI engines.",
+    "modulesTitle1": "Six AI engines.",
     "modulesTitle2": "One platform.",
-    "modulesBody": "The same capabilities institutional investors pay $50,000+/yr for — bundled, integrated, and purpose-built for real estate professionals.",
+    "modulesBody": "Replaces your separate skip-tracing, lead-gen, CRM, and design tools — one platform, one price.",
     "workflowEyebrow": "End-to-End Process",
     "workflowTitle1": "Unknown owner to",
     "workflowTitle2": "closed deal",
@@ -64,7 +64,7 @@
   "modules": {
     "01": {
       "title": "AI Owner Search",
-      "desc": "Query nationwide property records in seconds. Find owners by address, ZIP, equity, distress signal, or absentee status.",
+      "desc": "Search property records in seconds by address, ZIP, equity, distress signal, or absentee status. Deep distress-data coverage in NYC and Philadelphia — with more markets coming.",
       "powered": "PropAI Search Intelligence"
     },
     "02": {
@@ -96,7 +96,7 @@
   "workflow": {
     "1": {
       "t": "Find the Owner",
-      "d": "PropAI's Search Intelligence queries nationwide property records.",
+      "d": "PropAI's Search Intelligence queries property records across supported markets.",
       "tag": "Search Intelligence"
     },
     "2": {
