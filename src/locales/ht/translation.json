@@ -46,9 +46,9 @@
       "avgOpenRate": "Mwayèn open rate outreach"
     },
     "modulesEyebrow": "Modil platfòm nan",
-    "modulesTitle1": "Sèt motè AI.",
+    "modulesTitle1": "Sis motè AI.",
     "modulesTitle2": "Yon sèl platfòm.",
-    "modulesBody": "Menm zouti envestisè enstitisyonèl peye plis pase $50,000 pa ane pou yo — tout nan yon sèl pakèt, fèt pou pwofesyonèl imobilye.",
+    "modulesBody": "Ranplase zouti skip-tracing, lead-gen, CRM ak dizay ou separe yo — yon sèl platfòm, yon sèl pri.",
     "workflowEyebrow": "Pwosesis konplè",
     "workflowTitle1": "Soti nan yon mèt pwopriyete enkoni rive nan",
     "workflowTitle2": "afè fèmen",
@@ -64,7 +64,7 @@
   "modules": {
     "01": {
       "title": "AI Owner Search",
-      "desc": "Chèche dosye pwopriyete nan tout peyi a nan kèk segond. Jwenn mèt pwopriyete pa adrès, ZIP, equity, siyal distress oswa absentee.",
+      "desc": "Chèche dosye pwopriyete nan kèk segond pa adrès, ZIP, equity, siyal distress oswa absentee. Kouvèti pwofon done distress nan NYC ak Philadelphia — plis mache ap vini.",
       "powered": "PropAI Search Intelligence"
     },
     "02": {
@@ -96,7 +96,7 @@
   "workflow": {
     "1": {
       "t": "Jwenn mèt pwopriyete a",
-      "d": "PropAI Search Intelligence chèche nan dosye pwopriyete tout peyi a.",
+      "d": "PropAI Search Intelligence chèche nan dosye pwopriyete nan mache sipòte yo.",
       "tag": "Search Intelligence"
     },
     "2": {

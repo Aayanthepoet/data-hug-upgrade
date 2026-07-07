@@ -46,9 +46,9 @@
       "avgOpenRate": "平均触达打开率"
     },
     "modulesEyebrow": "平台模块",
-    "modulesTitle1": "七大 AI 引擎,",
+    "modulesTitle1": "六大 AI 引擎,",
     "modulesTitle2": "一个平台。",
-    "modulesBody": "机构投资者每年花费 5 万美元以上才能获得的能力 —— 整合在一起,专为房地产专业人士打造。",
+    "modulesBody": "替代您分散的 skip-tracing、获客、CRM 和设计工具 —— 一个平台,一个价格。",
     "workflowEyebrow": "端到端流程",
     "workflowTitle1": "从陌生业主到",
     "workflowTitle2": "成交",
@@ -64,7 +64,7 @@
   "modules": {
     "01": {
       "title": "AI 业主搜索",
-      "desc": "数秒内查询全美房产记录。可按地址、邮编、净值、distress 信号或非自住身份查找业主。",
+      "desc": "按地址、邮编、净值、distress 信号或非自住身份,数秒内查询房产记录。已深度覆盖纽约市和费城的困境房产数据 —— 更多市场即将上线。",
       "powered": "PropAI Search Intelligence"
     },
     "02": {
@@ -96,7 +96,7 @@
   "workflow": {
     "1": {
       "t": "找到业主",
-      "d": "PropAI Search Intelligence 查询全美房产记录。",
+      "d": "PropAI Search Intelligence 在已支持的市场中查询房产记录。",
       "tag": "Search Intelligence"
     },
     "2": {

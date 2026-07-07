@@ -6,10 +6,15 @@ export const Route = createFileRoute("/features")({
   head: () => ({
     meta: [
       { title: "Features — PropAI Platform" },
-      { name: "description", content: "Six AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, and video marketing." },
+      { name: "description", content: "Six AI engines powering owner search, skip tracing, lead scoring, outreach, property redesign, and video marketing. Deep distress-data coverage in NYC and Philadelphia — with more markets coming." },
       { property: "og:title", content: "PropAI Features — Six AI engines for real estate" },
       { property: "og:description", content: "AI-powered owner search, skip tracing, outreach, vision studio, and video studio." },
+      { property: "og:url", content: "https://propai.ainetworkagency.com/features" },
+      { property: "og:image", content: "https://propai.ainetworkagency.com/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://propai.ainetworkagency.com/og-image.png" },
     ],
+    links: [{ rel: "canonical", href: "https://propai.ainetworkagency.com/features" }],
   }),
   component: Features,
 });
@@ -20,7 +25,6 @@ const engines = [
   { icon: "👤", name: "Contact Resolver", role: "Phone, email, social skip tracing", badge: "Skip Trace", color: "var(--violet)" },
   { icon: "👁️", name: "Vision Studio", role: "Property redesign, room detection, upscaling", badge: "Image AI", color: "var(--cyan)" },
   { icon: "🎙️", name: "Voice & Video", role: "AI voiceover, video assembly, brand overlay", badge: "Video AI", color: "var(--red)" },
-  
   { icon: "🤖", name: "PropAI Agent", role: "Conversational AI assistant with full account context", badge: "AI Agent", color: "var(--violet)" },
 ];
 
@@ -32,10 +36,10 @@ function Features() {
         <div className="max-w-3xl">
           <div className="eyebrow"><span className="eyebrow-dot" />What Makes PropAI Different</div>
           <h1 className="h-display text-[clamp(44px,6vw,80px)] mt-6">
-            Seven AI engines.<br /><span className="h-italic">One platform.</span>
+            Six AI engines.<br /><span className="h-italic">One platform.</span>
           </h1>
           <p className="text-[var(--w55)] mt-6 text-lg leading-relaxed">
-            PropAI bundles the same AI capabilities that institutional investors pay $50,000+ per year for — seamlessly integrated and purpose-built for real estate professionals.
+            Replaces your separate skip-tracing, lead-gen, CRM, and design tools — one platform, one price. Deep distress-data coverage in New York City and Philadelphia, with more markets coming.
           </p>
         </div>
       </section>
@@ -60,10 +64,11 @@ function Features() {
             </div>
           ))}
         </div>
-        <div className="text-center mt-16">
+        <div className="text-center mt-16 flex flex-col items-center gap-3">
           <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary text-base px-7 py-4">
             Start Free 7-Day Trial
           </Link>
+          <p className="text-[11px] text-[var(--w35)]">No credit card required · Cancel anytime</p>
         </div>
       </section>
       <SiteFooter />

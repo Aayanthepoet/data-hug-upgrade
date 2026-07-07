@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /app/
 Disallow: /dashboard
+Disallow: /billing
 Disallow: /auth
+
+Sitemap: https://propai.ainetworkagency.com/sitemap.xml
