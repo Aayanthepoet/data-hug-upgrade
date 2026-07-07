@@ -8,10 +8,15 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "PropAI — The Complete Intelligence Platform for Real Estate" },
-      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, and video marketing. Built for real estate professionals by AI Network Agency." },
+      { name: "description", content: "AI-powered owner search, skip tracing, outreach, property redesign, and video marketing. Deep distress-data coverage in NYC and Philadelphia — with more markets coming." },
       { property: "og:title", content: "PropAI — Intelligence Platform for Real Estate" },
       { property: "og:description", content: "Find hidden sellers, automate outreach, redesign properties, and close more deals — one AI platform." },
+      { property: "og:url", content: "https://propai.ainetworkagency.com/" },
+      { property: "og:image", content: "https://propai.ainetworkagency.com/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://propai.ainetworkagency.com/og-image.png" },
     ],
+    links: [{ rel: "canonical", href: "https://propai.ainetworkagency.com/" }],
   }),
   component: Index,
 });
@@ -58,7 +63,7 @@ function Index() {
               <Link to="/features" className="btn-ghost text-base px-6 py-4">{t("common.explorePlatform")}</Link>
             </div>
             <div className="mt-12 pt-8 border-t border-border text-xs text-[var(--w45)] fu fu-4">
-              7-day free trial · No credit card required · Built by AI Network Agency
+              7-day free trial · No credit card required · Cancel anytime · Built by AI Network Agency
             </div>
 
           </div>
@@ -71,7 +76,7 @@ function Index() {
                 <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                 <div className="w-3 h-3 rounded-full bg-[#28C840]" />
               </div>
-              <div className="text-[11px] text-[var(--w35)] flex-1 text-center font-mono">app.propai.io</div>
+              <div className="text-[11px] text-[var(--w35)] flex-1 text-center font-mono">propai.ainetworkagency.com</div>
             </div>
             <div className="grid grid-cols-[140px_1fr]">
               <div className="border-r border-border p-3 space-y-1 bg-[rgba(0,0,0,.15)]">
@@ -135,9 +140,12 @@ function Index() {
             );
           })}
         </div>
-        <div className="text-center mt-10 flex justify-center gap-3 flex-wrap">
-          <Link to="/features" className="btn-ghost">{t("common.seeAllFeatures")}</Link>
-          <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary">{t("common.startTrialLong")}</Link>
+        <div className="text-center mt-10 flex flex-col items-center gap-3">
+          <div className="flex justify-center gap-3 flex-wrap">
+            <Link to="/features" className="btn-ghost">{t("common.seeAllFeatures")}</Link>
+            <Link to="/auth" search={{ mode: "signup" } as never} className="btn-primary">{t("common.startTrialLong")}</Link>
+          </div>
+          <p className="text-[11px] text-[var(--w35)]">No credit card required · Cancel anytime</p>
         </div>
       </section>
 
