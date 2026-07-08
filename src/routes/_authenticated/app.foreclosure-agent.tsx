@@ -78,12 +78,29 @@ function ForeclosureAgentPage() {
   const [properties, setProperties] = useState<ForeclosureProperty[]>([]);
   const [selected, setSelected] = useState<ForeclosureProperty | null>(null);
 
+  const [testAddress, setTestAddress] = useState("");
+  const [testCity, setTestCity] = useState("Brooklyn, NY");
+  const [testType, setTestType] = useState<string>("Pre-Foreclosure");
+
   const [letter, setLetter] = useState<string>("");
   const [analysis, setAnalysis] = useState<string>("");
   const [skipLeads, setSkipLeads] = useState<
     Array<{ type: string; value: string; source: string; confidence: string; rationale: string }>
   >([]);
   const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | null>(null);
+
+  function runTestWorkflow() {
+    if (!testAddress.trim()) {
+      toast.error("Enter an address to test");
+      return;
+    }
+    const mock: ForeclosureProperty = {
+      address: testAddress.trim(),
+      city: testCity.trim() || "Brooklyn, NY",
+      type: testType,
+    };
+    openDetail(mock);
+  }
 
   async function runSearch() {
     setLoading(true);
