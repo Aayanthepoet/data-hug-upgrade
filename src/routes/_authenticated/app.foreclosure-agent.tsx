@@ -97,7 +97,21 @@ function ForeclosureAgentPage() {
     const mock: ForeclosureProperty = {
       address: testAddress.trim(),
       city: testCity.trim() || "Brooklyn, NY",
+      neighborhood: "",
       type: testType,
+      price: "",
+      beds: "",
+      baths: "",
+      sqft: "",
+      auctionDate: "",
+      indexNo: "",
+      lender: "",
+      owner: "",
+      ownerPhone: "",
+      ownerEmail: "",
+      ownerAddress: "",
+      contactSource: "",
+      notes: "Test entry — manual address input",
     };
     openDetail(mock);
   }
