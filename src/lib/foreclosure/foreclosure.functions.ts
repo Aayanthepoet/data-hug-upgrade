@@ -36,7 +36,7 @@ const SearchInput = z.object({
   type: z.string().min(1).max(60),
 });
 
-const CLAUDE_MODEL = "claude-sonnet-4-5";
+const CLAUDE_MODEL = "claude-sonnet-4-6";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
 type AnthropicContentBlock =
