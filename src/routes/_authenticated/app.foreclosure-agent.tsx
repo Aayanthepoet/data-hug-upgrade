@@ -235,6 +235,58 @@ function ForeclosureAgentPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Test Workflow</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Enter an address to open the detail panel and run outreach, skip trace, and
+            investment analysis against it.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="md:col-span-2">
+              <label className="text-xs font-medium text-muted-foreground">Address</label>
+              <input
+                value={testAddress}
+                onChange={(e) => setTestAddress(e.target.value)}
+                placeholder="123 Main St"
+                className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">City, State</label>
+              <input
+                value={testCity}
+                onChange={(e) => setTestCity(e.target.value)}
+                placeholder="Brooklyn, NY"
+                className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-muted-foreground">Type</label>
+              <Select value={testType} onValueChange={setTestType}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Pre-Foreclosure", "Auction", "Bank REO", "Short Sale"].map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={runTestWorkflow} className="md:w-44">
+              Run Workflow
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {loading && (
         <div className="text-center py-12 text-muted-foreground">
           <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
