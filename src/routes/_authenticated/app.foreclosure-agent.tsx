@@ -78,12 +78,43 @@ function ForeclosureAgentPage() {
   const [properties, setProperties] = useState<ForeclosureProperty[]>([]);
   const [selected, setSelected] = useState<ForeclosureProperty | null>(null);
 
+  const [testAddress, setTestAddress] = useState("");
+  const [testCity, setTestCity] = useState("Brooklyn, NY");
+  const [testType, setTestType] = useState<string>("Pre-Foreclosure");
+
   const [letter, setLetter] = useState<string>("");
   const [analysis, setAnalysis] = useState<string>("");
   const [skipLeads, setSkipLeads] = useState<
     Array<{ type: string; value: string; source: string; confidence: string; rationale: string }>
   >([]);
   const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | null>(null);
+
+  function runTestWorkflow() {
+    if (!testAddress.trim()) {
+      toast.error("Enter an address to test");
+      return;
+    }
+    const mock: ForeclosureProperty = {
+      address: testAddress.trim(),
+      city: testCity.trim() || "Brooklyn, NY",
+      neighborhood: "",
+      type: testType,
+      price: "",
+      beds: "",
+      baths: "",
+      sqft: "",
+      auctionDate: "",
+      indexNo: "",
+      lender: "",
+      owner: "",
+      ownerPhone: "",
+      ownerEmail: "",
+      ownerAddress: "",
+      contactSource: "",
+      notes: "Test entry — manual address input",
+    };
+    openDetail(mock);
+  }
 
   async function runSearch() {
     setLoading(true);
@@ -200,6 +231,58 @@ function ForeclosureAgentPage() {
                 {t}
               </button>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Test Workflow</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Enter an address to open the detail panel and run outreach, skip trace, and
+            investment analysis against it.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="md:col-span-2">
+              <label className="text-xs font-medium text-muted-foreground">Address</label>
+              <input
+                value={testAddress}
+                onChange={(e) => setTestAddress(e.target.value)}
+                placeholder="123 Main St"
+                className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">City, State</label>
+              <input
+                value={testCity}
+                onChange={(e) => setTestCity(e.target.value)}
+                placeholder="Brooklyn, NY"
+                className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-muted-foreground">Type</label>
+              <Select value={testType} onValueChange={setTestType}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Pre-Foreclosure", "Auction", "Bank REO", "Short Sale"].map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={runTestWorkflow} className="md:w-44">
+              Run Workflow
+            </Button>
           </div>
         </CardContent>
       </Card>
