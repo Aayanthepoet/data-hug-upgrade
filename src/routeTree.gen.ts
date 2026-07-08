@@ -44,6 +44,7 @@ import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
 import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
+import { Route as AuthenticatedAppForeclosureAgentRouteImport } from './routes/_authenticated/app.foreclosure-agent'
 import { Route as AuthenticatedAppContractsRouteImport } from './routes/_authenticated/app.contracts'
 import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
 import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
@@ -264,6 +265,12 @@ const AuthenticatedAppLeadListsRoute =
   AuthenticatedAppLeadListsRouteImport.update({
     id: '/lead-lists',
     path: '/lead-lists',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppForeclosureAgentRoute =
+  AuthenticatedAppForeclosureAgentRouteImport.update({
+    id: '/foreclosure-agent',
+    path: '/foreclosure-agent',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppContractsRoute =
@@ -520,6 +527,7 @@ export interface FileRoutesByFullPath {
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
+  '/app/foreclosure-agent': typeof AuthenticatedAppForeclosureAgentRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -595,6 +603,7 @@ export interface FileRoutesByTo {
   '/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/app/contacts': typeof AuthenticatedAppContactsRoute
   '/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
+  '/app/foreclosure-agent': typeof AuthenticatedAppForeclosureAgentRoute
   '/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -672,6 +681,7 @@ export interface FileRoutesById {
   '/_authenticated/app/campaigns': typeof AuthenticatedAppCampaignsRoute
   '/_authenticated/app/contacts': typeof AuthenticatedAppContactsRoute
   '/_authenticated/app/contracts': typeof AuthenticatedAppContractsRouteWithChildren
+  '/_authenticated/app/foreclosure-agent': typeof AuthenticatedAppForeclosureAgentRoute
   '/_authenticated/app/lead-lists': typeof AuthenticatedAppLeadListsRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRouteWithChildren
   '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
@@ -750,6 +760,7 @@ export interface FileRouteTypes {
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/contracts'
+    | '/app/foreclosure-agent'
     | '/app/lead-lists'
     | '/app/leads'
     | '/app/notifications'
@@ -825,6 +836,7 @@ export interface FileRouteTypes {
     | '/app/campaigns'
     | '/app/contacts'
     | '/app/contracts'
+    | '/app/foreclosure-agent'
     | '/app/lead-lists'
     | '/app/leads'
     | '/app/notifications'
@@ -901,6 +913,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/campaigns'
     | '/_authenticated/app/contacts'
     | '/_authenticated/app/contracts'
+    | '/_authenticated/app/foreclosure-agent'
     | '/_authenticated/app/lead-lists'
     | '/_authenticated/app/leads'
     | '/_authenticated/app/notifications'
@@ -1238,6 +1251,13 @@ declare module '@tanstack/react-router' {
       path: '/lead-lists'
       fullPath: '/app/lead-lists'
       preLoaderRoute: typeof AuthenticatedAppLeadListsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/foreclosure-agent': {
+      id: '/_authenticated/app/foreclosure-agent'
+      path: '/foreclosure-agent'
+      fullPath: '/app/foreclosure-agent'
+      preLoaderRoute: typeof AuthenticatedAppForeclosureAgentRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/contracts': {
@@ -1676,6 +1696,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCampaignsRoute: typeof AuthenticatedAppCampaignsRoute
   AuthenticatedAppContactsRoute: typeof AuthenticatedAppContactsRoute
   AuthenticatedAppContractsRoute: typeof AuthenticatedAppContractsRouteWithChildren
+  AuthenticatedAppForeclosureAgentRoute: typeof AuthenticatedAppForeclosureAgentRoute
   AuthenticatedAppLeadListsRoute: typeof AuthenticatedAppLeadListsRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRouteWithChildren
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
@@ -1700,6 +1721,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCampaignsRoute: AuthenticatedAppCampaignsRoute,
   AuthenticatedAppContactsRoute: AuthenticatedAppContactsRoute,
   AuthenticatedAppContractsRoute: AuthenticatedAppContractsRouteWithChildren,
+  AuthenticatedAppForeclosureAgentRoute: AuthenticatedAppForeclosureAgentRoute,
   AuthenticatedAppLeadListsRoute: AuthenticatedAppLeadListsRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRouteWithChildren,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
@@ -1798,13 +1820,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
