@@ -507,6 +507,18 @@ function ForeclosureAgentPage() {
                     )}
                     Analyze Investment Value
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onTitleSearch}
+                    disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
+                  >
+                    {actionLoading === "title" && (
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                    )}
+                    Title Search
+                  </Button>
                 </div>
 
                 {letter && (
