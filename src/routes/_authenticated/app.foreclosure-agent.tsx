@@ -4,10 +4,13 @@ import { useState } from "react";
 import {
   analyzeInvestment,
   generateOutreachLetter,
+  runTitleSearch,
   searchForeclosureProperties,
   skipTraceOwner,
   type ForeclosureProperty,
+  type TitleSearchResult,
 } from "@/lib/foreclosure/foreclosure.functions";
+import { TitleSearchPanel, printTitleSearch } from "@/components/title-search/TitleSearchPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +99,9 @@ function ForeclosureAgentPage() {
   >([]);
   const [skipRaw, setSkipRaw] = useState<string>("");
   const [skipFormatFailed, setSkipFormatFailed] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | null>(null);
+  const [titleResult, setTitleResult] = useState<TitleSearchResult | null>(null);
+  const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | "title" | null>(null);
+  const runTitle = useServerFn(runTitleSearch);
 
   function runTestWorkflow() {
     if (!testAddress.trim()) {
@@ -146,6 +151,29 @@ function ForeclosureAgentPage() {
     setSkipPortals([]);
     setSkipRaw("");
     setSkipFormatFailed(false);
+    setTitleResult(null);
+  }
+
+  async function onTitleSearch() {
+    if (!selected) return;
+    const addr = [selected.address, selected.city].filter(Boolean).join(", ");
+    if (!addr) {
+      toast.error("Property is missing an address");
+      return;
+    }
+    setActionLoading("title");
+    try {
+      const res = await runTitle({ data: { address: addr } });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setTitleResult(res.result);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Title search failed");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   const hasContact = (p: ForeclosureProperty) => Boolean(p.ownerPhone || p.ownerEmail);
@@ -479,6 +507,18 @@ function ForeclosureAgentPage() {
                     )}
                     Analyze Investment Value
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onTitleSearch}
+                    disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
+                  >
+                    {actionLoading === "title" && (
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                    )}
+                    Title Search
+                  </Button>
                 </div>
 
                 {letter && (
@@ -513,6 +553,14 @@ function ForeclosureAgentPage() {
                     {skipPortals.map((portal, i) => (
                       <PortalCard key={`${portal.url}-${i}`} portal={portal} />
                     ))}
+                  </div>
+                )}
+                {titleResult && (
+                  <div className="border rounded p-3 bg-muted/40">
+                    <TitleSearchPanel
+                      result={titleResult}
+                      onPrint={() => printTitleSearch(titleResult)}
+                    />
                   </div>
                 )}
               </div>

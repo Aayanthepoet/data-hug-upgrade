@@ -1953,6 +1953,30 @@ export type Database = {
         }
         Relationships: []
       }
+      title_searches: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          results: Json
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          results?: Json
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          results?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

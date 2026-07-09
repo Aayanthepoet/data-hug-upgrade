@@ -34,6 +34,7 @@ import { Route as AuthenticatedBillingReturnRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
 import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
 import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppTitleSearchRouteImport } from './routes/_authenticated/app.title-search'
 import { Route as AuthenticatedAppSocialRouteImport } from './routes/_authenticated/app.social'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
@@ -67,6 +68,7 @@ import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api
 import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
 import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
 import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
+import { Route as AuthenticatedAppTitleSearchHistoryRouteImport } from './routes/_authenticated/app.title-search.history'
 import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
 import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
 import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
@@ -212,6 +214,12 @@ const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppTitleSearchRoute =
+  AuthenticatedAppTitleSearchRouteImport.update({
+    id: '/title-search',
+    path: '/title-search',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppSocialRoute = AuthenticatedAppSocialRouteImport.update({
   id: '/social',
   path: '/social',
@@ -398,6 +406,12 @@ const AuthenticatedAppVisionLibraryRoute =
     path: '/library',
     getParentRoute: () => AuthenticatedAppVisionRoute,
   } as any)
+const AuthenticatedAppTitleSearchHistoryRoute =
+  AuthenticatedAppTitleSearchHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedAppTitleSearchRoute,
+  } as any)
 const AuthenticatedAppSocialComposeRoute =
   AuthenticatedAppSocialComposeRouteImport.update({
     id: '/compose',
@@ -538,6 +552,7 @@ export interface FileRoutesByFullPath {
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
+  '/app/title-search': typeof AuthenticatedAppTitleSearchRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -560,6 +575,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
+  '/app/title-search/history': typeof AuthenticatedAppTitleSearchHistoryRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -613,6 +629,7 @@ export interface FileRoutesByTo {
   '/app/scoring': typeof AuthenticatedAppScoringRoute
   '/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/app/social': typeof AuthenticatedAppSocialRouteWithChildren
+  '/app/title-search': typeof AuthenticatedAppTitleSearchRouteWithChildren
   '/app/videos': typeof AuthenticatedAppVideosRoute
   '/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -635,6 +652,7 @@ export interface FileRoutesByTo {
   '/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
+  '/app/title-search/history': typeof AuthenticatedAppTitleSearchHistoryRoute
   '/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -692,6 +710,7 @@ export interface FileRoutesById {
   '/_authenticated/app/scoring': typeof AuthenticatedAppScoringRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRouteWithChildren
   '/_authenticated/app/social': typeof AuthenticatedAppSocialRouteWithChildren
+  '/_authenticated/app/title-search': typeof AuthenticatedAppTitleSearchRouteWithChildren
   '/_authenticated/app/videos': typeof AuthenticatedAppVideosRoute
   '/_authenticated/app/vision': typeof AuthenticatedAppVisionRouteWithChildren
   '/_authenticated/app/watchlist': typeof AuthenticatedAppWatchlistRoute
@@ -714,6 +733,7 @@ export interface FileRoutesById {
   '/_authenticated/app/settings/public-profile': typeof AuthenticatedAppSettingsPublicProfileRoute
   '/_authenticated/app/social/business-portfolio': typeof AuthenticatedAppSocialBusinessPortfolioRoute
   '/_authenticated/app/social/compose': typeof AuthenticatedAppSocialComposeRoute
+  '/_authenticated/app/title-search/history': typeof AuthenticatedAppTitleSearchHistoryRoute
   '/_authenticated/app/vision/library': typeof AuthenticatedAppVisionLibraryRoute
   '/agents/$slug/p/$postSlug': typeof AgentsSlugPPostSlugRoute
   '/api/public/hooks/close-auctions': typeof ApiPublicHooksCloseAuctionsRoute
@@ -771,6 +791,7 @@ export interface FileRouteTypes {
     | '/app/scoring'
     | '/app/settings'
     | '/app/social'
+    | '/app/title-search'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -793,6 +814,7 @@ export interface FileRouteTypes {
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
     | '/app/social/compose'
+    | '/app/title-search/history'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -846,6 +868,7 @@ export interface FileRouteTypes {
     | '/app/scoring'
     | '/app/settings'
     | '/app/social'
+    | '/app/title-search'
     | '/app/videos'
     | '/app/vision'
     | '/app/watchlist'
@@ -868,6 +891,7 @@ export interface FileRouteTypes {
     | '/app/settings/public-profile'
     | '/app/social/business-portfolio'
     | '/app/social/compose'
+    | '/app/title-search/history'
     | '/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -924,6 +948,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/scoring'
     | '/_authenticated/app/settings'
     | '/_authenticated/app/social'
+    | '/_authenticated/app/title-search'
     | '/_authenticated/app/videos'
     | '/_authenticated/app/vision'
     | '/_authenticated/app/watchlist'
@@ -946,6 +971,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings/public-profile'
     | '/_authenticated/app/social/business-portfolio'
     | '/_authenticated/app/social/compose'
+    | '/_authenticated/app/title-search/history'
     | '/_authenticated/app/vision/library'
     | '/agents/$slug/p/$postSlug'
     | '/api/public/hooks/close-auctions'
@@ -1183,6 +1209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/title-search': {
+      id: '/_authenticated/app/title-search'
+      path: '/title-search'
+      fullPath: '/app/title-search'
+      preLoaderRoute: typeof AuthenticatedAppTitleSearchRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/social': {
       id: '/_authenticated/app/social'
       path: '/social'
@@ -1413,6 +1446,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/vision/library'
       preLoaderRoute: typeof AuthenticatedAppVisionLibraryRouteImport
       parentRoute: typeof AuthenticatedAppVisionRoute
+    }
+    '/_authenticated/app/title-search/history': {
+      id: '/_authenticated/app/title-search/history'
+      path: '/history'
+      fullPath: '/app/title-search/history'
+      preLoaderRoute: typeof AuthenticatedAppTitleSearchHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppTitleSearchRoute
     }
     '/_authenticated/app/social/compose': {
       id: '/_authenticated/app/social/compose'
@@ -1660,6 +1700,21 @@ const AuthenticatedAppSocialRouteWithChildren =
     AuthenticatedAppSocialRouteChildren,
   )
 
+interface AuthenticatedAppTitleSearchRouteChildren {
+  AuthenticatedAppTitleSearchHistoryRoute: typeof AuthenticatedAppTitleSearchHistoryRoute
+}
+
+const AuthenticatedAppTitleSearchRouteChildren: AuthenticatedAppTitleSearchRouteChildren =
+  {
+    AuthenticatedAppTitleSearchHistoryRoute:
+      AuthenticatedAppTitleSearchHistoryRoute,
+  }
+
+const AuthenticatedAppTitleSearchRouteWithChildren =
+  AuthenticatedAppTitleSearchRoute._addFileChildren(
+    AuthenticatedAppTitleSearchRouteChildren,
+  )
+
 interface AuthenticatedAppVisionRouteChildren {
   AuthenticatedAppVisionLibraryRoute: typeof AuthenticatedAppVisionLibraryRoute
 }
@@ -1707,6 +1762,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppScoringRoute: typeof AuthenticatedAppScoringRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRouteWithChildren
   AuthenticatedAppSocialRoute: typeof AuthenticatedAppSocialRouteWithChildren
+  AuthenticatedAppTitleSearchRoute: typeof AuthenticatedAppTitleSearchRouteWithChildren
   AuthenticatedAppVideosRoute: typeof AuthenticatedAppVideosRoute
   AuthenticatedAppVisionRoute: typeof AuthenticatedAppVisionRouteWithChildren
   AuthenticatedAppWatchlistRoute: typeof AuthenticatedAppWatchlistRoute
@@ -1732,6 +1788,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppScoringRoute: AuthenticatedAppScoringRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRouteWithChildren,
   AuthenticatedAppSocialRoute: AuthenticatedAppSocialRouteWithChildren,
+  AuthenticatedAppTitleSearchRoute:
+    AuthenticatedAppTitleSearchRouteWithChildren,
   AuthenticatedAppVideosRoute: AuthenticatedAppVideosRoute,
   AuthenticatedAppVisionRoute: AuthenticatedAppVisionRouteWithChildren,
   AuthenticatedAppWatchlistRoute: AuthenticatedAppWatchlistRoute,
