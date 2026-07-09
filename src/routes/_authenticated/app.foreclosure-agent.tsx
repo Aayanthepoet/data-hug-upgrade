@@ -151,6 +151,29 @@ function ForeclosureAgentPage() {
     setSkipPortals([]);
     setSkipRaw("");
     setSkipFormatFailed(false);
+    setTitleResult(null);
+  }
+
+  async function onTitleSearch() {
+    if (!selected) return;
+    const addr = [selected.address, selected.city].filter(Boolean).join(", ");
+    if (!addr) {
+      toast.error("Property is missing an address");
+      return;
+    }
+    setActionLoading("title");
+    try {
+      const res = await runTitle({ data: { address: addr } });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      setTitleResult(res.result);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Title search failed");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   const hasContact = (p: ForeclosureProperty) => Boolean(p.ownerPhone || p.ownerEmail);
