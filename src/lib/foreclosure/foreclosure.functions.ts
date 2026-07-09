@@ -176,42 +176,73 @@ export const analyzeInvestment = createServerFn({ method: "POST" })
 
 const SkipInput = z.object({ property: PropertySchema });
 
+const PortalSchema = z.object({
+  portal_name: z.string().min(1),
+  url: z.string().min(1),
+  is_free: z.boolean().optional().default(false),
+  what_it_yields: z.string().optional().default(""),
+  steps: z.array(z.string()).optional().default([]),
+  description: z.string().optional().default(""),
+});
+
+export type SkipTracePortal = z.infer<typeof PortalSchema>;
+
 export const skipTraceOwner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SkipInput.parse(d))
   .handler(async ({ data }) => {
-    const system =
-      "You are a NY public-records skip-trace assistant with web_search access. Search ACRIS, county clerk records, DOB filings, and public tax rolls to find verifiable owner-contact leads. Never fabricate specific phone numbers or emails. Mark every result as a suggestion with a confidence score (low/medium/high) and cite the public source.";
-    const prompt = `Find up to 3 likely contact leads for the owner of this property. Use web search on ACRIS, NYC DOB, county tax rolls.
+    const system = `You are a NY public-records research assistant. Given a distressed property, return the best free, publicly-accessible county/state portals a researcher should use to find the mortgagor, lender, index number, and other filing details.
 
-Return ONLY a JSON object (no prose): {"leads":[{"type":"","value":"","source":"","confidence":"","rationale":""}, ...]}
+CRITICAL OUTPUT RULES:
+- Respond with ONLY a single valid JSON object. No markdown code fences. No preamble. No trailing prose.
+- Shape: {"portals":[{"portal_name":string,"url":string,"is_free":boolean,"what_it_yields":string,"steps":string[],"description":string}, ...]}
+- Every portal MUST include a non-empty portal_name and a fully-qualified https URL.
+- steps is an ordered array of short imperative strings (e.g. "Select document type: Lis Pendens").
+- Prefer official county clerk / court / ACRIS-style systems over aggregators. Include 2-5 portals.
+- Never fabricate URLs — only include portals you are confident exist.`;
 
-${JSON.stringify(data.property, null, 2)}`;
+    const prompt = `Property:\n${JSON.stringify(data.property, null, 2)}\n\nReturn the JSON object described in the system prompt.`;
+
+    let rawText = "";
     try {
-      const text = await callClaude({
+      rawText = await callClaude({
         system,
         prompt,
         webSearch: true,
         maxTokens: 3072,
       });
-      const parsed = extractJson(text) as { leads?: unknown };
-      const result = z
-        .object({
-          leads: z.array(
-            z.object({
-              type: z.string(),
-              value: z.string(),
-              source: z.string(),
-              confidence: z.string(),
-              rationale: z.string(),
-            }),
-          ),
-        })
-        .safeParse(parsed);
-      if (result.success) return { leads: result.data.leads };
-      return { leads: [] };
     } catch (error) {
-      console.error("[foreclosure.skiptrace]", error);
-      return { leads: [] };
+      console.error("[foreclosure.skiptrace] call failed", error);
+      return {
+        portals: [] as SkipTracePortal[],
+        raw: "",
+        formattingFailed: true as const,
+        error: error instanceof Error ? error.message : "Skip trace failed",
+      };
+    }
+
+    try {
+      const stripped = rawText
+        .replace(/^\s*```(?:json)?\s*/i, "")
+        .replace(/\s*```\s*$/i, "")
+        .trim();
+      const start = stripped.indexOf("{");
+      const end = stripped.lastIndexOf("}");
+      if (start === -1 || end === -1) throw new Error("No JSON object found");
+      const parsed = JSON.parse(stripped.slice(start, end + 1));
+      const result = z.object({ portals: z.array(PortalSchema).min(1) }).safeParse(parsed);
+      if (!result.success) throw new Error("Portals array missing or invalid");
+      return {
+        portals: result.data.portals,
+        raw: rawText,
+        formattingFailed: false as const,
+      };
+    } catch (error) {
+      console.error("[foreclosure.skiptrace] parse failed", error);
+      return {
+        portals: [] as SkipTracePortal[],
+        raw: rawText,
+        formattingFailed: true as const,
+      };
     }
   });

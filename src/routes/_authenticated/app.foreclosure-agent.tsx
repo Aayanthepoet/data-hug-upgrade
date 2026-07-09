@@ -26,7 +26,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Mail, Phone, Search, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, Phone, Search, CheckCircle2, ExternalLink, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/foreclosure-agent")({
   head: () => ({
@@ -84,9 +84,18 @@ function ForeclosureAgentPage() {
 
   const [letter, setLetter] = useState<string>("");
   const [analysis, setAnalysis] = useState<string>("");
-  const [skipLeads, setSkipLeads] = useState<
-    Array<{ type: string; value: string; source: string; confidence: string; rationale: string }>
+  const [skipPortals, setSkipPortals] = useState<
+    Array<{
+      portal_name: string;
+      url: string;
+      is_free: boolean;
+      what_it_yields: string;
+      steps: string[];
+      description: string;
+    }>
   >([]);
+  const [skipRaw, setSkipRaw] = useState<string>("");
+  const [skipFormatFailed, setSkipFormatFailed] = useState(false);
   const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | null>(null);
 
   function runTestWorkflow() {
@@ -134,7 +143,9 @@ function ForeclosureAgentPage() {
     setSelected(p);
     setLetter("");
     setAnalysis("");
-    setSkipLeads([]);
+    setSkipPortals([]);
+    setSkipRaw("");
+    setSkipFormatFailed(false);
   }
 
   const hasContact = (p: ForeclosureProperty) => Boolean(p.ownerPhone || p.ownerEmail);
@@ -169,15 +180,20 @@ function ForeclosureAgentPage() {
     if (!selected) return;
     setActionLoading("skip");
     try {
-      const { leads } = await skip({ data: { property: selected } });
-      setSkipLeads(leads);
-      if (leads.length === 0) toast.info("No leads returned.");
+      const res = await skip({ data: { property: selected } });
+      setSkipPortals(res.portals);
+      setSkipRaw(res.raw ?? "");
+      setSkipFormatFailed(Boolean(res.formattingFailed));
+      if (!res.formattingFailed && res.portals.length === 0) {
+        toast.info("No portals returned.");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Skip trace failed");
     } finally {
       setActionLoading(null);
     }
   }
+
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -343,7 +359,7 @@ function ForeclosureAgentPage() {
       )}
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           {selected && (
             <>
               <DialogHeader>
@@ -425,8 +441,13 @@ function ForeclosureAgentPage() {
                   </div>
                 )}
 
-                <div className="border-t pt-3 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={onGenerateLetter} disabled={actionLoading !== null}>
+                <div className="border-t pt-3 -mx-1 px-1 flex flex-wrap gap-2 overflow-x-auto">
+                  <Button
+                    size="sm"
+                    onClick={onGenerateLetter}
+                    disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
+                  >
                     {actionLoading === "letter" && (
                       <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                     )}
@@ -438,6 +459,7 @@ function ForeclosureAgentPage() {
                       variant="outline"
                       onClick={onSkipTrace}
                       disabled={actionLoading !== null}
+                      className="whitespace-nowrap shrink-0"
                     >
                       {actionLoading === "skip" && (
                         <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -450,6 +472,7 @@ function ForeclosureAgentPage() {
                     variant="outline"
                     onClick={onAnalyze}
                     disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
                   >
                     {actionLoading === "analysis" && (
                       <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -470,18 +493,25 @@ function ForeclosureAgentPage() {
                     <pre className="whitespace-pre-wrap text-sm font-sans">{analysis}</pre>
                   </div>
                 )}
-                {skipLeads.length > 0 && (
-                  <div className="border rounded p-3 bg-muted/40 space-y-2">
+                {(skipPortals.length > 0 || skipFormatFailed) && (
+                  <div className="space-y-3 min-w-0">
                     <div className="text-xs font-medium">Skip Trace Leads</div>
-                    {skipLeads.map((l, i) => (
-                      <div key={i} className="text-sm border-t pt-2 first:border-t-0 first:pt-0">
-                        <div className="flex justify-between">
-                          <span className="font-medium">{l.type}: {l.value}</span>
-                          <span className="text-xs text-muted-foreground">{l.confidence}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground">{l.source}</div>
-                        <div className="text-xs">{l.rationale}</div>
+
+                    {skipFormatFailed && (
+                      <div className="flex items-start gap-2 rounded border border-amber-500/30 bg-amber-500/10 text-amber-200 p-3 text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <span>Formatting failed — showing raw results</span>
                       </div>
+                    )}
+
+                    {skipFormatFailed && skipRaw && (
+                      <div className="rounded border border-border bg-muted/40 p-3 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                        {skipRaw}
+                      </div>
+                    )}
+
+                    {skipPortals.map((portal, i) => (
+                      <PortalCard key={`${portal.url}-${i}`} portal={portal} />
                     ))}
                   </div>
                 )}
@@ -499,6 +529,75 @@ function Field({ label, value }: { label: string; value: string }) {
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
       <div>{value}</div>
+    </div>
+  );
+}
+
+function PortalCard({
+  portal,
+}: {
+  portal: {
+    portal_name: string;
+    url: string;
+    is_free: boolean;
+    what_it_yields: string;
+    steps: string[];
+    description: string;
+  };
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasLongDescription = portal.description.trim().length > 0;
+
+  return (
+    <div className="rounded-lg border border-border bg-card/60 p-4 space-y-3 min-w-0 break-words">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+          <span className="font-semibold text-sm text-foreground break-words">
+            {portal.portal_name}
+          </span>
+          {portal.is_free && (
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shrink-0">
+              Free · Public
+            </Badge>
+          )}
+        </div>
+        <a
+          href={portal.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto shrink-0"
+        >
+          <Button size="sm" variant="outline" className="whitespace-nowrap">
+            Open Portal
+            <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+          </Button>
+        </a>
+      </div>
+
+      {portal.what_it_yields && (
+        <p className="text-xs text-muted-foreground">{portal.what_it_yields}</p>
+      )}
+
+      {portal.steps.length > 0 && (
+        <ol className="list-decimal pl-5 space-y-1 text-sm marker:text-muted-foreground">
+          {portal.steps.map((step, i) => (
+            <li key={i} className="break-words">{step}</li>
+          ))}
+        </ol>
+      )}
+
+      {hasLongDescription && (
+        <div className="text-xs text-muted-foreground">
+          <p className={expanded ? "" : "line-clamp-3"}>{portal.description}</p>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-1 text-primary hover:underline text-xs"
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
