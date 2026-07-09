@@ -143,7 +143,9 @@ function ForeclosureAgentPage() {
     setSelected(p);
     setLetter("");
     setAnalysis("");
-    setSkipLeads([]);
+    setSkipPortals([]);
+    setSkipRaw("");
+    setSkipFormatFailed(false);
   }
 
   const hasContact = (p: ForeclosureProperty) => Boolean(p.ownerPhone || p.ownerEmail);
