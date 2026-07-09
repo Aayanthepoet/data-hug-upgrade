@@ -441,8 +441,13 @@ function ForeclosureAgentPage() {
                   </div>
                 )}
 
-                <div className="border-t pt-3 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={onGenerateLetter} disabled={actionLoading !== null}>
+                <div className="border-t pt-3 -mx-1 px-1 flex flex-wrap gap-2 overflow-x-auto">
+                  <Button
+                    size="sm"
+                    onClick={onGenerateLetter}
+                    disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
+                  >
                     {actionLoading === "letter" && (
                       <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                     )}
@@ -454,6 +459,7 @@ function ForeclosureAgentPage() {
                       variant="outline"
                       onClick={onSkipTrace}
                       disabled={actionLoading !== null}
+                      className="whitespace-nowrap shrink-0"
                     >
                       {actionLoading === "skip" && (
                         <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -466,6 +472,7 @@ function ForeclosureAgentPage() {
                     variant="outline"
                     onClick={onAnalyze}
                     disabled={actionLoading !== null}
+                    className="whitespace-nowrap shrink-0"
                   >
                     {actionLoading === "analysis" && (
                       <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -486,18 +493,25 @@ function ForeclosureAgentPage() {
                     <pre className="whitespace-pre-wrap text-sm font-sans">{analysis}</pre>
                   </div>
                 )}
-                {skipLeads.length > 0 && (
-                  <div className="border rounded p-3 bg-muted/40 space-y-2">
+                {(skipPortals.length > 0 || skipFormatFailed) && (
+                  <div className="space-y-3 min-w-0">
                     <div className="text-xs font-medium">Skip Trace Leads</div>
-                    {skipLeads.map((l, i) => (
-                      <div key={i} className="text-sm border-t pt-2 first:border-t-0 first:pt-0">
-                        <div className="flex justify-between">
-                          <span className="font-medium">{l.type}: {l.value}</span>
-                          <span className="text-xs text-muted-foreground">{l.confidence}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground">{l.source}</div>
-                        <div className="text-xs">{l.rationale}</div>
+
+                    {skipFormatFailed && (
+                      <div className="flex items-start gap-2 rounded border border-amber-500/30 bg-amber-500/10 text-amber-200 p-3 text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <span>Formatting failed — showing raw results</span>
                       </div>
+                    )}
+
+                    {skipFormatFailed && skipRaw && (
+                      <div className="rounded border border-border bg-muted/40 p-3 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                        {skipRaw}
+                      </div>
+                    )}
+
+                    {skipPortals.map((portal, i) => (
+                      <PortalCard key={`${portal.url}-${i}`} portal={portal} />
                     ))}
                   </div>
                 )}
