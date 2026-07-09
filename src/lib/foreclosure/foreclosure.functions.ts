@@ -246,3 +246,210 @@ CRITICAL OUTPUT RULES:
       };
     }
   });
+
+// ============================================================
+// Preliminary Title Search (NY)
+// ============================================================
+
+const TitleSearchInput = z.object({
+  address: z.string().min(3).max(300),
+});
+
+const MortgageSchema = z.object({
+  lender: z.string().default(""),
+  amount: z.string().default(""),
+  date: z.string().default(""),
+}).passthrough();
+const TaxLienSchema = z.object({
+  amount: z.string().default(""),
+  year: z.string().default(""),
+  status: z.string().default(""),
+}).passthrough();
+const JudgmentSchema = z.object({
+  creditor: z.string().default(""),
+  amount: z.string().default(""),
+  date: z.string().default(""),
+}).passthrough();
+const LisPendensSchema = z.object({
+  caseNo: z.string().default(""),
+  plaintiff: z.string().default(""),
+  filedDate: z.string().default(""),
+  status: z.string().default(""),
+}).passthrough();
+const MechanicsLienSchema = z.object({
+  claimant: z.string().default(""),
+  amount: z.string().default(""),
+  date: z.string().default(""),
+}).passthrough();
+const HpdViolationSchema = z.object({
+  class: z.string().default(""),
+  description: z.string().default(""),
+  date: z.string().default(""),
+  status: z.string().default(""),
+}).passthrough();
+
+export const TitleSearchResultSchema = z.object({
+  address: z.string().default(""),
+  searchDate: z.string().default(""),
+  ownerOfRecord: z.string().nullable().default(null),
+  ownerSince: z.string().nullable().default(null),
+  deedType: z.string().nullable().default(null),
+  purchasePrice: z.string().nullable().default(null),
+  legalDescription: z.string().nullable().default(null),
+  openMortgages: z.array(MortgageSchema).default([]),
+  taxLiens: z.array(TaxLienSchema).default([]),
+  judgments: z.array(JudgmentSchema).default([]),
+  lisPendens: z.array(LisPendensSchema).default([]),
+  mechanicsLiens: z.array(MechanicsLienSchema).default([]),
+  hpdViolations: z.array(HpdViolationSchema).default([]),
+  taxStatus: z.string().nullable().default(null),
+  taxDelinquencyAmount: z.string().nullable().default(null),
+  marketableTitle: z.string().default("Unknown"),
+  redFlags: z.array(z.string()).default([]),
+  recommendation: z.string().default(""),
+}).passthrough();
+
+export type TitleSearchResult = z.infer<typeof TitleSearchResultSchema>;
+
+const TITLE_SEARCH_LIMIT_FREE = 10;
+
+async function checkTitleSearchQuota(supabase: SupabaseLike, userId: string): Promise<{ allowed: boolean; used: number; limit: number | null }> {
+  const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+  if (isAdmin) return { allowed: true, used: 0, limit: null };
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("status, current_period_end")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const active = sub && ["active", "trialing"].includes(sub.status);
+  if (active) return { allowed: true, used: 0, limit: null };
+
+  const start = new Date();
+  start.setUTCDate(1);
+  start.setUTCHours(0, 0, 0, 0);
+  const { count } = await supabase
+    .from("title_searches")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", start.toISOString());
+  const used = count ?? 0;
+  return { allowed: used < TITLE_SEARCH_LIMIT_FREE, used, limit: TITLE_SEARCH_LIMIT_FREE };
+}
+
+type SupabaseLike = {
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }>;
+  from: (t: string) => any;
+};
+
+export const getTitleSearchQuota = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    return checkTitleSearchQuota(context.supabase as unknown as SupabaseLike, context.userId);
+  });
+
+export const runTitleSearch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TitleSearchInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase as unknown as SupabaseLike;
+    const quota = await checkTitleSearchQuota(supabase, context.userId);
+    if (!quota.allowed) {
+      return {
+        ok: false as const,
+        error: `Monthly limit reached (${quota.used}/${quota.limit}). Upgrade to Pro or Agency for unlimited title searches.`,
+        quota,
+      };
+    }
+
+    const system = `You are a New York real estate title search agent. For the property address provided search public records and return ONLY this JSON with no markdown or backticks:
+{
+"address": "full address searched",
+"searchDate": "today's date",
+"ownerOfRecord": "current owner name or null",
+"ownerSince": "date of last deed transfer or null",
+"deedType": "type of deed or null",
+"purchasePrice": "last sale price or null",
+"legalDescription": "lot and block or null",
+"openMortgages": [{"lender": "name", "amount": "$000,000", "date": "recorded date"}],
+"taxLiens": [{"amount": "$000", "year": "2024", "status": "open or paid"}],
+"judgments": [{"creditor": "name", "amount": "$000,000", "date": "filed date"}],
+"lisPendens": [{"caseNo": "index number", "plaintiff": "name", "filedDate": "date", "status": "active or cancelled"}],
+"mechanicsLiens": [{"claimant": "name", "amount": "$000,000", "date": "filed date"}],
+"hpdViolations": [{"class": "A/B/C", "description": "violation", "date": "issued date", "status": "open or closed"}],
+"taxStatus": "current or delinquent",
+"taxDelinquencyAmount": "$000 or null",
+"marketableTitle": "Yes / No / Unknown",
+"redFlags": ["list of any issues that would concern a buyer or investor"],
+"recommendation": "1-2 sentence summary of title risk level"
+}
+
+Search these sources: ACRIS (acris.nyc.gov), NYSCEF court records, NYC Finance property tax records, NYC HPD violation records, NYS court judgment records, county clerk deed records. Never fabricate data — if a field is not verifiable, use null or an empty array.`;
+
+    const prompt = `Property address: ${data.address}\n\nRun the title search and return ONLY the JSON object described.`;
+
+    try {
+      const raw = await callClaude({
+        system,
+        prompt,
+        webSearch: true,
+        maxTokens: 6144,
+      });
+      const parsed = extractJson(raw);
+      const result = TitleSearchResultSchema.parse(parsed);
+      if (!result.address) result.address = data.address;
+      if (!result.searchDate) result.searchDate = new Date().toISOString().slice(0, 10);
+
+      const { data: inserted, error } = await supabase
+        .from("title_searches")
+        .insert({ user_id: context.userId, address: data.address, results: result })
+        .select("id, created_at")
+        .single();
+      if (error) throw error;
+
+      return {
+        ok: true as const,
+        id: inserted.id as string,
+        createdAt: inserted.created_at as string,
+        result,
+      };
+    } catch (error) {
+      console.error("[foreclosure.titleSearch]", error);
+      return {
+        ok: false as const,
+        error: error instanceof Error ? error.message : "Title search failed",
+        quota,
+      };
+    }
+  });
+
+export const listTitleSearches = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const supabase = context.supabase as unknown as SupabaseLike;
+    const { data, error } = await supabase
+      .from("title_searches")
+      .select("id, address, results, created_at")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return { items: (data ?? []) as Array<{ id: string; address: string; results: TitleSearchResult; created_at: string }> };
+  });
+
+const GetTitleInput = z.object({ id: z.string().uuid() });
+export const getTitleSearch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => GetTitleInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const supabase = context.supabase as unknown as SupabaseLike;
+    const { data: row, error } = await supabase
+      .from("title_searches")
+      .select("id, address, results, created_at")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) throw new Error("Not found");
+    return row as { id: string; address: string; results: TitleSearchResult; created_at: string };
+  });
