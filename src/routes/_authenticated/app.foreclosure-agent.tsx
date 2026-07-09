@@ -26,7 +26,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Mail, Phone, Search, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, Phone, Search, CheckCircle2, ExternalLink, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/foreclosure-agent")({
   head: () => ({
