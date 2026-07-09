@@ -532,3 +532,72 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function PortalCard({
+  portal,
+}: {
+  portal: {
+    portal_name: string;
+    url: string;
+    is_free: boolean;
+    what_it_yields: string;
+    steps: string[];
+    description: string;
+  };
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasLongDescription = portal.description.trim().length > 0;
+
+  return (
+    <div className="rounded-lg border border-border bg-card/60 p-4 space-y-3 min-w-0 break-words">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+          <span className="font-semibold text-sm text-foreground break-words">
+            {portal.portal_name}
+          </span>
+          {portal.is_free && (
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shrink-0">
+              Free · Public
+            </Badge>
+          )}
+        </div>
+        <a
+          href={portal.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto shrink-0"
+        >
+          <Button size="sm" variant="outline" className="whitespace-nowrap">
+            Open Portal
+            <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+          </Button>
+        </a>
+      </div>
+
+      {portal.what_it_yields && (
+        <p className="text-xs text-muted-foreground">{portal.what_it_yields}</p>
+      )}
+
+      {portal.steps.length > 0 && (
+        <ol className="list-decimal pl-5 space-y-1 text-sm marker:text-muted-foreground">
+          {portal.steps.map((step, i) => (
+            <li key={i} className="break-words">{step}</li>
+          ))}
+        </ol>
+      )}
+
+      {hasLongDescription && (
+        <div className="text-xs text-muted-foreground">
+          <p className={expanded ? "" : "line-clamp-3"}>{portal.description}</p>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-1 text-primary hover:underline text-xs"
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
