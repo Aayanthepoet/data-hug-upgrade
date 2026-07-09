@@ -4,10 +4,13 @@ import { useState } from "react";
 import {
   analyzeInvestment,
   generateOutreachLetter,
+  runTitleSearch,
   searchForeclosureProperties,
   skipTraceOwner,
   type ForeclosureProperty,
+  type TitleSearchResult,
 } from "@/lib/foreclosure/foreclosure.functions";
+import { TitleSearchPanel, printTitleSearch } from "@/components/title-search/TitleSearchPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
