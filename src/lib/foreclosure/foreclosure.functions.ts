@@ -259,34 +259,34 @@ const MortgageSchema = z.object({
   lender: z.string().default(""),
   amount: z.string().default(""),
   date: z.string().default(""),
-}).passthrough();
+});
 const TaxLienSchema = z.object({
   amount: z.string().default(""),
   year: z.string().default(""),
   status: z.string().default(""),
-}).passthrough();
+});
 const JudgmentSchema = z.object({
   creditor: z.string().default(""),
   amount: z.string().default(""),
   date: z.string().default(""),
-}).passthrough();
+});
 const LisPendensSchema = z.object({
   caseNo: z.string().default(""),
   plaintiff: z.string().default(""),
   filedDate: z.string().default(""),
   status: z.string().default(""),
-}).passthrough();
+});
 const MechanicsLienSchema = z.object({
   claimant: z.string().default(""),
   amount: z.string().default(""),
   date: z.string().default(""),
-}).passthrough();
+});
 const HpdViolationSchema = z.object({
   class: z.string().default(""),
   description: z.string().default(""),
   date: z.string().default(""),
   status: z.string().default(""),
-}).passthrough();
+});
 
 export const TitleSearchResultSchema = z.object({
   address: z.string().default(""),
@@ -307,7 +307,7 @@ export const TitleSearchResultSchema = z.object({
   marketableTitle: z.string().default("Unknown"),
   redFlags: z.array(z.string()).default([]),
   recommendation: z.string().default(""),
-}).passthrough();
+});
 
 export type TitleSearchResult = z.infer<typeof TitleSearchResultSchema>;
 
