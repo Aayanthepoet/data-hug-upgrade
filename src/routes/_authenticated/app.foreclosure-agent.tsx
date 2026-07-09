@@ -180,15 +180,20 @@ function ForeclosureAgentPage() {
     if (!selected) return;
     setActionLoading("skip");
     try {
-      const { leads } = await skip({ data: { property: selected } });
-      setSkipLeads(leads);
-      if (leads.length === 0) toast.info("No leads returned.");
+      const res = await skip({ data: { property: selected } });
+      setSkipPortals(res.portals);
+      setSkipRaw(res.raw ?? "");
+      setSkipFormatFailed(Boolean(res.formattingFailed));
+      if (!res.formattingFailed && res.portals.length === 0) {
+        toast.info("No portals returned.");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Skip trace failed");
     } finally {
       setActionLoading(null);
     }
   }
+
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
