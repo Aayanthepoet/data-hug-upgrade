@@ -555,6 +555,14 @@ function ForeclosureAgentPage() {
                     ))}
                   </div>
                 )}
+                {titleResult && (
+                  <div className="border rounded p-3 bg-muted/40">
+                    <TitleSearchPanel
+                      result={titleResult}
+                      onPrint={() => printTitleSearch(titleResult)}
+                    />
+                  </div>
+                )}
               </div>
             </>
           )}
