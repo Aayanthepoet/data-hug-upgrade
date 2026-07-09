@@ -53,6 +53,7 @@ const items = [
   { key: "lookupHistory", url: "/app/properties/lookup-history", icon: HistoryIcon },
   { key: "findDistressed", url: "/app/properties/search", icon: Search },
   { key: "foreclosureAgent", url: "/app/foreclosure-agent", icon: AlertTriangle },
+  { key: "titleSearch", url: "/app/title-search", icon: FileSignature },
   { key: "auctions", url: "/app/auctions", icon: Gavel },
   { key: "watchlist", url: "/app/watchlist", icon: Bookmark },
   { key: "owners", url: "/app/owners", icon: Users },
