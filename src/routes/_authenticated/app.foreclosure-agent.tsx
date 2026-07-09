@@ -99,7 +99,9 @@ function ForeclosureAgentPage() {
   >([]);
   const [skipRaw, setSkipRaw] = useState<string>("");
   const [skipFormatFailed, setSkipFormatFailed] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | null>(null);
+  const [titleResult, setTitleResult] = useState<TitleSearchResult | null>(null);
+  const [actionLoading, setActionLoading] = useState<"letter" | "analysis" | "skip" | "title" | null>(null);
+  const runTitle = useServerFn(runTitleSearch);
 
   function runTestWorkflow() {
     if (!testAddress.trim()) {
