@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { publicBaseUrl } from "@/lib/public-url.server";
 
 const CreateSchema = z.object({
   property_id: z.string().uuid(),
@@ -220,9 +221,7 @@ export const createContract = createServerFn({ method: "POST" })
     if (data.send_for_signature) {
       const apiKey = process.env.SIGNWELL_API_KEY;
       const webhookSecret = process.env.SIGNWELL_WEBHOOK_SECRET;
-      const publicBase =
-        process.env.NOTIFY_PUBLIC_URL ||
-        "https://project--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app";
+      const publicBase = publicBaseUrl();
 
       if (!apiKey) {
         await supabase

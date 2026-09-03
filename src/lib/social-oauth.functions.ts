@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateOAuthState } from "./oauth-state.server";
 import { encryptToken, decryptToken } from "./social-token-crypto.server";
+import { publicBaseUrl } from "@/lib/public-url.server";
 
 
 const MOCK_PAGES = [
@@ -47,10 +48,9 @@ export const getMetaOAuthUrl = createServerFn({ method: "GET" })
       throw new Error("META_APP_ID is not configured.");
     }
 
-    // Determine the redirect origin. We default to the preview URL.
-    const origin = process.env.VITE_SUPABASE_URL 
-      ? `https://id-preview--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app`
-      : "http://localhost:8080";
+    // Redirect origin for the OAuth round trip. This must match a redirect URI
+    // registered with Meta, so it has to be this deployment's real origin.
+    const origin = publicBaseUrl();
       
     const redirectUri = `${origin}/api/public/oauth/meta/callback`;
     const state = generateOAuthState(userId);

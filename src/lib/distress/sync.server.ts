@@ -17,12 +17,10 @@ import { fetchNYCSignal } from "./nyc-signals-provider.server";
 import { fetchPhillySignal } from "./philly-signals-provider.server";
 import { SYNC_TARGETS, PER_TARGET_LIMIT, type SyncTarget } from "./sync-config";
 import type { DistressedPropertyRecord } from "./provider";
+import { publicBaseUrl } from "@/lib/public-url.server";
 
 const PROVIDER_TIMEOUT_MS = 50_000;
 const FANOUT_CONCURRENCY = 4;
-
-const STABLE_BASE_URL =
-  "https://project--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app";
 
 async function getAdminClient() {
   const mod = await import("@/integrations/supabase/client.server");
@@ -297,7 +295,7 @@ export async function runDistressSync(
   }
 
 
-  const url = `${STABLE_BASE_URL}/api/public/hooks/sync-distressed-one`;
+  const url = `${publicBaseUrl()}/api/public/hooks/sync-distressed-one`;
   const results: Array<SyncSummary & { ranVia: "hook" | "fallback" }> = [];
   const queue = [...providers];
 

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { publicBaseUrl } from "@/lib/public-url.server";
 
 export const getNotificationPreferences = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -185,8 +186,7 @@ export const wireSmsTriggers = createServerFn({ method: "POST" })
     if (!isAdmin) throw new Error("Admins only.");
 
     const url =
-      process.env.NOTIFY_PUBLIC_URL ||
-      "https://project--f060fcf2-0071-41a6-8014-e8dd9520d418.lovable.app";
+      publicBaseUrl();
     const secret = process.env.NOTIFY_HOOK_SECRET;
     if (!secret) throw new Error("NOTIFY_HOOK_SECRET is not configured.");
 
