@@ -1,3 +1,14 @@
+// ⚠️ STILL ON THE LOVABLE AI GATEWAY — THIS DIES WHEN LOVABLE LAPSES.
+//
+// Every other AI engine moved to Anthropic (src/lib/engines/anthropic.server.ts).
+// This one could not: Anthropic has no text-to-speech endpoint.
+//
+// Current model via the gateway: "openai/gpt-4o-mini-tts" (default voice "alloy")
+//
+// Repointing means an OpenAI API key and a direct client against
+// api.openai.com/v1/audio/speech — not a swap of the model
+// string. Budget for that before the Lovable subscription ends.
+//
 import { createFileRoute } from "@tanstack/react-router";
 import { requireApiAuth } from "@/lib/api-auth.server";
 

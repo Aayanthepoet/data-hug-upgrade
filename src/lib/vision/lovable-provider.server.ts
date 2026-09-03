@@ -1,3 +1,16 @@
+// ⚠️ STILL ON THE LOVABLE AI GATEWAY — THIS DIES WHEN LOVABLE LAPSES.
+//
+// Every other AI engine moved to Anthropic (src/lib/engines/anthropic.server.ts).
+// This one could not: Anthropic has no image-generation endpoint at all.
+//
+// Current models via the gateway: "openai/gpt-image-2" (text-to-image) and
+//   "google/gemini-3.1-flash-image" (image edit, when a source photo is sent)
+//
+// Repointing means an OpenAI API key and a direct client against
+// api.openai.com/v1/images/generations (and an image-edit
+// equivalent for the source-photo path) — not a swap of the model
+// string. Budget for that before the Lovable subscription ends.
+//
 // Lovable AI image-gen provider for Vision Studio.
 //
 // Two render paths, picked automatically:

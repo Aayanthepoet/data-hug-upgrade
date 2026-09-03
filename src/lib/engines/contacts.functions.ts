@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { MODELS, aiModel } from "./anthropic.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireActiveSubscription } from "@/lib/billing/require-subscription.server";
 
@@ -26,12 +26,8 @@ export const resolveOwnerContacts = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!owner) throw new Error("Owner not found");
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const gateway = createLovableAiGatewayProvider(key);
-
     const { output } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model: aiModel(MODELS.cheap),
       output: Output.object({ schema: ContactSchema }),
       system: "You are the PropAI Contact Resolver. Given an owner record, propose realistic skip-trace candidates (phone/email/social handles) that would be plausible to investigate. Mark confidence honestly; these are AI-generated leads pending verification, not verified contacts.",
       prompt: `Owner: ${JSON.stringify(owner, null, 2)}\n\nReturn up to 6 plausible contact candidates ordered by confidence.`,

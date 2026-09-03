@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { MODELS, aiModel } from "./anthropic.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Loose schema — coerce numbers, default missing arrays, normalize tier.
@@ -55,16 +55,12 @@ const SYSTEM_PROMPT =
   "You are the PropAI Lead Scoring Engine for a real estate investor. Score a property's seller motivation 0-100 using ANY available signals: distress_type, equity, vacancy, absentee ownership, preforeclosure/auction status, tax owed, liens, days on market, location. Many properties have sparse data — score from whatever IS available; never refuse. Distress signals alone (e.g. hpd_litigation, vacate, tax_lien, preforeclosure, reo) justify a meaningful score even with no financial data. Tier: cold 0-39, warm 40-64, hot 65-84, on_fire 85-100.";
 
 async function callModel(compact: Record<string, unknown>, strict: boolean): Promise<ScoreResult> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const gateway = createLovableAiGatewayProvider(key);
-
   const userPrompt = strict
     ? `Property data (sparse fields omitted):\n${JSON.stringify(compact, null, 2)}\n\nReturn ONLY valid JSON, no markdown, no commentary, matching EXACTLY this shape:\n{"score": <number 0-100>, "tier": "cold"|"warm"|"hot"|"on_fire", "rationale": "<string under 400 chars>", "signals": ["<short signal>", ...]}\nIf data is sparse, score from distress_type and location alone.`
     : `Property data (sparse fields omitted):\n${JSON.stringify(compact, null, 2)}\n\nReturn a JSON object with: score (0-100), tier (cold/warm/hot/on_fire), rationale (short), signals (array of 2-6 short strings). Score from whatever is available — distress_type alone is enough.`;
 
   const { text } = await generateText({
-    model: gateway("google/gemini-3-flash-preview"),
+    model: aiModel(MODELS.cheap),
     system: SYSTEM_PROMPT,
     prompt: userPrompt,
   });

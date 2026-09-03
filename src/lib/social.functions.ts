@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { generateText, Output } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { MODELS, aiModel } from "@/lib/engines/anthropic.server";
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,80}[a-z0-9])$/;
 
@@ -55,14 +55,10 @@ export const generatePostFromProperty = createServerFn({ method: "POST" })
       .from("profiles").select("full_name, public_slug, public_brokerage")
       .eq("id", userId).maybeSingle();
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const gateway = createLovableAiGatewayProvider(key);
-
     const briefs = data.platforms.map((p) => `- ${p}: ${PLATFORM_BRIEFS[p]}`).join("\n");
 
     const { output } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model: aiModel(MODELS.balanced),
       output: Output.object({ schema: GenerateSchema }),
       system: `You are PropAI's Social Amplifier. Given a real estate listing, generate one shareable landing-page article and per-platform social variants. The landing page is the SEO surface; social posts drive traffic to it. Use specific, honest details from the property data — never invent prices, sizes, or features. Write for buyers, investors, and curious neighbors.`,
       prompt: `Agent: ${profile?.full_name ?? "PropAI Agent"}${profile?.public_brokerage ? ` — ${profile.public_brokerage}` : ""}
@@ -139,7 +135,7 @@ export const savePost = createServerFn({ method: "POST" })
         status,
         scheduled_at: data.scheduled_at ?? null,
         published_at: data.publish ? new Date().toISOString() : null,
-        ai_model: "google/gemini-3-flash-preview",
+        ai_model: MODELS.balanced,
       })
       .select()
       .single();

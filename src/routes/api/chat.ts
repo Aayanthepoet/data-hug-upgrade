@@ -3,7 +3,7 @@ import { convertToModelMessages, streamText, tool, stepCountIs, type UIMessage }
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/integrations/supabase/types";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { MODELS, aiModel } from "@/lib/engines/anthropic.server";
 
 const SYSTEM_PROMPT = `You are PropAI Agent, an assistant for a real-estate investor inside the PropAI app.
 
@@ -54,9 +54,8 @@ export const Route = createFileRoute("/api/chat")({
 
         const supabaseUrl = process.env.SUPABASE_URL;
         const supabasePublishable = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const lovableKey = process.env.LOVABLE_API_KEY;
         if (!supabaseUrl || !supabasePublishable) return new Response("Server misconfigured", { status: 500 });
-        if (!lovableKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        if (!process.env.ANTHROPIC_API_KEY) return new Response("Missing ANTHROPIC_API_KEY", { status: 500 });
 
         const supabase = createClient<Database>(supabaseUrl, supabasePublishable, {
           global: { headers: { Authorization: `Bearer ${token}` } },
@@ -99,8 +98,9 @@ export const Route = createFileRoute("/api/chat")({
         };
 
 
-        const gateway = createLovableAiGatewayProvider(lovableKey);
-        const model = gateway("google/gemini-3-flash-preview");
+        // Sonnet rather than the cheap tier: this loop reasons across several
+        // tool calls per turn and the output is read by a person, not parsed.
+        const model = aiModel(MODELS.balanced);
 
         const tools = {
           list_properties: tool({

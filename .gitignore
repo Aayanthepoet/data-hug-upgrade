@@ -30,3 +30,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deploy build output. .output is the nitro default; .vercel is what the
+# "vercel" preset emits (Vercel Build Output API) and is also where the Vercel
+# CLI stores project linkage. .wrangler only appears if the preset falls back
+# to cloudflare-module.
+.vercel
+.wrangler

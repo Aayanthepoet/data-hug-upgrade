@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Deploy target. The Lovable preset defaults nitro to "cloudflare-module",
+  // which emits a Workers bundle plus wrangler.json — the wrong shape for
+  // Vercel, and easy to miss because the build still succeeds.
+  nitro: { preset: "vercel" },
 });
