@@ -27,6 +27,13 @@ import { toast } from "sonner";
 import { Plus, Search, MapPin, DollarSign, Home, X, SlidersHorizontal } from "lucide-react";
 import { ImportLeadsDialog } from "@/components/properties/ImportLeadsDialog";
 
+// PostgREST returns at most 1000 rows for a select with no explicit range, so
+// anything that must be complete has to page. Several other pages under
+// _authenticated/ use the same unbounded pattern (leads, lead-lists, settings)
+// but hold well under 1000 rows, so they are latent rather than broken — they
+// would truncate silently the moment they cross it.
+const PAGE_SIZE = 1000;
+
 type DistressFilter = "all" | "preforeclosure" | "reo" | "auction" | "tax_lien" | "tax_delinquent" | "fsbo_stale" | "vacant" | "absentee";
 type ScoreFilter = "all" | "hot" | "warm" | "cold";
 type PriceFilter = "all" | "u250" | "250_500" | "500_1m" | "o1m";
@@ -87,16 +94,45 @@ function PropertiesPage() {
   const { data: allData, isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Exact count for the denominator, fetched separately from the rows.
+      // PostgREST caps an unbounded select at 1000, so the length of the
+      // returned array can never be the true total. Deriving the denominator
+      // from it is what made this read "1000 of 1000" rather than
+      // "1000 of 10,826" — wrong AND self-consistent, which is exactly why it
+      // looked like a complete list instead of a truncated one.
+      const { count, error: countErr } = await supabase
         .from("properties")
-        .select("id, address, city, state, zip, estimated_value, lead_score, distress_type, is_preforeclosure, is_vacant, is_absentee")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+        .select("id", { count: "exact", head: true });
+      if (countErr) throw countErr;
+
+      // Page explicitly instead of relying on the default cap.
+      //
+      // The second .order("id") is load-bearing: .range() re-runs the query for
+      // each page, and created_at is not unique, so without a unique final
+      // tiebreaker rows can repeat or vanish between pages.
+      const fetchPage = async (from: number) => {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("id, address, city, state, zip, estimated_value, lead_score, distress_type, is_preforeclosure, is_vacant, is_absentee")
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        return data ?? [];
+      };
+
+      const rows: Awaited<ReturnType<typeof fetchPage>> = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const page = await fetchPage(from);
+        rows.push(...page);
+        if (page.length < PAGE_SIZE) break;
+      }
+
+      return { rows, total: count ?? rows.length };
     },
   });
 
-  const data = (allData ?? []).filter((p) => {
+  const data = (allData?.rows ?? []).filter((p) => {
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       const hay = `${p.address ?? ""} ${p.city ?? ""} ${p.state ?? ""} ${p.zip ?? ""}`.toLowerCase();
@@ -352,7 +388,7 @@ function PropertiesPage() {
 
   if (isLoading) return <div className="text-[var(--w55)] p-8">Loading properties…</div>;
 
-  if (!allData?.length) {
+  if (!allData?.rows.length) {
     return (
       <EmptyModule
         eyebrow="Properties"
@@ -471,7 +507,7 @@ function PropertiesPage() {
 
         <div className="flex items-center justify-between pt-1 text-xs text-[var(--w55)]">
           <span>
-            Showing <span className="text-white font-semibold">{data.length}</span> of {allData.length} properties
+            Showing <span className="text-white font-semibold">{data.length}</span> of {allData.total.toLocaleString()} properties
             {activeFilterCount > 0 && <span className="ml-2 text-cyan">· {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active</span>}
           </span>
           {(activeFilterCount > 0 || searchText) && (
