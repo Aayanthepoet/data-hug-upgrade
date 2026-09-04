@@ -7,7 +7,6 @@ import { NotificationBell } from "@/components/app/NotificationBell";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
 import { ArrowLeft, Home } from "lucide-react";
 import { SubscriptionGate } from "@/components/billing/SubscriptionGate";
 
@@ -39,7 +38,7 @@ function AppShell() {
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <Link to="/" className="flex items-center gap-3 font-bold">
-                <img src={logoAsset.url} alt="AI Network Agency Logo" className="h-7 w-auto rounded bg-white p-0.5" />
+                <img src="/ainetworkagency-logo.png" alt="AI Network Agency Logo" className="h-7 w-auto rounded bg-white p-0.5" />
                 <span className="border-l border-border pl-3 text-xs font-medium text-[var(--w65)]">
                   Prop<span className="text-cyan">AI</span>
                 </span>

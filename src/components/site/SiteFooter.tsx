@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import logoAsset from "@/assets/ainetworkagency-logo.png.asset.json";
 
 export function SiteFooter() {
   const { t } = useTranslation();
@@ -9,7 +8,7 @@ export function SiteFooter() {
       <div className="container-x py-16 grid grid-cols-2 md:grid-cols-4 gap-10 text-sm">
         <div className="col-span-2">
           <div className="flex items-center gap-3 font-bold text-lg mb-4">
-            <img src={logoAsset.url} alt="AI Network Agency Logo" className="h-8 w-auto rounded bg-white p-1" />
+            <img src="/ainetworkagency-logo.png" alt="AI Network Agency Logo" className="h-8 w-auto rounded bg-white p-1" />
             <span className="border-l border-border pl-3 text-sm font-medium tracking-normal text-[var(--w65)]">
               Prop<span className="text-cyan">AI</span>
             </span>
