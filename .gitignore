@@ -37,3 +37,10 @@ dist-ssr
 # to cloudflare-module.
 .vercel
 .wrangler
+
+# Local secrets. Untracked as of the commit that added this line — the entry
+# alone does nothing while the file is still tracked, which is why the
+# git rm --cached matters.
+.env
+.env.*
+!.env.example
