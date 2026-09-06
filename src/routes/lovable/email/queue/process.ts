@@ -1,6 +1,7 @@
-import { sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { Resend } from 'resend'
+import { publicBaseUrl } from '@/lib/public-url.server'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -8,31 +9,59 @@ const DEFAULT_SEND_DELAY_MS = 200
 const DEFAULT_AUTH_TTL_MINUTES = 15
 const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 
-// Check if an error is a rate-limit (429) response.
-// Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
-// falls back to parsing the error message for older versions.
+// Resend reports failures as { error: { message, statusCode, name } } rather than
+// throwing, so the send site rethrows with `status` and `code` attached. `code` is
+// Resend's error name, which is the more reliable signal — statusCode is nullable.
 function isRateLimited(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'status' in error) {
-    return (error as { status: number }).status === 429
+  if (error && typeof error === 'object') {
+    const e = error as { status?: number | null; code?: string }
+    if (e.status === 429) return true
+    if (e.code === 'rate_limit_exceeded') return true
   }
   return error instanceof Error && error.message.includes('429')
 }
 
-// Check if an error is a forbidden (403) response. Retrying won't help.
-// Move straight to DLQ.
+// Permanent auth or sender-configuration failures. Retrying won't help, and every
+// other message in the batch will hit the same wall, so DLQ this one and stop.
 function isForbidden(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'status' in error) {
-    return (error as { status: number }).status === 403
+  if (error && typeof error === 'object') {
+    const e = error as { status?: number | null; code?: string }
+    if (e.status === 403 || e.status === 401) return true
+    if (
+      e.code === 'restricted_api_key' ||
+      e.code === 'invalid_api_key' ||
+      e.code === 'missing_api_key' ||
+      e.code === 'invalid_access' ||
+      e.code === 'invalid_from_address'
+    ) {
+      return true
+    }
   }
   return error instanceof Error && error.message.includes('403')
 }
 
-// Extract Retry-After seconds from a structured EmailAPIError, or default to 60s.
+// Permanently malformed message — bad recipient, missing field, oversized payload.
+// Scoped to this message alone, so DLQ it and carry on with the rest of the batch.
+function isInvalidMessage(error: unknown): boolean {
+  if (error && typeof error === 'object') {
+    return (error as { code?: string }).code === 'validation_error'
+  }
+  return false
+}
+
+// Extract Retry-After seconds from a rethrown Resend error, or default to 60s.
 function getRetryAfterSeconds(error: unknown): number {
   if (error && typeof error === 'object' && 'retryAfterSeconds' in error) {
     return (error as { retryAfterSeconds: number | null }).retryAfterSeconds ?? 60
   }
   return 60
+}
+
+// Resend surfaces rate-limit backoff on the response headers, not in the error body.
+function parseRetryAfter(headers: Record<string, string> | null): number | null {
+  const raw = headers?.['retry-after'] ?? headers?.['ratelimit-reset']
+  const secs = raw ? Number.parseInt(raw, 10) : Number.NaN
+  return Number.isFinite(secs) && secs > 0 ? secs : null
 }
 
 async function moveToDlq(
@@ -64,7 +93,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        const apiKey = process.env.RESEND_API_KEY
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -89,6 +118,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
         }
 
         const supabase: SupabaseClient<any, any> = createClient(supabaseUrl, supabaseServiceKey)
+        const resend = new Resend(apiKey)
 
         // 1. Check rate-limit cooldown and read queue config
         const { data: state } = await supabase
@@ -221,23 +251,39 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
             }
 
             try {
-              await sendLovableEmail(
-                {
-                  run_id: payload.run_id,
-                  to: payload.to,
-                  from: payload.from,
-                  sender_domain: payload.sender_domain,
-                  subject: payload.subject,
-                  html: payload.html,
-                  text: payload.text,
-                  purpose: payload.purpose,
-                  label: payload.label,
-                  idempotency_key: payload.idempotency_key,
-                  unsubscribe_token: payload.unsubscribe_token,
-                  message_id: payload.message_id,
-                },
-                { apiKey, sendUrl: process.env.LOVABLE_SEND_URL }
-              )
+              const { data: sent, error: sendError, headers: sendHeaders } =
+                await resend.emails.send(
+                  {
+                    from: payload.from,
+                    to: payload.to,
+                    subject: payload.subject,
+                    html: payload.html,
+                    text: payload.text,
+                    // Lovable derived these from unsubscribe_token; Resend has no
+                    // equivalent parameter, so set the RFC 8058 headers explicitly.
+                    ...(payload.unsubscribe_token
+                      ? {
+                          headers: {
+                            'List-Unsubscribe': `<${publicBaseUrl()}/email/unsubscribe?token=${payload.unsubscribe_token}>`,
+                            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+                          },
+                        }
+                      : {}),
+                  },
+                  payload.idempotency_key
+                    ? { idempotencyKey: payload.idempotency_key }
+                    : undefined
+                )
+
+              // Resend signals failure in the response body rather than by throwing.
+              // Rethrow so the retry, DLQ and cooldown handling below is unchanged.
+              if (sendError) {
+                throw Object.assign(new Error(sendError.message), {
+                  status: sendError.statusCode,
+                  code: sendError.name,
+                  retryAfterSeconds: parseRetryAfter(sendHeaders),
+                })
+              }
 
               // Log success
               await supabase.from('email_send_log').insert({
@@ -245,6 +291,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                 template_name: payload.label || queue,
                 recipient_email: payload.to,
                 status: 'sent',
+                metadata: { provider: 'resend', provider_id: sent?.id ?? null },
               })
 
               // Delete from queue
@@ -295,6 +342,13 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
               if (isForbidden(error)) {
                 await moveToDlq(supabase, queue, msg, errorMsg.slice(0, 1000))
                 return Response.json({ processed: totalProcessed, stopped: 'forbidden' })
+              }
+
+              // Validation failures are permanent for this message but say nothing
+              // about the rest of the batch, so DLQ it and keep processing.
+              if (isInvalidMessage(error)) {
+                await moveToDlq(supabase, queue, msg, errorMsg.slice(0, 1000))
+                continue
               }
 
               // Log non-429 failures to track real retry attempts.

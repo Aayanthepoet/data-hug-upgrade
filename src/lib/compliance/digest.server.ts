@@ -8,8 +8,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 const SITE_NAME = 'PropAI Compliance'
-const SENDER_DOMAIN = 'notify.www.ainetworkagency.com'
-const FROM_DOMAIN = 'notify.www.ainetworkagency.com'
+// The domain shown in the From: header. Must be a domain verified in Resend —
+// the API key is scoped to it and rejects anything else.
+const FROM_DOMAIN = 'mail.ainetworkagency.com'
 
 function generateToken(): string {
   const bytes = new Uint8Array(32)
@@ -192,7 +193,6 @@ export async function generateAndDispatchDigest(
         message_id: messageId,
         to: email,
         from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-        sender_domain: SENDER_DOMAIN,
         subject,
         html,
         text,

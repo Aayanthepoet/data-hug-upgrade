@@ -6,12 +6,9 @@ import { TEMPLATES } from '@/lib/email-templates/registry'
 
 // Configuration baked in at scaffold time
 const SITE_NAME = "Website Data Upgrade"
-// SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
-// It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
-const SENDER_DOMAIN = "notify.www.ainetworkagency.com"
-// FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
-// Can be the root domain when display_from_root is enabled — this is cosmetic only.
-const FROM_DOMAIN = "notify.www.ainetworkagency.com"
+// FROM_DOMAIN is the domain shown in the From: header. It must be a domain
+// verified in Resend — the API key is scoped to it and rejects anything else.
+const FROM_DOMAIN = "mail.ainetworkagency.com"
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'
@@ -279,7 +276,6 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             message_id: messageId,
             to: effectiveRecipient,
             from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
             subject: resolvedSubject,
             html,
             text: plainText,

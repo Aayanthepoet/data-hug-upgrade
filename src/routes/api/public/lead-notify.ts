@@ -7,8 +7,9 @@ import { TEMPLATES } from '@/lib/email-templates/registry'
 import { parseLocation } from '@/lib/location-parse'
 
 const SITE_NAME = 'PropAI'
-const SENDER_DOMAIN = 'notify.www.ainetworkagency.com'
-const FROM_DOMAIN = 'notify.www.ainetworkagency.com'
+// The domain shown in the From: header. Must be a domain verified in Resend —
+// the API key is scoped to it and rejects anything else.
+const FROM_DOMAIN = 'mail.ainetworkagency.com'
 const TEMPLATE_NAME = 'new-lead-alert'
 
 const schema = z.object({
@@ -153,7 +154,6 @@ export const Route = createFileRoute('/api/public/lead-notify')({
             message_id: messageId,
             to: template.to,
             from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
             subject,
             html,
             text,
