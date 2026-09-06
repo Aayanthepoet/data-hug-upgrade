@@ -318,7 +318,7 @@ export const Route = createFileRoute("/lovable/email/queue/process")({
                   message_id: payload.message_id,
                   template_name: payload.label || queue,
                   recipient_email: payload.to,
-                  status: 'failed',
+                  status: 'rate_limited',
                   error_message: errorMsg.slice(0, 1000),
                 })
 
