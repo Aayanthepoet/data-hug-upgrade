@@ -1,5 +1,6 @@
-// Deterministic mock vision provider — a tiny solid-color PNG. Used when no
-// LOVABLE_API_KEY is configured so dev/test runs don't burn credits.
+// Deterministic mock vision provider — a tiny solid-color PNG. Used when
+// neither OPENAI_API_KEY nor LOVABLE_API_KEY is configured, so dev/test runs
+// don't burn credits.
 
 import type { VisionProvider } from "./provider";
 

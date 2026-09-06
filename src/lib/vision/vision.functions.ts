@@ -42,17 +42,22 @@ export const generateRedesign = createServerFn({ method: "POST" })
     //    validate the requested resolution BEFORE we queue a render row,
     //    so unsupported tiers (e.g. 4K on gpt-image-2) surface a clean
     //    error to the UI instead of a half-written audit row.
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) {
+    // Two upstreams now: text-to-image is OpenAI direct, image-edit is still
+    // the Lovable gateway. Either key alone still serves its own path, so we
+    // only hard-fail when neither is configured; the provider raises a
+    // path-specific error if the render needs the key that's missing.
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const lovableApiKey = process.env.LOVABLE_API_KEY;
+    if (!openaiApiKey && !lovableApiKey) {
       // Don't silently render a blank 1x1 PNG when no key is configured —
       // surface a clear error so the UI can prompt the operator.
       throw new Error(
-        "Vision Studio is not configured: missing LOVABLE_API_KEY. Enable Lovable Cloud / AI Gateway to render images.",
+        "Vision Studio is not configured: set OPENAI_API_KEY (text-to-image) and/or LOVABLE_API_KEY (photo edit) to render images.",
       );
     }
     const { createLovableVisionProvider } = await import("./lovable-provider.server");
     const { RESOLUTION_LABELS } = await import("./provider");
-    const provider = createLovableVisionProvider(key);
+    const provider = createLovableVisionProvider({ openaiApiKey, lovableApiKey });
 
     if (!provider.supportedResolutions.includes(data.resolution)) {
       const supportedLabel = provider.supportedResolutions
@@ -500,10 +505,14 @@ export const listPropertiesForRender = createServerFn({ method: "GET" })
 export const getVisionCapabilities = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    const key = process.env.LOVABLE_API_KEY;
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    const lovableApiKey = process.env.LOVABLE_API_KEY;
     const { mockVisionProvider } = await import("./mock-provider.server");
     const { createLovableVisionProvider } = await import("./lovable-provider.server");
-    const provider = key ? createLovableVisionProvider(key) : mockVisionProvider;
+    const provider =
+      openaiApiKey || lovableApiKey
+        ? createLovableVisionProvider({ openaiApiKey, lovableApiKey })
+        : mockVisionProvider;
     return {
       provider: provider.name,
       supportedResolutions: [...provider.supportedResolutions],

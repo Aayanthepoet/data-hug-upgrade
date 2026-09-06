@@ -1,13 +1,12 @@
-// ⚠️ STILL ON THE LOVABLE AI GATEWAY — THIS DIES WHEN LOVABLE LAPSES.
+// Speech-to-text via the OpenAI API directly (api.openai.com/v1/audio/transcriptions).
 //
-// Every other AI engine moved to Anthropic (src/lib/engines/anthropic.server.ts).
-// This one could not: Anthropic has no speech-to-text endpoint.
+// Moved off the Lovable AI gateway — the request shape was already
+// OpenAI-native (multipart `model` + `file`), so this is a URL, key, and
+// model-prefix change only. Anthropic has no speech-to-text endpoint,
+// which is why this doesn't live in src/lib/engines/anthropic.server.ts.
 //
-// Current model via the gateway: "openai/gpt-4o-mini-transcribe"
-//
-// Repointing means an OpenAI API key and a direct client against
-// api.openai.com/v1/audio/transcriptions — not a swap of the model
-// string. Budget for that before the Lovable subscription ends.
+// Model: "gpt-4o-mini-transcribe" (was "openai/gpt-4o-mini-transcribe"
+//   behind the gateway, which required the vendor prefix).
 //
 import { createFileRoute } from "@tanstack/react-router";
 import { requireApiAuth } from "@/lib/api-auth.server";
@@ -19,9 +18,9 @@ export const Route = createFileRoute("/api/transcribe")({
         const auth = await requireApiAuth(request);
         if (auth instanceof Response) return auth;
 
-        const lovableKey = process.env.LOVABLE_API_KEY;
-        if (!lovableKey) {
-          return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        const openaiKey = process.env.OPENAI_API_KEY;
+        if (!openaiKey) {
+          return new Response("Missing OPENAI_API_KEY", { status: 500 });
         }
 
         const contentType = request.headers.get("content-type") ?? "";
@@ -50,14 +49,14 @@ export const Route = createFileRoute("/api/transcribe")({
         const ext = extMap[mime] ?? "webm";
 
         const upstream = new FormData();
-        upstream.append("model", "openai/gpt-4o-mini-transcribe");
+        upstream.append("model", "gpt-4o-mini-transcribe");
         upstream.append("file", file, `recording.${ext}`);
 
         const resp = await fetch(
-          "https://ai.gateway.lovable.dev/v1/audio/transcriptions",
+          "https://api.openai.com/v1/audio/transcriptions",
           {
             method: "POST",
-            headers: { Authorization: `Bearer ${lovableKey}` },
+            headers: { Authorization: `Bearer ${openaiKey}` },
             body: upstream,
           },
         );
