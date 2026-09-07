@@ -41,7 +41,7 @@ function LeadsPage() {
   const [source, setSource] = useState<string>("all");
   const [assignee, setAssignee] = useState<string>("all");
 
-  const isNavigating = useRouterState({ select: (s) => s.isLoading || s.isTransitioning });
+  const isNavigating = useRouterState({ select: (s) => s.isLoading || s.status === "pending" });
   const fetchingCount = useIsFetching();
 
   const { data: leads = [], isLoading, error } = useQuery({

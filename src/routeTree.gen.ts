@@ -9,113 +9,92 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as FeaturesRouteImport } from './routes/features'
-import { Route as DataDeletionRouteImport } from './routes/data-deletion'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AgentsSlugRouteImport } from './routes/agents.$slug'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DataDeletionRouteImport } from './routes/data-deletion'
+import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AgentsSlugRouteImport } from './routes/agents.$slug'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
-import { Route as ApiPublicAttomHealthRouteImport } from './routes/api/public/attom-health'
-import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
-import { Route as AuthenticatedBillingReturnRouteImport } from './routes/_authenticated/billing.return'
-import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
-import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
-import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
-import { Route as AuthenticatedAppTitleSearchRouteImport } from './routes/_authenticated/app.title-search'
-import { Route as AuthenticatedAppSocialRouteImport } from './routes/_authenticated/app.social'
-import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
-import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
-import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
-import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
-import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
-import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
-import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
-import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
-import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
-import { Route as AuthenticatedAppForeclosureAgentRouteImport } from './routes/_authenticated/app.foreclosure-agent'
-import { Route as AuthenticatedAppContractsRouteImport } from './routes/_authenticated/app.contracts'
-import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
-import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
-import { Route as AuthenticatedAppAuditRouteImport } from './routes/_authenticated/app.audit'
-import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
 import { Route as AuthenticatedAppAgentRouteImport } from './routes/_authenticated/app.agent'
-import { Route as AuthenticatedAppPropertiesIndexRouteImport } from './routes/_authenticated/app.properties.index'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
-import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
-import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
-import { Route as ApiPublicHooksSyncDistressedOneRouteImport } from './routes/api/public/hooks/sync-distressed-one'
-import { Route as ApiPublicHooksSyncDistressedRouteImport } from './routes/api/public/hooks/sync-distressed'
-import { Route as ApiPublicHooksSignwellRouteImport } from './routes/api/public/hooks/signwell'
-import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
-import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
-import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
-import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
-import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
-import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
-import { Route as AuthenticatedAppTitleSearchHistoryRouteImport } from './routes/_authenticated/app.title-search.history'
-import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
-import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
-import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
-import { Route as AuthenticatedAppSettingsIntegrationsRouteImport } from './routes/_authenticated/app.settings.integrations'
-import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
-import { Route as AuthenticatedAppPropertiesLookupHistoryRouteImport } from './routes/_authenticated/app.properties.lookup-history'
-import { Route as AuthenticatedAppPropertiesLookupRouteImport } from './routes/_authenticated/app.properties.lookup'
-import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
-import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
-import { Route as AuthenticatedAppContractsContractIdRouteImport } from './routes/_authenticated/app.contracts.$contractId'
-import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
-import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
+import { Route as AuthenticatedAppAuctionsRouteImport } from './routes/_authenticated/app.auctions'
+import { Route as AuthenticatedAppAuditRouteImport } from './routes/_authenticated/app.audit'
+import { Route as AuthenticatedAppCampaignsRouteImport } from './routes/_authenticated/app.campaigns'
+import { Route as AuthenticatedAppContactsRouteImport } from './routes/_authenticated/app.contacts'
+import { Route as AuthenticatedAppContractsRouteImport } from './routes/_authenticated/app.contracts'
+import { Route as AuthenticatedAppForeclosureAgentRouteImport } from './routes/_authenticated/app.foreclosure-agent'
+import { Route as AuthenticatedAppLeadListsRouteImport } from './routes/_authenticated/app.lead-lists'
+import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
+import { Route as AuthenticatedAppOptOutsRouteImport } from './routes/_authenticated/app.opt-outs'
+import { Route as AuthenticatedAppOutreachRouteImport } from './routes/_authenticated/app.outreach'
+import { Route as AuthenticatedAppOwnersRouteImport } from './routes/_authenticated/app.owners'
+import { Route as AuthenticatedAppPropertiesRouteImport } from './routes/_authenticated/app.properties'
+import { Route as AuthenticatedAppScoringRouteImport } from './routes/_authenticated/app.scoring'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
+import { Route as AuthenticatedAppSocialRouteImport } from './routes/_authenticated/app.social'
+import { Route as AuthenticatedAppTitleSearchRouteImport } from './routes/_authenticated/app.title-search'
+import { Route as AuthenticatedAppVideosRouteImport } from './routes/_authenticated/app.videos'
+import { Route as AuthenticatedAppVisionRouteImport } from './routes/_authenticated/app.vision'
+import { Route as AuthenticatedAppWatchlistRouteImport } from './routes/_authenticated/app.watchlist'
+import { Route as AuthenticatedBillingReturnRouteImport } from './routes/_authenticated/billing.return'
+import { Route as ApiEnginesTtsRouteImport } from './routes/api/engines/tts'
+import { Route as ApiPublicAttomHealthRouteImport } from './routes/api/public/attom-health'
+import { Route as ApiPublicLeadNotifyRouteImport } from './routes/api/public/lead-notify'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAppAdminContractsRouteImport } from './routes/_authenticated/app.admin.contracts'
-import { Route as ApiPublicOauthYoutubeStartRouteImport } from './routes/api/public/oauth/youtube.start'
-import { Route as ApiPublicOauthXStartRouteImport } from './routes/api/public/oauth/x.start'
-import { Route as ApiPublicOauthMetaStartRouteImport } from './routes/api/public/oauth/meta.start'
-import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta.callback'
+import { Route as AuthenticatedAppAgentThreadIdRouteImport } from './routes/_authenticated/app.agent.$threadId'
+import { Route as AuthenticatedAppAuctionsAuctionIdRouteImport } from './routes/_authenticated/app.auctions.$auctionId'
+import { Route as AuthenticatedAppContractsContractIdRouteImport } from './routes/_authenticated/app.contracts.$contractId'
+import { Route as AuthenticatedAppLeadsLeadIdRouteImport } from './routes/_authenticated/app.leads.$leadId'
+import { Route as AuthenticatedAppPropertiesIndexRouteImport } from './routes/_authenticated/app.properties.index'
+import { Route as AuthenticatedAppPropertiesPropertyIdRouteImport } from './routes/_authenticated/app.properties.$propertyId'
+import { Route as AuthenticatedAppPropertiesLookupRouteImport } from './routes/_authenticated/app.properties.lookup'
+import { Route as AuthenticatedAppPropertiesLookupHistoryRouteImport } from './routes/_authenticated/app.properties.lookup-history'
+import { Route as AuthenticatedAppPropertiesSearchRouteImport } from './routes/_authenticated/app.properties.search'
+import { Route as AuthenticatedAppSettingsIntegrationsRouteImport } from './routes/_authenticated/app.settings.integrations'
+import { Route as AuthenticatedAppSettingsPublicProfileRouteImport } from './routes/_authenticated/app.settings.public-profile'
+import { Route as AuthenticatedAppSocialBusinessPortfolioRouteImport } from './routes/_authenticated/app.social.business-portfolio'
+import { Route as AuthenticatedAppSocialComposeRouteImport } from './routes/_authenticated/app.social.compose'
+import { Route as AuthenticatedAppTitleSearchHistoryRouteImport } from './routes/_authenticated/app.title-search.history'
+import { Route as AuthenticatedAppVisionLibraryRouteImport } from './routes/_authenticated/app.vision.library'
+import { Route as AgentsSlugPPostSlugRouteImport } from './routes/agents.$slug.p.$postSlug'
+import { Route as ApiPublicHooksCloseAuctionsRouteImport } from './routes/api/public/hooks/close-auctions'
+import { Route as ApiPublicHooksComplianceDigestRouteImport } from './routes/api/public/hooks/compliance-digest'
+import { Route as ApiPublicHooksNotifySmsRouteImport } from './routes/api/public/hooks/notify-sms'
+import { Route as ApiPublicHooksOutreachReplyRouteImport } from './routes/api/public/hooks/outreach-reply'
+import { Route as ApiPublicHooksSignwellRouteImport } from './routes/api/public/hooks/signwell'
+import { Route as ApiPublicHooksSyncDistressedRouteImport } from './routes/api/public/hooks/sync-distressed'
+import { Route as ApiPublicHooksSyncDistressedOneRouteImport } from './routes/api/public/hooks/sync-distressed-one'
+import { Route as ApiPublicHooksTwilioSmsRouteImport } from './routes/api/public/hooks/twilio-sms'
+import { Route as ApiPublicHooksTwilioVoiceRouteImport } from './routes/api/public/hooks/twilio-voice'
+import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as AuthenticatedAppAdminContractsContractIdRouteImport } from './routes/_authenticated/app.admin.contracts.$contractId'
+import { Route as ApiPublicOauthMetaCallbackRouteImport } from './routes/api/public/oauth/meta.callback'
+import { Route as ApiPublicOauthMetaStartRouteImport } from './routes/api/public/oauth/meta.start'
+import { Route as ApiPublicOauthXStartRouteImport } from './routes/api/public/oauth/x.start'
+import { Route as ApiPublicOauthYoutubeStartRouteImport } from './routes/api/public/oauth/youtube.start'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeaturesRoute = FeaturesRouteImport.update({
-  id: '/features',
-  path: '/features',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DataDeletionRoute = DataDeletionRouteImport.update({
-  id: '/data-deletion',
-  path: '/data-deletion',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -123,38 +102,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const DataDeletionRoute = DataDeletionRouteImport.update({
+  id: '/data-deletion',
+  path: '/data-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
-  id: '/api/transcribe',
-  path: '/api/transcribe',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AgentsSlugRoute = AgentsSlugRouteImport.update({
-  id: '/agents/$slug',
-  path: '/agents/$slug',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
@@ -162,146 +142,39 @@ const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AgentsSlugRoute = AgentsSlugRouteImport.update({
+  id: '/agents/$slug',
+  path: '/agents/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicLeadNotifyRoute = ApiPublicLeadNotifyRouteImport.update({
-  id: '/api/public/lead-notify',
-  path: '/api/public/lead-notify',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAttomHealthRoute = ApiPublicAttomHealthRouteImport.update({
-  id: '/api/public/attom-health',
-  path: '/api/public/attom-health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
-  id: '/api/engines/tts',
-  path: '/api/engines/tts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedBillingReturnRoute =
-  AuthenticatedBillingReturnRouteImport.update({
-    id: '/return',
-    path: '/return',
-    getParentRoute: () => AuthenticatedBillingRoute,
-  } as any)
-const AuthenticatedAppWatchlistRoute =
-  AuthenticatedAppWatchlistRouteImport.update({
-    id: '/watchlist',
-    path: '/watchlist',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppVisionRoute = AuthenticatedAppVisionRouteImport.update({
-  id: '/vision',
-  path: '/vision',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
-  id: '/videos',
-  path: '/videos',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppTitleSearchRoute =
-  AuthenticatedAppTitleSearchRouteImport.update({
-    id: '/title-search',
-    path: '/title-search',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppSocialRoute = AuthenticatedAppSocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppSettingsRoute =
-  AuthenticatedAppSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppScoringRoute = AuthenticatedAppScoringRouteImport.update({
-  id: '/scoring',
-  path: '/scoring',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppPropertiesRoute =
-  AuthenticatedAppPropertiesRouteImport.update({
-    id: '/properties',
-    path: '/properties',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
-  id: '/owners',
-  path: '/owners',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppOutreachRoute =
-  AuthenticatedAppOutreachRouteImport.update({
-    id: '/outreach',
-    path: '/outreach',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppOptOutsRoute = AuthenticatedAppOptOutsRouteImport.update({
-  id: '/opt-outs',
-  path: '/opt-outs',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppNotificationsRoute =
-  AuthenticatedAppNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
-  id: '/leads',
-  path: '/leads',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppLeadListsRoute =
-  AuthenticatedAppLeadListsRouteImport.update({
-    id: '/lead-lists',
-    path: '/lead-lists',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppForeclosureAgentRoute =
-  AuthenticatedAppForeclosureAgentRouteImport.update({
-    id: '/foreclosure-agent',
-    path: '/foreclosure-agent',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppContractsRoute =
-  AuthenticatedAppContractsRouteImport.update({
-    id: '/contracts',
-    path: '/contracts',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppContactsRoute =
-  AuthenticatedAppContactsRouteImport.update({
-    id: '/contacts',
-    path: '/contacts',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCampaignsRoute =
-  AuthenticatedAppCampaignsRouteImport.update({
-    id: '/campaigns',
-    path: '/campaigns',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppAuditRoute = AuthenticatedAppAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
+const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
+  id: '/agent',
+  path: '/agent',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppAuctionsRoute =
@@ -310,148 +183,172 @@ const AuthenticatedAppAuctionsRoute =
     path: '/auctions',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppAgentRoute = AuthenticatedAppAgentRouteImport.update({
-  id: '/agent',
-  path: '/agent',
+const AuthenticatedAppAuditRoute = AuthenticatedAppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppCampaignsRoute =
+  AuthenticatedAppCampaignsRouteImport.update({
+    id: '/campaigns',
+    path: '/campaigns',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppContactsRoute =
+  AuthenticatedAppContactsRouteImport.update({
+    id: '/contacts',
+    path: '/contacts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppContractsRoute =
+  AuthenticatedAppContractsRouteImport.update({
+    id: '/contracts',
+    path: '/contracts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppForeclosureAgentRoute =
+  AuthenticatedAppForeclosureAgentRouteImport.update({
+    id: '/foreclosure-agent',
+    path: '/foreclosure-agent',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppLeadListsRoute =
+  AuthenticatedAppLeadListsRouteImport.update({
+    id: '/lead-lists',
+    path: '/lead-lists',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppOptOutsRoute = AuthenticatedAppOptOutsRouteImport.update({
+  id: '/opt-outs',
+  path: '/opt-outs',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppOutreachRoute =
+  AuthenticatedAppOutreachRouteImport.update({
+    id: '/outreach',
+    path: '/outreach',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppOwnersRoute = AuthenticatedAppOwnersRouteImport.update({
+  id: '/owners',
+  path: '/owners',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppPropertiesRoute =
+  AuthenticatedAppPropertiesRouteImport.update({
+    id: '/properties',
+    path: '/properties',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppScoringRoute = AuthenticatedAppScoringRouteImport.update({
+  id: '/scoring',
+  path: '/scoring',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppSocialRoute = AuthenticatedAppSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppTitleSearchRoute =
+  AuthenticatedAppTitleSearchRouteImport.update({
+    id: '/title-search',
+    path: '/title-search',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppVideosRoute = AuthenticatedAppVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppVisionRoute = AuthenticatedAppVisionRouteImport.update({
+  id: '/vision',
+  path: '/vision',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppWatchlistRoute =
+  AuthenticatedAppWatchlistRouteImport.update({
+    id: '/watchlist',
+    path: '/watchlist',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedBillingReturnRoute =
+  AuthenticatedBillingReturnRouteImport.update({
+    id: '/return',
+    path: '/return',
+    getParentRoute: () => AuthenticatedBillingRoute,
+  } as any)
+const ApiEnginesTtsRoute = ApiEnginesTtsRouteImport.update({
+  id: '/api/engines/tts',
+  path: '/api/engines/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAttomHealthRoute = ApiPublicAttomHealthRouteImport.update({
+  id: '/api/public/attom-health',
+  path: '/api/public/attom-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicLeadNotifyRoute = ApiPublicLeadNotifyRouteImport.update({
+  id: '/api/public/lead-notify',
+  path: '/api/public/lead-notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppAdminContractsRoute =
+  AuthenticatedAppAdminContractsRouteImport.update({
+    id: '/admin/contracts',
+    path: '/admin/contracts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppAgentThreadIdRoute =
+  AuthenticatedAppAgentThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedAppAgentRoute,
+  } as any)
+const AuthenticatedAppAuctionsAuctionIdRoute =
+  AuthenticatedAppAuctionsAuctionIdRouteImport.update({
+    id: '/$auctionId',
+    path: '/$auctionId',
+    getParentRoute: () => AuthenticatedAppAuctionsRoute,
+  } as any)
+const AuthenticatedAppContractsContractIdRoute =
+  AuthenticatedAppContractsContractIdRouteImport.update({
+    id: '/$contractId',
+    path: '/$contractId',
+    getParentRoute: () => AuthenticatedAppContractsRoute,
+  } as any)
+const AuthenticatedAppLeadsLeadIdRoute =
+  AuthenticatedAppLeadsLeadIdRouteImport.update({
+    id: '/$leadId',
+    path: '/$leadId',
+    getParentRoute: () => AuthenticatedAppLeadsRoute,
+  } as any)
 const AuthenticatedAppPropertiesIndexRoute =
   AuthenticatedAppPropertiesIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedAppPropertiesRoute,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
-  id: '/api/public/webhooks/stripe',
-  path: '/api/public/webhooks/stripe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksTwilioVoiceRoute =
-  ApiPublicHooksTwilioVoiceRouteImport.update({
-    id: '/api/public/hooks/twilio-voice',
-    path: '/api/public/hooks/twilio-voice',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksTwilioSmsRoute = ApiPublicHooksTwilioSmsRouteImport.update({
-  id: '/api/public/hooks/twilio-sms',
-  path: '/api/public/hooks/twilio-sms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksSyncDistressedOneRoute =
-  ApiPublicHooksSyncDistressedOneRouteImport.update({
-    id: '/api/public/hooks/sync-distressed-one',
-    path: '/api/public/hooks/sync-distressed-one',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksSyncDistressedRoute =
-  ApiPublicHooksSyncDistressedRouteImport.update({
-    id: '/api/public/hooks/sync-distressed',
-    path: '/api/public/hooks/sync-distressed',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksSignwellRoute = ApiPublicHooksSignwellRouteImport.update({
-  id: '/api/public/hooks/signwell',
-  path: '/api/public/hooks/signwell',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksOutreachReplyRoute =
-  ApiPublicHooksOutreachReplyRouteImport.update({
-    id: '/api/public/hooks/outreach-reply',
-    path: '/api/public/hooks/outreach-reply',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksNotifySmsRoute = ApiPublicHooksNotifySmsRouteImport.update({
-  id: '/api/public/hooks/notify-sms',
-  path: '/api/public/hooks/notify-sms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksComplianceDigestRoute =
-  ApiPublicHooksComplianceDigestRouteImport.update({
-    id: '/api/public/hooks/compliance-digest',
-    path: '/api/public/hooks/compliance-digest',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksCloseAuctionsRoute =
-  ApiPublicHooksCloseAuctionsRouteImport.update({
-    id: '/api/public/hooks/close-auctions',
-    path: '/api/public/hooks/close-auctions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AgentsSlugPPostSlugRoute = AgentsSlugPPostSlugRouteImport.update({
-  id: '/p/$postSlug',
-  path: '/p/$postSlug',
-  getParentRoute: () => AgentsSlugRoute,
-} as any)
-const AuthenticatedAppVisionLibraryRoute =
-  AuthenticatedAppVisionLibraryRouteImport.update({
-    id: '/library',
-    path: '/library',
-    getParentRoute: () => AuthenticatedAppVisionRoute,
-  } as any)
-const AuthenticatedAppTitleSearchHistoryRoute =
-  AuthenticatedAppTitleSearchHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => AuthenticatedAppTitleSearchRoute,
-  } as any)
-const AuthenticatedAppSocialComposeRoute =
-  AuthenticatedAppSocialComposeRouteImport.update({
-    id: '/compose',
-    path: '/compose',
-    getParentRoute: () => AuthenticatedAppSocialRoute,
-  } as any)
-const AuthenticatedAppSocialBusinessPortfolioRoute =
-  AuthenticatedAppSocialBusinessPortfolioRouteImport.update({
-    id: '/business-portfolio',
-    path: '/business-portfolio',
-    getParentRoute: () => AuthenticatedAppSocialRoute,
-  } as any)
-const AuthenticatedAppSettingsPublicProfileRoute =
-  AuthenticatedAppSettingsPublicProfileRouteImport.update({
-    id: '/public-profile',
-    path: '/public-profile',
-    getParentRoute: () => AuthenticatedAppSettingsRoute,
-  } as any)
-const AuthenticatedAppSettingsIntegrationsRoute =
-  AuthenticatedAppSettingsIntegrationsRouteImport.update({
-    id: '/integrations',
-    path: '/integrations',
-    getParentRoute: () => AuthenticatedAppSettingsRoute,
-  } as any)
-const AuthenticatedAppPropertiesSearchRoute =
-  AuthenticatedAppPropertiesSearchRouteImport.update({
-    id: '/search',
-    path: '/search',
-    getParentRoute: () => AuthenticatedAppPropertiesRoute,
-  } as any)
-const AuthenticatedAppPropertiesLookupHistoryRoute =
-  AuthenticatedAppPropertiesLookupHistoryRouteImport.update({
-    id: '/lookup-history',
-    path: '/lookup-history',
-    getParentRoute: () => AuthenticatedAppPropertiesRoute,
-  } as any)
-const AuthenticatedAppPropertiesLookupRoute =
-  AuthenticatedAppPropertiesLookupRouteImport.update({
-    id: '/lookup',
-    path: '/lookup',
     getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
 const AuthenticatedAppPropertiesPropertyIdRoute =
@@ -460,56 +357,137 @@ const AuthenticatedAppPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
-const AuthenticatedAppLeadsLeadIdRoute =
-  AuthenticatedAppLeadsLeadIdRouteImport.update({
-    id: '/$leadId',
-    path: '/$leadId',
-    getParentRoute: () => AuthenticatedAppLeadsRoute,
+const AuthenticatedAppPropertiesLookupRoute =
+  AuthenticatedAppPropertiesLookupRouteImport.update({
+    id: '/lookup',
+    path: '/lookup',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
-const AuthenticatedAppContractsContractIdRoute =
-  AuthenticatedAppContractsContractIdRouteImport.update({
-    id: '/$contractId',
-    path: '/$contractId',
-    getParentRoute: () => AuthenticatedAppContractsRoute,
+const AuthenticatedAppPropertiesLookupHistoryRoute =
+  AuthenticatedAppPropertiesLookupHistoryRouteImport.update({
+    id: '/lookup-history',
+    path: '/lookup-history',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
-const AuthenticatedAppAuctionsAuctionIdRoute =
-  AuthenticatedAppAuctionsAuctionIdRouteImport.update({
-    id: '/$auctionId',
-    path: '/$auctionId',
-    getParentRoute: () => AuthenticatedAppAuctionsRoute,
+const AuthenticatedAppPropertiesSearchRoute =
+  AuthenticatedAppPropertiesSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => AuthenticatedAppPropertiesRoute,
   } as any)
-const AuthenticatedAppAgentThreadIdRoute =
-  AuthenticatedAppAgentThreadIdRouteImport.update({
-    id: '/$threadId',
-    path: '/$threadId',
-    getParentRoute: () => AuthenticatedAppAgentRoute,
+const AuthenticatedAppSettingsIntegrationsRoute =
+  AuthenticatedAppSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedAppSettingsRoute,
   } as any)
-const AuthenticatedAppAdminContractsRoute =
-  AuthenticatedAppAdminContractsRouteImport.update({
-    id: '/admin/contracts',
-    path: '/admin/contracts',
-    getParentRoute: () => AuthenticatedAppRoute,
+const AuthenticatedAppSettingsPublicProfileRoute =
+  AuthenticatedAppSettingsPublicProfileRouteImport.update({
+    id: '/public-profile',
+    path: '/public-profile',
+    getParentRoute: () => AuthenticatedAppSettingsRoute,
   } as any)
-const ApiPublicOauthYoutubeStartRoute =
-  ApiPublicOauthYoutubeStartRouteImport.update({
-    id: '/api/public/oauth/youtube/start',
-    path: '/api/public/oauth/youtube/start',
+const AuthenticatedAppSocialBusinessPortfolioRoute =
+  AuthenticatedAppSocialBusinessPortfolioRouteImport.update({
+    id: '/business-portfolio',
+    path: '/business-portfolio',
+    getParentRoute: () => AuthenticatedAppSocialRoute,
+  } as any)
+const AuthenticatedAppSocialComposeRoute =
+  AuthenticatedAppSocialComposeRouteImport.update({
+    id: '/compose',
+    path: '/compose',
+    getParentRoute: () => AuthenticatedAppSocialRoute,
+  } as any)
+const AuthenticatedAppTitleSearchHistoryRoute =
+  AuthenticatedAppTitleSearchHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedAppTitleSearchRoute,
+  } as any)
+const AuthenticatedAppVisionLibraryRoute =
+  AuthenticatedAppVisionLibraryRouteImport.update({
+    id: '/library',
+    path: '/library',
+    getParentRoute: () => AuthenticatedAppVisionRoute,
+  } as any)
+const AgentsSlugPPostSlugRoute = AgentsSlugPPostSlugRouteImport.update({
+  id: '/p/$postSlug',
+  path: '/p/$postSlug',
+  getParentRoute: () => AgentsSlugRoute,
+} as any)
+const ApiPublicHooksCloseAuctionsRoute =
+  ApiPublicHooksCloseAuctionsRouteImport.update({
+    id: '/api/public/hooks/close-auctions',
+    path: '/api/public/hooks/close-auctions',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicOauthXStartRoute = ApiPublicOauthXStartRouteImport.update({
-  id: '/api/public/oauth/x/start',
-  path: '/api/public/oauth/x/start',
+const ApiPublicHooksComplianceDigestRoute =
+  ApiPublicHooksComplianceDigestRouteImport.update({
+    id: '/api/public/hooks/compliance-digest',
+    path: '/api/public/hooks/compliance-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksNotifySmsRoute = ApiPublicHooksNotifySmsRouteImport.update({
+  id: '/api/public/hooks/notify-sms',
+  path: '/api/public/hooks/notify-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicOauthMetaStartRoute = ApiPublicOauthMetaStartRouteImport.update({
-  id: '/api/public/oauth/meta/start',
-  path: '/api/public/oauth/meta/start',
+const ApiPublicHooksOutreachReplyRoute =
+  ApiPublicHooksOutreachReplyRouteImport.update({
+    id: '/api/public/hooks/outreach-reply',
+    path: '/api/public/hooks/outreach-reply',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksSignwellRoute = ApiPublicHooksSignwellRouteImport.update({
+  id: '/api/public/hooks/signwell',
+  path: '/api/public/hooks/signwell',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicOauthMetaCallbackRoute =
-  ApiPublicOauthMetaCallbackRouteImport.update({
-    id: '/api/public/oauth/meta/callback',
-    path: '/api/public/oauth/meta/callback',
+const ApiPublicHooksSyncDistressedRoute =
+  ApiPublicHooksSyncDistressedRouteImport.update({
+    id: '/api/public/hooks/sync-distressed',
+    path: '/api/public/hooks/sync-distressed',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksSyncDistressedOneRoute =
+  ApiPublicHooksSyncDistressedOneRouteImport.update({
+    id: '/api/public/hooks/sync-distressed-one',
+    path: '/api/public/hooks/sync-distressed-one',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksTwilioSmsRoute = ApiPublicHooksTwilioSmsRouteImport.update({
+  id: '/api/public/hooks/twilio-sms',
+  path: '/api/public/hooks/twilio-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksTwilioVoiceRoute =
+  ApiPublicHooksTwilioVoiceRouteImport.update({
+    id: '/api/public/hooks/twilio-voice',
+    path: '/api/public/hooks/twilio-voice',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
+  id: '/api/public/webhooks/stripe',
+  path: '/api/public/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedAppAdminContractsContractIdRoute =
@@ -517,6 +495,28 @@ const AuthenticatedAppAdminContractsContractIdRoute =
     id: '/$contractId',
     path: '/$contractId',
     getParentRoute: () => AuthenticatedAppAdminContractsRoute,
+  } as any)
+const ApiPublicOauthMetaCallbackRoute =
+  ApiPublicOauthMetaCallbackRouteImport.update({
+    id: '/api/public/oauth/meta/callback',
+    path: '/api/public/oauth/meta/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicOauthMetaStartRoute = ApiPublicOauthMetaStartRouteImport.update({
+  id: '/api/public/oauth/meta/start',
+  path: '/api/public/oauth/meta/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOauthXStartRoute = ApiPublicOauthXStartRouteImport.update({
+  id: '/api/public/oauth/x/start',
+  path: '/api/public/oauth/x/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOauthYoutubeStartRoute =
+  ApiPublicOauthYoutubeStartRouteImport.update({
+    id: '/api/public/oauth/youtube/start',
+    path: '/api/public/oauth/youtube/start',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -1034,53 +1034,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/features': {
-      id: '/features'
-      path: '/features'
-      fullPath: '/features'
-      preLoaderRoute: typeof FeaturesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/data-deletion': {
-      id: '/data-deletion'
-      path: '/data-deletion'
-      fullPath: '/data-deletion'
-      preLoaderRoute: typeof DataDeletionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1090,46 +1048,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+    '/data-deletion': {
+      id: '/data-deletion'
+      path: '/data-deletion'
+      fullPath: '/data-deletion'
+      preLoaderRoute: typeof DataDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/transcribe': {
-      id: '/api/transcribe'
-      path: '/api/transcribe'
-      fullPath: '/api/transcribe'
-      preLoaderRoute: typeof ApiTranscribeRouteImport
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/agents/$slug': {
-      id: '/agents/$slug'
-      path: '/agents/$slug'
-      fullPath: '/agents/$slug'
-      preLoaderRoute: typeof AgentsSlugRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/billing': {
@@ -1139,193 +1111,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBillingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/app': {
-      id: '/_authenticated/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AuthenticatedAppRouteImport
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/agents/$slug': {
+      id: '/agents/$slug'
+      path: '/agents/$slug'
+      fullPath: '/agents/$slug'
+      preLoaderRoute: typeof AgentsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/lead-notify': {
-      id: '/api/public/lead-notify'
-      path: '/api/public/lead-notify'
-      fullPath: '/api/public/lead-notify'
-      preLoaderRoute: typeof ApiPublicLeadNotifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/attom-health': {
-      id: '/api/public/attom-health'
-      path: '/api/public/attom-health'
-      fullPath: '/api/public/attom-health'
-      preLoaderRoute: typeof ApiPublicAttomHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/engines/tts': {
-      id: '/api/engines/tts'
-      path: '/api/engines/tts'
-      fullPath: '/api/engines/tts'
-      preLoaderRoute: typeof ApiEnginesTtsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/billing/return': {
-      id: '/_authenticated/billing/return'
-      path: '/return'
-      fullPath: '/billing/return'
-      preLoaderRoute: typeof AuthenticatedBillingReturnRouteImport
-      parentRoute: typeof AuthenticatedBillingRoute
-    }
-    '/_authenticated/app/watchlist': {
-      id: '/_authenticated/app/watchlist'
-      path: '/watchlist'
-      fullPath: '/app/watchlist'
-      preLoaderRoute: typeof AuthenticatedAppWatchlistRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/vision': {
-      id: '/_authenticated/app/vision'
-      path: '/vision'
-      fullPath: '/app/vision'
-      preLoaderRoute: typeof AuthenticatedAppVisionRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/videos': {
-      id: '/_authenticated/app/videos'
-      path: '/videos'
-      fullPath: '/app/videos'
-      preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/title-search': {
-      id: '/_authenticated/app/title-search'
-      path: '/title-search'
-      fullPath: '/app/title-search'
-      preLoaderRoute: typeof AuthenticatedAppTitleSearchRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/social': {
-      id: '/_authenticated/app/social'
-      path: '/social'
-      fullPath: '/app/social'
-      preLoaderRoute: typeof AuthenticatedAppSocialRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/settings': {
-      id: '/_authenticated/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/scoring': {
-      id: '/_authenticated/app/scoring'
-      path: '/scoring'
-      fullPath: '/app/scoring'
-      preLoaderRoute: typeof AuthenticatedAppScoringRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/properties': {
-      id: '/_authenticated/app/properties'
-      path: '/properties'
-      fullPath: '/app/properties'
-      preLoaderRoute: typeof AuthenticatedAppPropertiesRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/owners': {
-      id: '/_authenticated/app/owners'
-      path: '/owners'
-      fullPath: '/app/owners'
-      preLoaderRoute: typeof AuthenticatedAppOwnersRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/outreach': {
-      id: '/_authenticated/app/outreach'
-      path: '/outreach'
-      fullPath: '/app/outreach'
-      preLoaderRoute: typeof AuthenticatedAppOutreachRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/opt-outs': {
-      id: '/_authenticated/app/opt-outs'
-      path: '/opt-outs'
-      fullPath: '/app/opt-outs'
-      preLoaderRoute: typeof AuthenticatedAppOptOutsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/notifications': {
-      id: '/_authenticated/app/notifications'
-      path: '/notifications'
-      fullPath: '/app/notifications'
-      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/leads': {
-      id: '/_authenticated/app/leads'
-      path: '/leads'
-      fullPath: '/app/leads'
-      preLoaderRoute: typeof AuthenticatedAppLeadsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/lead-lists': {
-      id: '/_authenticated/app/lead-lists'
-      path: '/lead-lists'
-      fullPath: '/app/lead-lists'
-      preLoaderRoute: typeof AuthenticatedAppLeadListsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/foreclosure-agent': {
-      id: '/_authenticated/app/foreclosure-agent'
-      path: '/foreclosure-agent'
-      fullPath: '/app/foreclosure-agent'
-      preLoaderRoute: typeof AuthenticatedAppForeclosureAgentRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/contracts': {
-      id: '/_authenticated/app/contracts'
-      path: '/contracts'
-      fullPath: '/app/contracts'
-      preLoaderRoute: typeof AuthenticatedAppContractsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/contacts': {
-      id: '/_authenticated/app/contacts'
-      path: '/contacts'
-      fullPath: '/app/contacts'
-      preLoaderRoute: typeof AuthenticatedAppContactsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/campaigns': {
-      id: '/_authenticated/app/campaigns'
-      path: '/campaigns'
-      fullPath: '/app/campaigns'
-      preLoaderRoute: typeof AuthenticatedAppCampaignsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/audit': {
-      id: '/_authenticated/app/audit'
-      path: '/audit'
-      fullPath: '/app/audit'
-      preLoaderRoute: typeof AuthenticatedAppAuditRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/auctions': {
-      id: '/_authenticated/app/auctions'
-      path: '/auctions'
-      fullPath: '/app/auctions'
-      preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/agent': {
@@ -1335,172 +1160,221 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgentRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/auctions': {
+      id: '/_authenticated/app/auctions'
+      path: '/auctions'
+      fullPath: '/app/auctions'
+      preLoaderRoute: typeof AuthenticatedAppAuctionsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/audit': {
+      id: '/_authenticated/app/audit'
+      path: '/audit'
+      fullPath: '/app/audit'
+      preLoaderRoute: typeof AuthenticatedAppAuditRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/campaigns': {
+      id: '/_authenticated/app/campaigns'
+      path: '/campaigns'
+      fullPath: '/app/campaigns'
+      preLoaderRoute: typeof AuthenticatedAppCampaignsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/contacts': {
+      id: '/_authenticated/app/contacts'
+      path: '/contacts'
+      fullPath: '/app/contacts'
+      preLoaderRoute: typeof AuthenticatedAppContactsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/contracts': {
+      id: '/_authenticated/app/contracts'
+      path: '/contracts'
+      fullPath: '/app/contracts'
+      preLoaderRoute: typeof AuthenticatedAppContractsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/foreclosure-agent': {
+      id: '/_authenticated/app/foreclosure-agent'
+      path: '/foreclosure-agent'
+      fullPath: '/app/foreclosure-agent'
+      preLoaderRoute: typeof AuthenticatedAppForeclosureAgentRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/lead-lists': {
+      id: '/_authenticated/app/lead-lists'
+      path: '/lead-lists'
+      fullPath: '/app/lead-lists'
+      preLoaderRoute: typeof AuthenticatedAppLeadListsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/leads': {
+      id: '/_authenticated/app/leads'
+      path: '/leads'
+      fullPath: '/app/leads'
+      preLoaderRoute: typeof AuthenticatedAppLeadsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/notifications': {
+      id: '/_authenticated/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/opt-outs': {
+      id: '/_authenticated/app/opt-outs'
+      path: '/opt-outs'
+      fullPath: '/app/opt-outs'
+      preLoaderRoute: typeof AuthenticatedAppOptOutsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/outreach': {
+      id: '/_authenticated/app/outreach'
+      path: '/outreach'
+      fullPath: '/app/outreach'
+      preLoaderRoute: typeof AuthenticatedAppOutreachRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/owners': {
+      id: '/_authenticated/app/owners'
+      path: '/owners'
+      fullPath: '/app/owners'
+      preLoaderRoute: typeof AuthenticatedAppOwnersRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/properties': {
+      id: '/_authenticated/app/properties'
+      path: '/properties'
+      fullPath: '/app/properties'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/scoring': {
+      id: '/_authenticated/app/scoring'
+      path: '/scoring'
+      fullPath: '/app/scoring'
+      preLoaderRoute: typeof AuthenticatedAppScoringRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/social': {
+      id: '/_authenticated/app/social'
+      path: '/social'
+      fullPath: '/app/social'
+      preLoaderRoute: typeof AuthenticatedAppSocialRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/title-search': {
+      id: '/_authenticated/app/title-search'
+      path: '/title-search'
+      fullPath: '/app/title-search'
+      preLoaderRoute: typeof AuthenticatedAppTitleSearchRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/videos': {
+      id: '/_authenticated/app/videos'
+      path: '/videos'
+      fullPath: '/app/videos'
+      preLoaderRoute: typeof AuthenticatedAppVideosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/vision': {
+      id: '/_authenticated/app/vision'
+      path: '/vision'
+      fullPath: '/app/vision'
+      preLoaderRoute: typeof AuthenticatedAppVisionRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/watchlist': {
+      id: '/_authenticated/app/watchlist'
+      path: '/watchlist'
+      fullPath: '/app/watchlist'
+      preLoaderRoute: typeof AuthenticatedAppWatchlistRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/billing/return': {
+      id: '/_authenticated/billing/return'
+      path: '/return'
+      fullPath: '/billing/return'
+      preLoaderRoute: typeof AuthenticatedBillingReturnRouteImport
+      parentRoute: typeof AuthenticatedBillingRoute
+    }
+    '/api/engines/tts': {
+      id: '/api/engines/tts'
+      path: '/api/engines/tts'
+      fullPath: '/api/engines/tts'
+      preLoaderRoute: typeof ApiEnginesTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/attom-health': {
+      id: '/api/public/attom-health'
+      path: '/api/public/attom-health'
+      fullPath: '/api/public/attom-health'
+      preLoaderRoute: typeof ApiPublicAttomHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/lead-notify': {
+      id: '/api/public/lead-notify'
+      path: '/api/public/lead-notify'
+      fullPath: '/api/public/lead-notify'
+      preLoaderRoute: typeof ApiPublicLeadNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app/admin/contracts': {
+      id: '/_authenticated/app/admin/contracts'
+      path: '/admin/contracts'
+      fullPath: '/app/admin/contracts'
+      preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/agent/$threadId': {
+      id: '/_authenticated/app/agent/$threadId'
+      path: '/$threadId'
+      fullPath: '/app/agent/$threadId'
+      preLoaderRoute: typeof AuthenticatedAppAgentThreadIdRouteImport
+      parentRoute: typeof AuthenticatedAppAgentRoute
+    }
+    '/_authenticated/app/auctions/$auctionId': {
+      id: '/_authenticated/app/auctions/$auctionId'
+      path: '/$auctionId'
+      fullPath: '/app/auctions/$auctionId'
+      preLoaderRoute: typeof AuthenticatedAppAuctionsAuctionIdRouteImport
+      parentRoute: typeof AuthenticatedAppAuctionsRoute
+    }
+    '/_authenticated/app/contracts/$contractId': {
+      id: '/_authenticated/app/contracts/$contractId'
+      path: '/$contractId'
+      fullPath: '/app/contracts/$contractId'
+      preLoaderRoute: typeof AuthenticatedAppContractsContractIdRouteImport
+      parentRoute: typeof AuthenticatedAppContractsRoute
+    }
+    '/_authenticated/app/leads/$leadId': {
+      id: '/_authenticated/app/leads/$leadId'
+      path: '/$leadId'
+      fullPath: '/app/leads/$leadId'
+      preLoaderRoute: typeof AuthenticatedAppLeadsLeadIdRouteImport
+      parentRoute: typeof AuthenticatedAppLeadsRoute
+    }
     '/_authenticated/app/properties/': {
       id: '/_authenticated/app/properties/'
       path: '/'
       fullPath: '/app/properties/'
       preLoaderRoute: typeof AuthenticatedAppPropertiesIndexRouteImport
-      parentRoute: typeof AuthenticatedAppPropertiesRoute
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/webhooks/stripe': {
-      id: '/api/public/webhooks/stripe'
-      path: '/api/public/webhooks/stripe'
-      fullPath: '/api/public/webhooks/stripe'
-      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/twilio-voice': {
-      id: '/api/public/hooks/twilio-voice'
-      path: '/api/public/hooks/twilio-voice'
-      fullPath: '/api/public/hooks/twilio-voice'
-      preLoaderRoute: typeof ApiPublicHooksTwilioVoiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/twilio-sms': {
-      id: '/api/public/hooks/twilio-sms'
-      path: '/api/public/hooks/twilio-sms'
-      fullPath: '/api/public/hooks/twilio-sms'
-      preLoaderRoute: typeof ApiPublicHooksTwilioSmsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/sync-distressed-one': {
-      id: '/api/public/hooks/sync-distressed-one'
-      path: '/api/public/hooks/sync-distressed-one'
-      fullPath: '/api/public/hooks/sync-distressed-one'
-      preLoaderRoute: typeof ApiPublicHooksSyncDistressedOneRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/sync-distressed': {
-      id: '/api/public/hooks/sync-distressed'
-      path: '/api/public/hooks/sync-distressed'
-      fullPath: '/api/public/hooks/sync-distressed'
-      preLoaderRoute: typeof ApiPublicHooksSyncDistressedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/signwell': {
-      id: '/api/public/hooks/signwell'
-      path: '/api/public/hooks/signwell'
-      fullPath: '/api/public/hooks/signwell'
-      preLoaderRoute: typeof ApiPublicHooksSignwellRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/outreach-reply': {
-      id: '/api/public/hooks/outreach-reply'
-      path: '/api/public/hooks/outreach-reply'
-      fullPath: '/api/public/hooks/outreach-reply'
-      preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/notify-sms': {
-      id: '/api/public/hooks/notify-sms'
-      path: '/api/public/hooks/notify-sms'
-      fullPath: '/api/public/hooks/notify-sms'
-      preLoaderRoute: typeof ApiPublicHooksNotifySmsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/compliance-digest': {
-      id: '/api/public/hooks/compliance-digest'
-      path: '/api/public/hooks/compliance-digest'
-      fullPath: '/api/public/hooks/compliance-digest'
-      preLoaderRoute: typeof ApiPublicHooksComplianceDigestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/close-auctions': {
-      id: '/api/public/hooks/close-auctions'
-      path: '/api/public/hooks/close-auctions'
-      fullPath: '/api/public/hooks/close-auctions'
-      preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agents/$slug/p/$postSlug': {
-      id: '/agents/$slug/p/$postSlug'
-      path: '/p/$postSlug'
-      fullPath: '/agents/$slug/p/$postSlug'
-      preLoaderRoute: typeof AgentsSlugPPostSlugRouteImport
-      parentRoute: typeof AgentsSlugRoute
-    }
-    '/_authenticated/app/vision/library': {
-      id: '/_authenticated/app/vision/library'
-      path: '/library'
-      fullPath: '/app/vision/library'
-      preLoaderRoute: typeof AuthenticatedAppVisionLibraryRouteImport
-      parentRoute: typeof AuthenticatedAppVisionRoute
-    }
-    '/_authenticated/app/title-search/history': {
-      id: '/_authenticated/app/title-search/history'
-      path: '/history'
-      fullPath: '/app/title-search/history'
-      preLoaderRoute: typeof AuthenticatedAppTitleSearchHistoryRouteImport
-      parentRoute: typeof AuthenticatedAppTitleSearchRoute
-    }
-    '/_authenticated/app/social/compose': {
-      id: '/_authenticated/app/social/compose'
-      path: '/compose'
-      fullPath: '/app/social/compose'
-      preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
-      parentRoute: typeof AuthenticatedAppSocialRoute
-    }
-    '/_authenticated/app/social/business-portfolio': {
-      id: '/_authenticated/app/social/business-portfolio'
-      path: '/business-portfolio'
-      fullPath: '/app/social/business-portfolio'
-      preLoaderRoute: typeof AuthenticatedAppSocialBusinessPortfolioRouteImport
-      parentRoute: typeof AuthenticatedAppSocialRoute
-    }
-    '/_authenticated/app/settings/public-profile': {
-      id: '/_authenticated/app/settings/public-profile'
-      path: '/public-profile'
-      fullPath: '/app/settings/public-profile'
-      preLoaderRoute: typeof AuthenticatedAppSettingsPublicProfileRouteImport
-      parentRoute: typeof AuthenticatedAppSettingsRoute
-    }
-    '/_authenticated/app/settings/integrations': {
-      id: '/_authenticated/app/settings/integrations'
-      path: '/integrations'
-      fullPath: '/app/settings/integrations'
-      preLoaderRoute: typeof AuthenticatedAppSettingsIntegrationsRouteImport
-      parentRoute: typeof AuthenticatedAppSettingsRoute
-    }
-    '/_authenticated/app/properties/search': {
-      id: '/_authenticated/app/properties/search'
-      path: '/search'
-      fullPath: '/app/properties/search'
-      preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
-      parentRoute: typeof AuthenticatedAppPropertiesRoute
-    }
-    '/_authenticated/app/properties/lookup-history': {
-      id: '/_authenticated/app/properties/lookup-history'
-      path: '/lookup-history'
-      fullPath: '/app/properties/lookup-history'
-      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupHistoryRouteImport
-      parentRoute: typeof AuthenticatedAppPropertiesRoute
-    }
-    '/_authenticated/app/properties/lookup': {
-      id: '/_authenticated/app/properties/lookup'
-      path: '/lookup'
-      fullPath: '/app/properties/lookup'
-      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupRouteImport
       parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
     '/_authenticated/app/properties/$propertyId': {
@@ -1510,53 +1384,179 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
-    '/_authenticated/app/leads/$leadId': {
-      id: '/_authenticated/app/leads/$leadId'
-      path: '/$leadId'
-      fullPath: '/app/leads/$leadId'
-      preLoaderRoute: typeof AuthenticatedAppLeadsLeadIdRouteImport
-      parentRoute: typeof AuthenticatedAppLeadsRoute
+    '/_authenticated/app/properties/lookup': {
+      id: '/_authenticated/app/properties/lookup'
+      path: '/lookup'
+      fullPath: '/app/properties/lookup'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
-    '/_authenticated/app/contracts/$contractId': {
-      id: '/_authenticated/app/contracts/$contractId'
-      path: '/$contractId'
-      fullPath: '/app/contracts/$contractId'
-      preLoaderRoute: typeof AuthenticatedAppContractsContractIdRouteImport
-      parentRoute: typeof AuthenticatedAppContractsRoute
+    '/_authenticated/app/properties/lookup-history': {
+      id: '/_authenticated/app/properties/lookup-history'
+      path: '/lookup-history'
+      fullPath: '/app/properties/lookup-history'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesLookupHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
-    '/_authenticated/app/auctions/$auctionId': {
-      id: '/_authenticated/app/auctions/$auctionId'
-      path: '/$auctionId'
-      fullPath: '/app/auctions/$auctionId'
-      preLoaderRoute: typeof AuthenticatedAppAuctionsAuctionIdRouteImport
-      parentRoute: typeof AuthenticatedAppAuctionsRoute
+    '/_authenticated/app/properties/search': {
+      id: '/_authenticated/app/properties/search'
+      path: '/search'
+      fullPath: '/app/properties/search'
+      preLoaderRoute: typeof AuthenticatedAppPropertiesSearchRouteImport
+      parentRoute: typeof AuthenticatedAppPropertiesRoute
     }
-    '/_authenticated/app/agent/$threadId': {
-      id: '/_authenticated/app/agent/$threadId'
-      path: '/$threadId'
-      fullPath: '/app/agent/$threadId'
-      preLoaderRoute: typeof AuthenticatedAppAgentThreadIdRouteImport
-      parentRoute: typeof AuthenticatedAppAgentRoute
+    '/_authenticated/app/settings/integrations': {
+      id: '/_authenticated/app/settings/integrations'
+      path: '/integrations'
+      fullPath: '/app/settings/integrations'
+      preLoaderRoute: typeof AuthenticatedAppSettingsIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAppSettingsRoute
     }
-    '/_authenticated/app/admin/contracts': {
-      id: '/_authenticated/app/admin/contracts'
-      path: '/admin/contracts'
-      fullPath: '/app/admin/contracts'
-      preLoaderRoute: typeof AuthenticatedAppAdminContractsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
+    '/_authenticated/app/settings/public-profile': {
+      id: '/_authenticated/app/settings/public-profile'
+      path: '/public-profile'
+      fullPath: '/app/settings/public-profile'
+      preLoaderRoute: typeof AuthenticatedAppSettingsPublicProfileRouteImport
+      parentRoute: typeof AuthenticatedAppSettingsRoute
     }
-    '/api/public/oauth/youtube/start': {
-      id: '/api/public/oauth/youtube/start'
-      path: '/api/public/oauth/youtube/start'
-      fullPath: '/api/public/oauth/youtube/start'
-      preLoaderRoute: typeof ApiPublicOauthYoutubeStartRouteImport
+    '/_authenticated/app/social/business-portfolio': {
+      id: '/_authenticated/app/social/business-portfolio'
+      path: '/business-portfolio'
+      fullPath: '/app/social/business-portfolio'
+      preLoaderRoute: typeof AuthenticatedAppSocialBusinessPortfolioRouteImport
+      parentRoute: typeof AuthenticatedAppSocialRoute
+    }
+    '/_authenticated/app/social/compose': {
+      id: '/_authenticated/app/social/compose'
+      path: '/compose'
+      fullPath: '/app/social/compose'
+      preLoaderRoute: typeof AuthenticatedAppSocialComposeRouteImport
+      parentRoute: typeof AuthenticatedAppSocialRoute
+    }
+    '/_authenticated/app/title-search/history': {
+      id: '/_authenticated/app/title-search/history'
+      path: '/history'
+      fullPath: '/app/title-search/history'
+      preLoaderRoute: typeof AuthenticatedAppTitleSearchHistoryRouteImport
+      parentRoute: typeof AuthenticatedAppTitleSearchRoute
+    }
+    '/_authenticated/app/vision/library': {
+      id: '/_authenticated/app/vision/library'
+      path: '/library'
+      fullPath: '/app/vision/library'
+      preLoaderRoute: typeof AuthenticatedAppVisionLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppVisionRoute
+    }
+    '/agents/$slug/p/$postSlug': {
+      id: '/agents/$slug/p/$postSlug'
+      path: '/p/$postSlug'
+      fullPath: '/agents/$slug/p/$postSlug'
+      preLoaderRoute: typeof AgentsSlugPPostSlugRouteImport
+      parentRoute: typeof AgentsSlugRoute
+    }
+    '/api/public/hooks/close-auctions': {
+      id: '/api/public/hooks/close-auctions'
+      path: '/api/public/hooks/close-auctions'
+      fullPath: '/api/public/hooks/close-auctions'
+      preLoaderRoute: typeof ApiPublicHooksCloseAuctionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/oauth/x/start': {
-      id: '/api/public/oauth/x/start'
-      path: '/api/public/oauth/x/start'
-      fullPath: '/api/public/oauth/x/start'
-      preLoaderRoute: typeof ApiPublicOauthXStartRouteImport
+    '/api/public/hooks/compliance-digest': {
+      id: '/api/public/hooks/compliance-digest'
+      path: '/api/public/hooks/compliance-digest'
+      fullPath: '/api/public/hooks/compliance-digest'
+      preLoaderRoute: typeof ApiPublicHooksComplianceDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/notify-sms': {
+      id: '/api/public/hooks/notify-sms'
+      path: '/api/public/hooks/notify-sms'
+      fullPath: '/api/public/hooks/notify-sms'
+      preLoaderRoute: typeof ApiPublicHooksNotifySmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/outreach-reply': {
+      id: '/api/public/hooks/outreach-reply'
+      path: '/api/public/hooks/outreach-reply'
+      fullPath: '/api/public/hooks/outreach-reply'
+      preLoaderRoute: typeof ApiPublicHooksOutreachReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/signwell': {
+      id: '/api/public/hooks/signwell'
+      path: '/api/public/hooks/signwell'
+      fullPath: '/api/public/hooks/signwell'
+      preLoaderRoute: typeof ApiPublicHooksSignwellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/sync-distressed': {
+      id: '/api/public/hooks/sync-distressed'
+      path: '/api/public/hooks/sync-distressed'
+      fullPath: '/api/public/hooks/sync-distressed'
+      preLoaderRoute: typeof ApiPublicHooksSyncDistressedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/sync-distressed-one': {
+      id: '/api/public/hooks/sync-distressed-one'
+      path: '/api/public/hooks/sync-distressed-one'
+      fullPath: '/api/public/hooks/sync-distressed-one'
+      preLoaderRoute: typeof ApiPublicHooksSyncDistressedOneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/twilio-sms': {
+      id: '/api/public/hooks/twilio-sms'
+      path: '/api/public/hooks/twilio-sms'
+      fullPath: '/api/public/hooks/twilio-sms'
+      preLoaderRoute: typeof ApiPublicHooksTwilioSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/twilio-voice': {
+      id: '/api/public/hooks/twilio-voice'
+      path: '/api/public/hooks/twilio-voice'
+      fullPath: '/api/public/hooks/twilio-voice'
+      preLoaderRoute: typeof ApiPublicHooksTwilioVoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/stripe': {
+      id: '/api/public/webhooks/stripe'
+      path: '/api/public/webhooks/stripe'
+      fullPath: '/api/public/webhooks/stripe'
+      preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app/admin/contracts/$contractId': {
+      id: '/_authenticated/app/admin/contracts/$contractId'
+      path: '/$contractId'
+      fullPath: '/app/admin/contracts/$contractId'
+      preLoaderRoute: typeof AuthenticatedAppAdminContractsContractIdRouteImport
+      parentRoute: typeof AuthenticatedAppAdminContractsRoute
+    }
+    '/api/public/oauth/meta/callback': {
+      id: '/api/public/oauth/meta/callback'
+      path: '/api/public/oauth/meta/callback'
+      fullPath: '/api/public/oauth/meta/callback'
+      preLoaderRoute: typeof ApiPublicOauthMetaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/oauth/meta/start': {
@@ -1566,19 +1566,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOauthMetaStartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/oauth/meta/callback': {
-      id: '/api/public/oauth/meta/callback'
-      path: '/api/public/oauth/meta/callback'
-      fullPath: '/api/public/oauth/meta/callback'
-      preLoaderRoute: typeof ApiPublicOauthMetaCallbackRouteImport
+    '/api/public/oauth/x/start': {
+      id: '/api/public/oauth/x/start'
+      path: '/api/public/oauth/x/start'
+      fullPath: '/api/public/oauth/x/start'
+      preLoaderRoute: typeof ApiPublicOauthXStartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/app/admin/contracts/$contractId': {
-      id: '/_authenticated/app/admin/contracts/$contractId'
-      path: '/$contractId'
-      fullPath: '/app/admin/contracts/$contractId'
-      preLoaderRoute: typeof AuthenticatedAppAdminContractsContractIdRouteImport
-      parentRoute: typeof AuthenticatedAppAdminContractsRoute
+    '/api/public/oauth/youtube/start': {
+      id: '/api/public/oauth/youtube/start'
+      path: '/api/public/oauth/youtube/start'
+      fullPath: '/api/public/oauth/youtube/start'
+      preLoaderRoute: typeof ApiPublicOauthYoutubeStartRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
