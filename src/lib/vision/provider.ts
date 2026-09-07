@@ -1,5 +1,6 @@
-// Vision Studio provider interface. Real (Lovable AI) lives alongside a mock
-// so the engine still renders if the gateway is down or out of credits.
+// Vision Studio provider interface. The real provider (Gemini for image-edit,
+// OpenAI for text-to-image) lives alongside a mock so the engine still renders
+// when no key is configured or an upstream is down.
 
 export type VisionResolution = "hd" | "2k" | "4k";
 
@@ -24,8 +25,13 @@ export interface VisionRenderInput {
 
 export interface VisionRenderResult {
   provider: string;
-  // PNG image as base64-encoded bytes (no data: prefix).
+  // Rendered image as base64-encoded bytes (no data: prefix).
   imageBase64: string;
+  // Upstreams disagree on format: gpt-image-2 returns PNG, gemini-3.1-flash-image
+  // returns JPEG regardless of the source format. Carried through so the stored
+  // object gets a truthful extension and content-type instead of every render
+  // being labelled .png.
+  mimeType: string;
 }
 
 export interface VisionProvider {

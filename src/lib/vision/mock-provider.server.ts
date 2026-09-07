@@ -1,5 +1,5 @@
 // Deterministic mock vision provider — a tiny solid-color PNG. Used when
-// neither OPENAI_API_KEY nor LOVABLE_API_KEY is configured, so dev/test runs
+// neither OPENAI_API_KEY nor GEMINI_API_KEY is configured, so dev/test runs
 // don't burn credits.
 
 import type { VisionProvider } from "./provider";
@@ -12,6 +12,6 @@ export const mockVisionProvider: VisionProvider = {
   name: "mock-vision",
   supportedResolutions: ["hd", "2k", "4k"],
   async render() {
-    return { provider: "mock-vision", imageBase64: TINY_PNG_B64 };
+    return { provider: "mock-vision", imageBase64: TINY_PNG_B64, mimeType: "image/png" };
   },
 };

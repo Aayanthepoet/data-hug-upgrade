@@ -25,6 +25,14 @@ const GenerateInput = z.object({
 
 const BUCKET = "vision-renders";
 
+// Render output format varies by upstream (PNG from gpt-image-2, JPEG from the
+// Gemini edit path), so the stored object's extension follows its mime type.
+const RENDER_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+
 function base64ToBytes(b64: string): Uint8Array {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -42,22 +50,22 @@ export const generateRedesign = createServerFn({ method: "POST" })
     //    validate the requested resolution BEFORE we queue a render row,
     //    so unsupported tiers (e.g. 4K on gpt-image-2) surface a clean
     //    error to the UI instead of a half-written audit row.
-    // Two upstreams now: text-to-image is OpenAI direct, image-edit is still
-    // the Lovable gateway. Either key alone still serves its own path, so we
-    // only hard-fail when neither is configured; the provider raises a
-    // path-specific error if the render needs the key that's missing.
+    // Two direct upstreams: text-to-image is OpenAI, image-edit is Gemini.
+    // Either key alone still serves its own path, so we only hard-fail when
+    // neither is configured; the provider raises a path-specific error if the
+    // render needs the key that's missing.
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    const lovableApiKey = process.env.LOVABLE_API_KEY;
-    if (!openaiApiKey && !lovableApiKey) {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!openaiApiKey && !geminiApiKey) {
       // Don't silently render a blank 1x1 PNG when no key is configured —
       // surface a clear error so the UI can prompt the operator.
       throw new Error(
-        "Vision Studio is not configured: set OPENAI_API_KEY (text-to-image) and/or LOVABLE_API_KEY (photo edit) to render images.",
+        "Vision Studio is not configured: set OPENAI_API_KEY (text-to-image) and/or GEMINI_API_KEY (photo edit) to render images.",
       );
     }
-    const { createLovableVisionProvider } = await import("./lovable-provider.server");
+    const { createVisionProvider } = await import("./vision-provider.server");
     const { RESOLUTION_LABELS } = await import("./provider");
-    const provider = createLovableVisionProvider({ openaiApiKey, lovableApiKey });
+    const provider = createVisionProvider({ openaiApiKey, geminiApiKey });
 
     if (!provider.supportedResolutions.includes(data.resolution)) {
       const supportedLabel = provider.supportedResolutions
@@ -112,6 +120,7 @@ export const generateRedesign = createServerFn({ method: "POST" })
     // 4. Render. Provider auto-picks image-edit (Gemini) vs text-to-image
     //    (gpt-image-2) based on whether a source image is present.
     let imageBase64: string;
+    let imageMimeType = "image/png";
     let usedProviderName = provider.name;
     try {
       const out = await provider.render({
@@ -121,6 +130,7 @@ export const generateRedesign = createServerFn({ method: "POST" })
         sourceImageUrl: resolvedSourceUrl,
       });
       imageBase64 = out.imageBase64;
+      imageMimeType = out.mimeType;
       usedProviderName = out.provider;
       if (out.provider !== provider.name) {
         await supabase
@@ -138,18 +148,21 @@ export const generateRedesign = createServerFn({ method: "POST" })
     }
     void usedProviderName;
 
-    // 4. Upload PNG to private bucket under <userId>/<renderId>.png so the
+    // 4. Upload to the private bucket under <userId>/<renderId>.<ext> so the
     //    bucket RLS (user-prefixed) lets the owner — and only the owner —
-    //    read/delete it later via signed URLs.
+    //    read/delete it later via signed URLs. The extension follows the
+    //    upstream's actual format: the Gemini edit path returns JPEG, so
+    //    hardcoding .png here would mislabel every photo edit.
     const bytes = base64ToBytes(imageBase64);
-    const storagePath = `${userId}/${renderId}.png`;
+    const ext = RENDER_EXTENSIONS[imageMimeType] ?? "png";
+    const storagePath = `${userId}/${renderId}.${ext}`;
 
     // Service-role upload bypasses the user's storage RLS but still writes
     // the row into the user's prefix so signed URLs work consistently.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error: upErr } = await supabaseAdmin.storage
       .from(BUCKET)
-      .upload(storagePath, bytes, { contentType: "image/png", upsert: true });
+      .upload(storagePath, bytes, { contentType: imageMimeType, upsert: true });
     if (upErr) {
       await supabase
         .from("media_assets")
@@ -506,12 +519,12 @@ export const getVisionCapabilities = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    const lovableApiKey = process.env.LOVABLE_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
     const { mockVisionProvider } = await import("./mock-provider.server");
-    const { createLovableVisionProvider } = await import("./lovable-provider.server");
+    const { createVisionProvider } = await import("./vision-provider.server");
     const provider =
-      openaiApiKey || lovableApiKey
-        ? createLovableVisionProvider({ openaiApiKey, lovableApiKey })
+      openaiApiKey || geminiApiKey
+        ? createVisionProvider({ openaiApiKey, geminiApiKey })
         : mockVisionProvider;
     return {
       provider: provider.name,
